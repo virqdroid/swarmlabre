@@ -1,0 +1,6 @@
+{"sample_sha256": "3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607", "shown": 4, "source": "walk", "total": 4, "truncated": false,"items":[
+{"crc": "91B627FD", "encrypted": false, "executable": false, "kind": "file", "method": "Store", "modified": "1980-01-01 00:00:00", "packed": 920, "path": "AndroidManifest.xml", "size": 920},
+{"crc": "52D3F2F3", "encrypted": false, "executable": false, "kind": "file", "method": "Store", "modified": "1980-01-01 00:00:00", "packed": 104, "path": "assets/config.json", "size": 104},
+{"crc": "EA18D657", "encrypted": false, "executable": false, "kind": "file", "method": "Store", "modified": "1980-01-01 00:00:00", "packed": 496, "path": "classes.dex", "size": 496},
+{"crc": "508ED680", "encrypted": false, "executable": false, "kind": "file", "method": "Deflate", "modified": "1980-01-01 00:00:00", "packed": 24, "path": "res/raw/note.txt", "size": 340}
+]}

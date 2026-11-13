@@ -1,0 +1,28 @@
+1e	a	AndroidManifest.xml
+8f	w	android
+9f	w	*http://schemas.android.com/apk/res/android
+f9	w	manifest
+10d	w	package
+11f	w	com.example.demo
+143	w	uses-permission
+171	w	android.permission.INTERNET
+1ab	w	application
+1df	w	activity
+1f3	w	com.example.demo.MainActivity
+231	w	exported
+3e7	a	classes.dexdex
+4bf	a	203.0.113.50
+4cd	a	Lcom/example/demo/MainActivity;
+4ee	a	Ljava/lang/Object;
+505	a	com.example.demo.secret
+51d	a	!http://c2.example.test/apk-beacon
+541	a	onCreate
+600	a	assets/config.json{
+614	a	 "server": "http://c2.example.test/apk-beacon",
+644	a	 "ip": "203.0.113.50",
+65b	a	 "note": "demo configuration"
+698	a	res/raw/note.txtsT
+6ee	a	AndroidManifest.xmlPK
+72f	a	classes.dexPK
+768	a	assets/config.jsonPK
+7a8	a	res/raw/note.txtPK

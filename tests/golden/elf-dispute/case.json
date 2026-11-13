@@ -1,0 +1,8 @@
+{
+ "kind": "recorded",
+ "name": "elf-dispute",
+ "proves": "a UTF-16 string, a dispute raised by Static, a round-2 plan that settles it, a duplicate reject and YARA rules; also the static demo's bundle",
+ "sample": "elf-wide",
+ "sample_sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+ "trace": "demo/sfaef16e6"
+}

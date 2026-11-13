@@ -1,0 +1,138 @@
+{
+ "evidence_ids": {
+  "overview": "ev_c7300b12df51039a85653ef90d0b03d54ec31d1a2df313896df1e4eda4a2281f",
+  "pe_resources": "ev_3607c0ad31cc97c3e1f62f83a7b3c4a2e04c74e3ae6002ba56fa5efeacc92c30",
+  "procedures": "ev_7455c92b2cf3ffcf05ade12f812ae3cf9d434dd6f1507be72a4cd5a06358fc9c",
+  "segments": "ev_2eafa3199e9d7cd3dc7962e2d134c461d6c4e7b9032c357f06790bca9a0912ea",
+  "strings": "ev_36524a2f54f81f63837f75a5240232dc6199fa43e9f1741ece1839c774fa85ac"
+ },
+ "facts": {
+  "architecture": "x86_64",
+  "entropy_fraction_blocks_over_7_2": null,
+  "entropy_whole": 1.344,
+  "extension_mismatch": false,
+  "format": "pe",
+  "functions": 1,
+  "imports": 1,
+  "unnamed_functions": 0,
+  "writable_executable_segments": []
+ },
+ "native_available": true,
+ "playbook": "pe",
+ "rea": "6.4.0",
+ "sample": {
+  "extension": "",
+  "extension_claims": null,
+  "extension_mismatch": false,
+  "file": "PE32+ executable (console) x86-64, for MS Windows, 3 sections",
+  "head_hex": "4d5a0000000000000000000000000000",
+  "magic": "pe",
+  "name": "sample",
+  "path": "/in/sample",
+  "sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523",
+  "size": 2048
+ },
+ "steps": [
+  {
+   "cached": false,
+   "call": "c1",
+   "file": "identity.json",
+   "note": null,
+   "secs": 0,
+   "status": "ok",
+   "step": "identify",
+   "tool": "local:identify",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c2",
+   "file": null,
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "open",
+   "tool": "open_binary",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c3",
+   "file": "overview.json",
+   "note": null,
+   "secs": 5.4,
+   "status": "ok",
+   "step": "overview",
+   "tool": "binary_overview",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c4",
+   "file": "segments.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "segments",
+   "tool": "list_segments",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c5",
+   "file": "procedures.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "procedures",
+   "tool": "list_procedures",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c6",
+   "file": "strings.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "strings",
+   "tool": "list_strings",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": null,
+   "file": "imports.json",
+   "note": null,
+   "secs": 0,
+   "status": "ok",
+   "step": "imports",
+   "tool": "derived",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c7",
+   "file": "pe-resources.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "pe_resources",
+   "tool": "inspect_pe_resources",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c8",
+   "file": "entropy.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "entropy",
+   "tool": "local:entropy",
+   "truncated": false
+  }
+ ],
+ "triage": 2,
+ "unresolved": []
+}

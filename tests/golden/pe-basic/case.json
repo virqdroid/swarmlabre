@@ -1,0 +1,8 @@
+{
+ "kind": "recorded",
+ "name": "pe-basic",
+ "proves": "a PE32+ with an import table through host parse, Ghidra prep and the report",
+ "run": "se55da324",
+ "sample": "pe-benign",
+ "sample_sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523"
+}

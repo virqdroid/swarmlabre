@@ -1,0 +1,11 @@
+{
+ "block_max": null,
+ "block_mean": null,
+ "block_size": 4096,
+ "blocks": 0,
+ "blocks_over_7_2": 0,
+ "bytes_read": 552,
+ "fraction_over_7_2": null,
+ "sample_sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+ "whole": 2.808
+}

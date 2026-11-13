@@ -1,0 +1,19 @@
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":149,"title":"C2 URL","value":"http://c2.example.test/beacon"},"role":"ioc","seen":[],"seq":1,"t":1790000002.5,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":179,"title":"Mutex name","value":"Mutex\\Global\\DemoSwarmMutex"},"role":"ioc","seen":[],"seq":2,"t":1790000003.0,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":207,"title":"Command line","value":"cmd.exe /c echo demo"},"role":"ioc","seen":[],"seq":3,"t":1790000003.5,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":228,"title":"Host name","value":"example.invalid"},"role":"ioc","seen":[],"seq":4,"t":1790000004.0,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"detail":"Maybe.","kind":"capability","title":"Talks to a server"},"role":"static","seen":[],"seq":5,"t":1790000004.5,"task":2}
+{"op":"intake","others":["c3"],"prep":[],"raw":{"calls":["c3"],"detail":"Cites a call it made.","kind":"capability","title":"Reads a file"},"role":"static","seen":["c3"],"seq":6,"t":1790000005.0,"task":2}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f1","reason":"A reserved example domain is not an indicator.","title":"Not an indicator"},"role":"crypto","seen":[],"seq":7,"t":1790000005.5,"task":3}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f2","reason":"It is only a name.","title":"Not a mutex"},"role":"static","seen":[],"seq":8,"t":1790000006.0,"task":2}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f3","reason":"Nothing runs it.","title":"Not a command"},"role":"behaviour","seen":[],"seq":9,"t":1790000006.5,"task":4}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f4","reason":"It is only a host name.","title":"Host is fine"},"role":"crypto","seen":[],"seq":10,"t":1790000007.0,"task":3}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f1","reason":"Again.","title":"Disputes twice"},"role":"crypto","seen":[],"seq":11,"t":1790000007.5,"task":3}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f99","reason":"There is no f99.","title":"Dispute of nothing"},"role":"behaviour","seen":[],"seq":12,"t":1790000008.0,"task":4}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f1","reason":"Its author cannot dispute it.","title":"Disputes own finding"},"role":"ioc","seen":[],"seq":13,"t":1790000008.5,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f6","reason":"Nothing shows the file is opened.","title":"Not a file read"},"role":"crypto","seen":[],"seq":14,"t":1790000009.0,"task":3}
+{"fid":"f6","op":"spot","rows":[{"call":"c3","same":true,"t":0.0,"tool":"strings","why":null},{"call":"c9","same":null,"t":0.0,"tool":"decompile","why":"not_repeatable"}],"seq":15,"t":1790000009.5}
+{"fid":"f1","op":"resolve","seq":16,"t":1790000010.0,"text":"The URL is still an indicator even though its domain is reserved for examples.","verdict":"stands"}
+{"fid":"f2","op":"resolve","seq":17,"t":1790000010.5,"text":"The dispute is right: it is a made-up name, not a mutex in use.","verdict":"wrong"}
+{"fid":"f3","op":"resolve","seq":18,"t":1790000011.0,"text":"Not enough to decide.","verdict":"unresolved"}
+{"fid":"f5","op":"resolve","seq":19,"t":1790000011.5,"text":"f5 was never disputed: nothing changes.","verdict":"stands"}

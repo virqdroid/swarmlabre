@@ -1,0 +1,70 @@
+{
+ "attack": "20.0",
+ "config": {
+  "detection_rules": true,
+  "max_parallel": 4,
+  "max_rounds": 2,
+  "report_contact": "",
+  "report_logo": false,
+  "report_org": "",
+  "task_minutes": 20.0,
+  "tlp": "AMBER"
+ },
+ "env": {
+  "apktool": "3.0.3",
+  "attack": "20.0",
+  "ghidra": "12.1.4",
+  "jadx": "jadx-headless-mcp 0.7.1",
+  "rea": "6.4.0",
+  "tool": "0.1.0"
+ },
+ "finished": 1794590486.5030398,
+ "format": 1,
+ "images": {
+  "swarmlabre-agent": "sha256:36d838f2cfc9a0dc81021984a82cdaa85be102c0abedfec5bb62fbfdc3b0219f",
+  "swarmlabre-tools": "sha256:3f2795fc3dba7d2e18586512059290ffdc401de5d9820fc28fe320719fdebf2c"
+ },
+ "inputs": {
+  "board.jsonl": "6fc860559f182752daf9fd1bad69940978745a6eff8fd604772ee461071da9fe",
+  "events.jsonl": "0d62fab5595c78d141d372d135c99095c4bdb7eeaacb5c987ccddb5bd6f32f07",
+  "inputs.jsonl": "89f11eae326b84ea7c75594f9f5b95a71ad761c448436ead06ec7bf7167cd3c6",
+  "layout.json": "649cbab07ed3da6a48ee871e759eddbf79149ba5b16fe843ac38e15901bb8854",
+  "model-trace.jsonl.gz": "15f1901c40791194b172e45c4ac8d0457d12e00239d2644300cc56e112588614",
+  "swarm.json": "cfdebaed938c4040856f88d81246d0144db974cffedd13125debf7b040ced5ed"
+ },
+ "model": {
+  "backend": "mock",
+  "model": "mock-1"
+ },
+ "model_trace_cut": false,
+ "outputs": {
+  "board.json": "d5cdf2abe3722fa2dc94bf680fe0dd924abca023f7354fad2c1cd7a3a2fa5e5a",
+  "iocs.csv": "932f0c1277a319ff0764816e030208df35e6691692568015009e7994b4691b33",
+  "iocs.misp.json": "112d5d57613d5610251a1c11e5eeb0ecedaf0a80a3e76c3b6e93db921e08e55d",
+  "iocs.stix.json": "45c57a25181a893c7f2fe6e2f3decf5276c9933cad3b86e52ea393bfe855c7e8",
+  "report.html": "c30009ca7aa8eaddc6502bd8e1c57d5d18f04355aa002b19e7a9d45268feefed",
+  "report.json": "7d5122611ca52fa42508b2aeaacf5d556fc84a1632808c14d4d7944fde97bb90",
+  "report.md": "489e71fddaef2364c49c3f29317904a283d6bf83fb18eb7c37b543adb70fe931"
+ },
+ "report_format": 4,
+ "run": "s7461d751",
+ "sample": {
+  "kept": true,
+  "kind": "apk",
+  "name": "demo.apk",
+  "sha256": "3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607",
+  "size": 1998
+ },
+ "sampling": {
+  "note": "scripted replies do not depend on sampling",
+  "seed": 1,
+  "seed_support": "honoured",
+  "temperature": 0.0
+ },
+ "status": "done",
+ "tool": {
+  "name": "swarmlabre",
+  "revision": "0.1.0",
+  "version": "0.1.0"
+ }
+}

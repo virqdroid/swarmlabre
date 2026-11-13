@@ -1,0 +1,63 @@
+{
+ "attack": "20.0",
+ "config": {
+  "detection_rules": true,
+  "max_parallel": 4,
+  "max_rounds": 2,
+  "report_contact": "",
+  "report_logo": false,
+  "report_org": "",
+  "task_minutes": 20.0,
+  "tlp": "CLEAR"
+ },
+ "env": {},
+ "finished": 1790000060.0,
+ "format": 1,
+ "images": {
+  "swarmlabre-agent": null,
+  "swarmlabre-tools": null
+ },
+ "inputs": {
+  "board.jsonl": "57811c3ebba8975dd3ba85f8659a29407c9db0530ae08a1dc337c2c553546b18",
+  "detection.json": "3bf69e29690e604e36a227fe884e2e5788064fd6f7239e02b0089cbcb263ce51",
+  "events.jsonl": "6c5e089691a8386459ca2cc396ea33babe938d847190d7e3e3bc72d5de41fb6c",
+  "inputs.jsonl": "48080a9273316d1e6a5beeaf3db7a707543bc50f395804aaf6e40906c12c2ba1",
+  "layout.json": "24788f29d60d3fe33f1af60d172e7b98b0b684d67d56d6e6d91c45eb9c071f6f",
+  "swarm.json": "9d07e3821acba1f19b55c59d8e36e90dc1d0f747bcdea09eb18a8a50f2fd4403"
+ },
+ "model": {
+  "backend": "mock",
+  "model": "mock"
+ },
+ "model_trace_cut": false,
+ "outputs": {
+  "board.json": "aad5e8631a5ec7bc6c542100e89f00445fd6d3e72081e792d29f7ea79c43bdb4",
+  "iocs.csv": "94f71019b447f1be6c486beea516665bc00091f60577bfff66b5c7ce8d61feb6",
+  "iocs.misp.json": "6d505b756011323e5e2406de4ee6d1d47a1929e9cc313a6b2e9c05337794c9f8",
+  "iocs.stix.json": "997a2813f685aa36f66cac8c87ef6b5e0328a8f5814850d6b2cdceac7fc368b9",
+  "report.html": "2da7696f4822ed3dffa6d6d38cffce4ed9f48cf6cba1f3c987facb67d98624d6",
+  "report.json": "f3d0d91b299ccd0c9e0cb00f48039073e6f88832ce45af2fca8b7350c778fc63",
+  "report.md": "c50d77e8ffc3cfe440cc51f9362d42c90a738a100a38a708ea500412c319a62e"
+ },
+ "report_format": 4,
+ "run": "s11d2b274",
+ "sample": {
+  "kept": true,
+  "kind": "elf",
+  "name": "demo.elf",
+  "sha256": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e",
+  "size": 528
+ },
+ "sampling": {
+  "note": "scripted board inputs; no model was asked",
+  "seed": 1,
+  "seed_support": "unknown",
+  "temperature": 0.0
+ },
+ "status": "done",
+ "tool": {
+  "name": "swarmlabre",
+  "revision": null,
+  "version": "0.1.0"
+ }
+}

@@ -1,0 +1,62 @@
+# Publishes the static demo (site/demo/) to GitHub Pages.
+#
+# UNEXERCISED: this workflow has never run. It cannot run before the repository is uploaded to GitHub, and Pages has to be switched on once in the repository
+# settings (Settings -> Pages -> Source: GitHub Actions). The build step it relies on is exercised locally (`python3 tools/build-demo.py BUNDLE`, tests/test_demo_build.py).
+#
+# What it does: builds the demo from a recorded run, then uploads site/ as the Pages artifact. The run is the committed bundle at DEMO_BUNDLE below: the benign generated
+# sample (`swarmlabre demo --variant two`) analysed with the scripted mock model and exported (`swarmlabre export --with-sample`); it is also the golden case `elf-dispute`.
+# Nothing is installed: the build is Python 3.12 standard library only.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["swarmlabre/**", "ui/**", "tools/build-demo.py", "tools/shim.js", "demo/**", "site/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+env:
+  DEMO_BUNDLE: demo/sfaef16e6
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Replay the recording (fails if it is not byte for byte what was recorded)
+        run: python3 -m swarmlabre replay "$DEMO_BUNDLE"
+      - name: Build the static demo
+        run: python3 tools/build-demo.py "$DEMO_BUNDLE" --out site/demo
+      - name: Check the page holds no address it would fetch
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          t = pathlib.Path("site/demo/index.html").read_text(encoding="utf-8")
+          t = re.sub(r'<script id="demo-data" type="application/json">.*?</script>', "", t, flags=re.S)
+          bad = [u for u in re.findall(r"https?://[^\s'\"<>)\\]+", t) if u != "http://www.w3.org/2000/svg"]
+          assert not bad, bad
+          PY
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

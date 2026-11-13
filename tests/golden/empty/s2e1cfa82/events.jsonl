@@ -1,0 +1,9 @@
+{"code": null, "why": "", "k": "waiting", "t": 1790000000.0, "n": 1}
+{"phase": "prepare", "k": "phase", "t": 1790000000.0, "n": 2}
+{"step": "sample", "status": "ok", "msg": "generated sample", "k": "step", "t": 1790000000.0, "n": 3}
+{"k": "layout", "t": 1790000001.0, "n": 4}
+{"phase": "round1", "k": "phase", "t": 1790000002.0, "n": 5}
+{"phase": "merge", "k": "phase", "t": 1790000032.0, "n": 6}
+{"task": 1, "role": "reporter", "letter": "R", "label": "Reporter", "limit": 600, "round": 1, "k": "task_start", "t": 1790000032.0, "n": 7}
+{"task": 1, "role": "reporter", "state": "done", "k": "task_end", "t": 1790000055.0, "n": 8}
+{"status": "done", "reason": null, "k": "done", "t": 1790000060.0, "n": 9}

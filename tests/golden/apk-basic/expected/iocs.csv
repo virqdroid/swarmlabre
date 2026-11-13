@@ -1,0 +1,7 @@
+tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+AMBER,Hash values,MD5,900fb31c45abe9ac511828f99e147320,900fb31c45abe9ac511828f99e147320,computed,,,Sample file. Computed by swarmlabre from the file itself.,s7461d751
+AMBER,Hash values,SHA-1,0eb89c862e3cd427e800f6e70681bb108e9c2d08,0eb89c862e3cd427e800f6e70681bb108e9c2d08,computed,,,Sample file. Computed by swarmlabre from the file itself.,s7461d751
+AMBER,Hash values,SHA-256,3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607,3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607,computed,,,Sample file. Computed by swarmlabre from the file itself.,s7461d751
+AMBER,IP addresses,IPv4 address,203.0.113.50,203[.]0[.]113[.]50,byte-checked,0x4bf,f2 f5,"Configuration string. byte-checked, offset 0x4bf, findings f2, f5, private or reserved address.",s7461d751
+AMBER,URLs,URL,http://c2.example.test/apk-beacon,hxxp://c2[.]example[.]test/apk-beacon,byte-checked,0x51e,f4,"C2 URL. byte-checked, offset 0x51e, finding f4.",s7461d751
+AMBER,Host artifacts,"Android name (package, component or action)",com.example.demo.secret,com.example.demo.secret,byte-checked,0x505,f6,"Address. byte-checked, offset 0x505, finding f6.",s7461d751

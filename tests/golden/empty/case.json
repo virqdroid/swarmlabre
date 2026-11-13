@@ -1,0 +1,8 @@
+{
+ "kind": "scripted",
+ "name": "empty",
+ "proves": "a run whose board stayed empty: no findings, no board file, verdict undetermined",
+ "run": "s2e1cfa82",
+ "sample": "elf-benign",
+ "sample_sha256": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e"
+}

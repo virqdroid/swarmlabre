@@ -1,0 +1,11 @@
+{"sample_sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523", "shown": 9, "tool": "list_strings", "total": 9, "truncated": false,"items":[
+{"address": "0x14000204a", "string": {"byte_length": 12, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "ExitProcess"},
+{"address": "0x140002056", "string": {"byte_length": 13, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "KERNEL32.dll"},
+{"address": "0x140002063", "string": {"byte_length": 33, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "http://c2.example.test/pe-beacon"},
+{"address": "0x140002084", "string": {"byte_length": 19, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "Global\\DemoPeMutex"},
+{"address": "0x140003000", "string": {"byte_length": 19, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "C:\\Demo\\config.ini"},
+{"address": "0x140003013", "string": {"byte_length": 29, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "powershell -nop echo demo"},
+{"address": "0xff000002d0", "string": {"byte_length": 24, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": ""},
+{"address": "0xff000002ee", "string": {"byte_length": 2, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": ""},
+{"address": "0xff00001268", "string": {"byte_length": 522, "encoding": "UTF-16", "termination": "present_or_not_required"}, "value": ""}
+]}

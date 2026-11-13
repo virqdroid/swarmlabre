@@ -1,0 +1,9 @@
+#!/bin/sh
+# Entry for profiles with `proxy = "socket"`: start the loopback forwarder, wait until it listens, then run the command.
+node /usr/local/lib/sock-fwd.js &
+i=0
+until node -e "const p=+process.env.SWARMLABRE_PROXY_PORT||8801;require('net').connect(p,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))" 2>/dev/null; do
+  i=$((i+1)); [ "$i" -ge 25 ] && echo "swarmlabre-net-entry: forwarder did not start" >&2 && break
+  sleep 0.2
+done
+exec "$@"

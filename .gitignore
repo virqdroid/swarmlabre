@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+swarmlabre.toml
+state/
+runs/
+*.bak
+.DS_Store
+site/demo/

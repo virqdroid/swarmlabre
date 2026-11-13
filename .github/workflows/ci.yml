@@ -1,0 +1,56 @@
+# Continuous integration: the unit tests (golden cases included) and the determinism checks.
+#
+# UNEXERCISED ON GITHUB: this workflow has never run there. It cannot before the repository is uploaded. Every command below was run locally, on a clean clone
+# (see docs/determinism.md, "Checks that were run"), but the YAML itself, the runner image and the two action versions are untested until the first push.
+#
+# Nothing here needs Docker, a model, a key or the network beyond fetching the two actions: the golden cases replay recorded traces, and Python is 3.12 standard library only.
+# The browser checks (tests/ui/parity.py, tour.py) are left out on purpose: they need headless Firefox with a snap-style profile folder and were only run locally.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests (every golden case is replayed and compared byte for byte)
+        env:
+          SWARMLABRE_SKIP_BROWSER: "1"
+        run: python3 -m unittest discover -s tests -v
+
+  determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Replay every golden case twice under four hash seeds, two time zones and -X dev
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/h"
+          for seed in 0 1 4242 random; do
+            tz=UTC
+            [ "$seed" = 1 ] && tz=Pacific/Auckland
+            PYTHONHASHSEED="$seed" TZ="$tz" python3 -X dev -W error tests/goldenrun.py --check --twice > "$RUNNER_TEMP/h/$seed.txt" 2> "$RUNNER_TEMP/h/$seed.err" || { cat "$RUNNER_TEMP/h/$seed.err"; exit 1; }
+            cat "$RUNNER_TEMP/h/$seed.err"
+            if grep -qi warning "$RUNNER_TEMP/h/$seed.err"; then echo "a warning under -X dev -W error"; exit 1; fi
+          done
+          test -s "$RUNNER_TEMP/h/0.txt"
+          for seed in 1 4242 random; do
+            cmp "$RUNNER_TEMP/h/0.txt" "$RUNNER_TEMP/h/$seed.txt" || { echo "the replayed bytes depend on the hash seed ($seed)"; exit 1; }
+          done
+          wc -l "$RUNNER_TEMP/h/0.txt"
+      - name: Re-recording and resealing change nothing (the recorder is deterministic on this runner too)
+        run: python3 -X dev -W error tests/goldenrun.py --update-golden
+      - name: The demo bundle replays
+        run: python3 -X dev -m swarmlabre replay demo/sfaef16e6

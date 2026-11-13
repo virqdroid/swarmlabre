@@ -1,0 +1,90 @@
+{
+ "Event": {
+  "uuid": "a3ef4d51-828d-59ff-b7bf-7afdf0584a61",
+  "info": "Malware analysis report: demo.exe (static analysis, run se55da324)",
+  "date": "2026-11-13",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1794590477",
+  "Tag": [
+   {
+    "name": "tlp:amber",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": [
+   {
+    "uuid": "6d061cff-7c34-5259-aa73-f7927d98d340",
+    "type": "md5",
+    "category": "Payload delivery",
+    "value": "a3feab14fe0fcd471be52d98844a9baa",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   },
+   {
+    "uuid": "6df391f3-7033-5425-9405-1e43775ed3a6",
+    "type": "sha1",
+    "category": "Payload delivery",
+    "value": "ee907d0e6240ab7d28a40d7975e6895eac48dc2a",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   },
+   {
+    "uuid": "1d63bfd5-a1b5-5bfc-99ef-f2c7d62dc733",
+    "type": "sha256",
+    "category": "Payload delivery",
+    "value": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   },
+   {
+    "uuid": "3460336c-ae78-55c1-a665-c98faeb580a2",
+    "type": "imphash",
+    "category": "Payload delivery",
+    "value": "f9ade0aa18f660a34a4fa23392e21838",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   },
+   {
+    "uuid": "7632b052-ddd1-5633-bee2-09b191abbcd7",
+    "type": "ip-dst",
+    "category": "Network activity",
+    "value": "198.51.100.7",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f6, offset 0x497.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   },
+   {
+    "uuid": "861b5042-b50c-526d-b309-db59b9843071",
+    "type": "url",
+    "category": "Network activity",
+    "value": "http://c2.example.test/pe-beacon",
+    "to_ids": true,
+    "comment": "byte-checked. Finding f2, offset 0x463.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   },
+   {
+    "uuid": "7db42c11-d659-55c4-b3f2-48da350df8b9",
+    "type": "filename",
+    "category": "Artifacts dropped",
+    "value": "Global\\DemoPeMutex",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f5, offset 0x484.",
+    "distribution": "5",
+    "timestamp": "1794590477"
+   }
+  ]
+ }
+}

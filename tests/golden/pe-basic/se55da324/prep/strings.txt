@@ -1,0 +1,10 @@
+4d	a	!This program cannot be run in DOS mode.
+1af	a	`.rdata
+1d7	a	@.data
+44a	a	ExitProcess
+456	a	KERNEL32.dll
+463	a	http://c2.example.test/pe-beacon
+484	a	Global\DemoPeMutex
+497	a	198.51.100.7
+600	a	C:\Demo\config.ini
+613	a	powershell -nop echo demo

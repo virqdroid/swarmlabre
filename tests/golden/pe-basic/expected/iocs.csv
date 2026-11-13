@@ -1,0 +1,8 @@
+tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+AMBER,Hash values,MD5,a3feab14fe0fcd471be52d98844a9baa,a3feab14fe0fcd471be52d98844a9baa,computed,,,Sample file. Computed by swarmlabre from the file itself.,se55da324
+AMBER,Hash values,SHA-1,ee907d0e6240ab7d28a40d7975e6895eac48dc2a,ee907d0e6240ab7d28a40d7975e6895eac48dc2a,computed,,,Sample file. Computed by swarmlabre from the file itself.,se55da324
+AMBER,Hash values,SHA-256,e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523,e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523,computed,,,Sample file. Computed by swarmlabre from the file itself.,se55da324
+AMBER,Hash values,Imphash,f9ade0aa18f660a34a4fa23392e21838,f9ade0aa18f660a34a4fa23392e21838,computed,,,Import table of the sample. Computed by swarmlabre from the file itself.,se55da324
+AMBER,IP addresses,IPv4 address,198.51.100.7,198[.]51[.]100[.]7,byte-checked,0x497,f6,"Address. byte-checked, offset 0x497, finding f6, private or reserved address.",se55da324
+AMBER,URLs,URL,http://c2.example.test/pe-beacon,hxxp://c2[.]example[.]test/pe-beacon,byte-checked,0x463,f2,"C2 URL. byte-checked, offset 0x463, finding f2.",se55da324
+AMBER,Host artifacts,Windows path (fragment),Global\DemoPeMutex,Global\DemoPeMutex,byte-checked,0x484,f5,"Mutex or package. byte-checked, offset 0x484, finding f5.",se55da324

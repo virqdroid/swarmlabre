@@ -1,0 +1,72 @@
+{
+ "attack": "20.0",
+ "config": {
+  "detection_rules": true,
+  "max_parallel": 4,
+  "max_rounds": 2,
+  "report_contact": "",
+  "report_logo": false,
+  "report_org": "",
+  "task_minutes": 20.0,
+  "tlp": "AMBER"
+ },
+ "env": {
+  "apktool": "3.0.3",
+  "attack": "20.0",
+  "ghidra": "12.1.4",
+  "jadx": "jadx-headless-mcp 0.7.1",
+  "rea": "6.4.0",
+  "tool": "0.1.0"
+ },
+ "finished": 1794576486.3779652,
+ "format": 1,
+ "images": {
+  "swarmlabre-agent": "sha256:36d838f2cfc9a0dc81021984a82cdaa85be102c0abedfec5bb62fbfdc3b0219f",
+  "swarmlabre-tools": "sha256:3f2795fc3dba7d2e18586512059290ffdc401de5d9820fc28fe320719fdebf2c"
+ },
+ "inputs": {
+  "board.jsonl": "05a18ec60fee2700cb75c2980a90892afa2c6cdc542bfc0ed234d5efb50d14c3",
+  "detection.json": "0e9e83b592a1d2683770577dfbafd0fcfff6155e12617d18d87496a321a20812",
+  "events.jsonl": "d968001d3ceaca3d42f440616d9f8283a348139d1a4dbd2cc877a24d7033becc",
+  "inputs.jsonl": "c1bf03310709fd36ca8e397611e5bf28752f06a9e1ff31a8f42c23830421be20",
+  "layout.json": "1f7b73c89614a505b343543dcbeca7f2c7614bda13a44adce76ed587bbc0b4ba",
+  "model-trace.jsonl.gz": "343e1890879c23c9fe5168d015859af3b4733edc40fa740996299572df2712a3",
+  "swarm.json": "7565f935d784335c08ed90597e26f55d1a95f66c7be3ba222a6a1572db352037"
+ },
+ "model": {
+  "backend": "mock",
+  "model": "mock-1"
+ },
+ "model_trace_cut": false,
+ "outputs": {
+  "board.json": "f4917a32890fde4f68fa99218ef5c108fb22de2132def385203bb12148b5f7c7",
+  "detection.yar": "661e7477bd45edb1f07997046e8f1a3fd512d78744b85c55fd3b7363bd246a3a",
+  "iocs.csv": "1390814036ab34919d84125d629a2adf27dee78ebadb790e98b4ac0f28808882",
+  "iocs.misp.json": "59d0811543b0fb60fbbe8f7455e066a62dcd804f5bd06cc884f27535d2411c67",
+  "iocs.stix.json": "4e176ad467461b7e6a563ceef6d6cbfe23e6f1fbe5ab6728ea86f10ee7394682",
+  "report.html": "a42e96e9632963caad5236d355d4f2f4735cc8eeebc9242db009d40a8c437875",
+  "report.json": "cc979cfe6160fba249b340014e6c95235af54c5a995a40ad0447eba1839a9a1a",
+  "report.md": "8698b97ba15e574e56ccd16477f9fc560bd8181eb863d3bfb3ff66af8b4cf09f"
+ },
+ "report_format": 4,
+ "run": "sfaef16e6",
+ "sample": {
+  "kept": true,
+  "kind": "elf",
+  "name": "demo2.elf",
+  "sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+  "size": 552
+ },
+ "sampling": {
+  "note": "scripted replies do not depend on sampling",
+  "seed": 1,
+  "seed_support": "honoured",
+  "temperature": 0.0
+ },
+ "status": "done",
+ "tool": {
+  "name": "swarmlabre",
+  "revision": "0.1.0",
+  "version": "0.1.0"
+ }
+}

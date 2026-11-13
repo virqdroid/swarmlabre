@@ -1,0 +1,3 @@
+tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+CLEAR,URLs,URL,http://c2.example.test/beacon,hxxp://c2[.]example[.]test/beacon,byte-checked,0x95,f1,"C2 URL. byte-checked, offset 0x95, finding f1.",s8a28311e
+CLEAR,Host artifacts,Windows path (fragment),Mutex\Global\DemoSwarmMutex,Mutex\Global\DemoSwarmMutex,byte-checked,0xb3,f2,"Mutex name. byte-checked, offset 0xb3, finding f2.",s8a28311e

@@ -1,0 +1,137 @@
+{
+ "evidence_ids": {
+  "overview": "ev_42ad2f7e7ce99935e6ef99b26786a4397272da3556e6a31d5b49930ae5c6e4da",
+  "procedures": "ev_ec2f860919c77af8d25b2e8b3389e0301bc7158348d733dcfb80babaf7267dd3",
+  "segments": "ev_d66b71feaad728426c2ee5cdf99d68200b6af13b7f034fc52229b084c28596f9",
+  "strings": "ev_60b13344f5bbafc39c193aeebf34eef90eb08e4cdd8f059b19ed327f6fc81fcd"
+ },
+ "facts": {
+  "architecture": "x86_64",
+  "entropy_fraction_blocks_over_7_2": null,
+  "entropy_whole": 2.808,
+  "extension_mismatch": false,
+  "format": "elf",
+  "functions": 2,
+  "imports": 0,
+  "unnamed_functions": 1,
+  "writable_executable_segments": []
+ },
+ "native_available": true,
+ "playbook": "elf",
+ "rea": "6.4.0",
+ "sample": {
+  "extension": "",
+  "extension_claims": null,
+  "extension_mismatch": false,
+  "file": "ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped",
+  "head_hex": "7f454c46020101000000000000000000",
+  "magic": "elf",
+  "name": "sample",
+  "path": "/in/sample",
+  "sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+  "size": 552
+ },
+ "steps": [
+  {
+   "cached": false,
+   "call": "c1",
+   "file": "identity.json",
+   "note": null,
+   "secs": 0,
+   "status": "ok",
+   "step": "identify",
+   "tool": "local:identify",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c2",
+   "file": null,
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "open",
+   "tool": "open_binary",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c3",
+   "file": "overview.json",
+   "note": null,
+   "secs": 4.3,
+   "status": "ok",
+   "step": "overview",
+   "tool": "binary_overview",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c4",
+   "file": "segments.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "segments",
+   "tool": "list_segments",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c5",
+   "file": "procedures.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "procedures",
+   "tool": "list_procedures",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c6",
+   "file": "strings.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "strings",
+   "tool": "list_strings",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": null,
+   "file": "imports.json",
+   "note": null,
+   "secs": 0,
+   "status": "ok",
+   "step": "imports",
+   "tool": "derived",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c7",
+   "file": "readelf.txt",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "readelf",
+   "tool": "local:readelf",
+   "truncated": false
+  },
+  {
+   "cached": false,
+   "call": "c8",
+   "file": "entropy.json",
+   "note": null,
+   "secs": 0.0,
+   "status": "ok",
+   "step": "entropy",
+   "tool": "local:entropy",
+   "truncated": false
+  }
+ ],
+ "triage": 2,
+ "unresolved": []
+}

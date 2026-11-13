@@ -1,0 +1,12 @@
+{
+ "extension": "",
+ "extension_claims": null,
+ "extension_mismatch": false,
+ "file": "PE32+ executable (console) x86-64, for MS Windows, 3 sections",
+ "head_hex": "4d5a0000000000000000000000000000",
+ "magic": "pe",
+ "name": "sample",
+ "path": "/in/sample",
+ "sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523",
+ "size": 2048
+}

@@ -1,0 +1,27 @@
+{
+ "result": {
+  "artifact": {
+   "bytes": 2048,
+   "path": "/in/sample",
+   "sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523"
+  },
+  "coverage": {
+   "examined_entries": 0,
+   "resources": 0,
+   "status": "complete"
+  },
+  "directories": [],
+  "directory": null,
+  "format": "pe32-plus",
+  "icon_groups": [],
+  "limitations": [
+   "Static PE32/PE32+ type/name/language resource inventory; payloads other than RT_GROUP_ICON remain opaque.",
+   "Icon candidates are resource-table relationships. Language fallback, image decoding and actual shell/window loading are not observed.",
+   "Exact shared byte ranges are retained; non-identical overlapping resource structures or payloads are rejected."
+  ],
+  "machine": 34404,
+  "resources": []
+ },
+ "sample_sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523",
+ "tool": "inspect_pe_resources"
+}

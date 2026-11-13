@@ -1,0 +1,40 @@
+{
+ "Event": {
+  "uuid": "78ea5fe2-02ce-5612-893d-cfbcd7eb5187",
+  "info": "Malware analysis report: demo.elf (static analysis, run s8a28311e)",
+  "date": "2026-09-21",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1790000060",
+  "Tag": [
+   {
+    "name": "tlp:clear",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": [
+   {
+    "uuid": "1ad64342-ecc6-5218-8d0d-cf533c9c61b0",
+    "type": "url",
+    "category": "Network activity",
+    "value": "http://c2.example.test/beacon",
+    "to_ids": true,
+    "comment": "byte-checked. Finding f1, offset 0x95.",
+    "distribution": "5",
+    "timestamp": "1790000060"
+   },
+   {
+    "uuid": "57d6e6f9-9b5f-552b-acc7-2366d3526a3d",
+    "type": "filename",
+    "category": "Artifacts dropped",
+    "value": "Mutex\\Global\\DemoSwarmMutex",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f2, offset 0xb3.",
+    "distribution": "5",
+    "timestamp": "1790000060"
+   }
+  ]
+ }
+}

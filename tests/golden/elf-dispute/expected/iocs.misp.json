@@ -1,0 +1,90 @@
+{
+ "Event": {
+  "uuid": "fe891e83-1fb1-5a9f-8ea5-8421c834218e",
+  "info": "Malware analysis report: demo2.elf (static analysis, run sfaef16e6)",
+  "date": "2026-11-13",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1794576486",
+  "Tag": [
+   {
+    "name": "tlp:amber",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": [
+   {
+    "uuid": "e0060750-0d81-52c4-857d-92774e1d6c22",
+    "type": "md5",
+    "category": "Payload delivery",
+    "value": "d0e6226b2c5e01d1f8bc9c46c32591be",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   },
+   {
+    "uuid": "cd6bcab1-a922-5f32-ba0d-a10ebd2601f3",
+    "type": "sha1",
+    "category": "Payload delivery",
+    "value": "e7d9e12462cea4c74018b33cd19b685143b0595e",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   },
+   {
+    "uuid": "93bbd8f4-dcab-5570-a748-61190340c559",
+    "type": "sha256",
+    "category": "Payload delivery",
+    "value": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   },
+   {
+    "uuid": "471634a9-57b0-501a-99d3-6f393588ce6e",
+    "type": "ip-dst",
+    "category": "Network activity",
+    "value": "203.0.113.9",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f3, offset 0xda.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   },
+   {
+    "uuid": "d96cec09-1cb6-5fd2-a632-99c75df50848",
+    "type": "url",
+    "category": "Network activity",
+    "value": "https://updates.example.test/check",
+    "to_ids": true,
+    "comment": "byte-checked. Finding f2, offset 0x95.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   },
+   {
+    "uuid": "d5f322d5-bbd0-54bc-860b-3058b4a0937f",
+    "type": "filename",
+    "category": "Artifacts dropped",
+    "value": "/tmp/.demo-cache",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f4, offset 0xc9.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   },
+   {
+    "uuid": "b107e68c-f847-5e3c-9ead-2a060ca29a11",
+    "type": "filename",
+    "category": "Artifacts dropped",
+    "value": "C:\\Demo\\agent.dll",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f5, offset 0xe6.",
+    "distribution": "5",
+    "timestamp": "1794576486"
+   }
+  ]
+ }
+}

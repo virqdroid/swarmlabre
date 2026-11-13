@@ -1,0 +1,221 @@
+{"code": null, "why": "", "k": "waiting", "t": 1794590477.89, "n": 1}
+{"phase": "prepare", "k": "phase", "t": 1794590477.89, "n": 2}
+{"step": "sample", "status": "ok", "msg": "APK, 4 members, 1 DEX file, 3edee4888c1d", "k": "step", "t": 1794590477.89, "n": 3}
+{"step": "host_parse", "status": "running", "msg": "", "k": "step", "t": 1794590477.89, "n": 4}
+{"k": "layout", "t": 1794590477.89, "n": 5}
+{"step": "host_parse", "status": "ok", "msg": "5 regions, 8 cells of 256 bytes, 28 strings, 1 classes in 1 DEX files", "k": "step", "t": 1794590477.9, "n": 6}
+{"step": "tools", "status": "running", "msg": "", "k": "step", "t": 1794590477.9, "n": 7}
+{"step": "tools", "status": "ok", "msg": "4 GiB, 4 cpus", "k": "step", "t": 1794590478.24, "n": 8}
+{"step": "prep_triage", "status": "ok", "msg": "", "k": "step", "t": 1794590483.05, "n": 9}
+{"step": "prep_functions", "status": "ok", "msg": "1 classes from jadx", "k": "step", "t": 1794590483.06, "n": 10}
+{"step": "prep_decompile", "status": "ok", "msg": "1 classes outlined, 1 methods decompiled", "k": "step", "t": 1794590483.61, "n": 11}
+{"step": "prep_edges", "status": "ok", "msg": "0 edges", "k": "step", "t": 1794590483.88, "n": 12}
+{"step": "copy_out", "status": "running", "msg": "", "k": "step", "t": 1794590483.89, "n": 13}
+{"step": "copy_out", "status": "ok", "msg": "11 files, 7 KiB", "k": "step", "t": 1794590483.94, "n": 14}
+{"k": "layout", "t": 1794590483.94, "n": 15}
+{"step": "layout", "status": "ok", "msg": "1 of 1 classes, 1 placed on a DEX file, 0 reference edges", "k": "step", "t": 1794590483.94, "n": 16}
+{"phase": "round1", "k": "phase", "t": 1794590484.0, "n": 17}
+{"step": "agents", "status": "running", "msg": "", "k": "step", "t": 1794590484.0, "n": 18}
+{"step": "agents", "status": "ok", "msg": "1433 MiB, model mock-1, 4 requests at a time", "k": "step", "t": 1794590484.34, "n": 19}
+{"role": "reporter", "letter": "R", "label": "Reporter", "why": "last", "k": "role_held", "t": 1794590484.34, "n": 20}
+{"role": "behaviour", "letter": "B", "label": "Behaviour", "why": "findings", "k": "role_held", "t": 1794590484.34, "n": 21}
+{"task": 1, "role": "triage", "letter": "T", "label": "Triage", "limit": 2400, "round": 1, "k": "task_start", "t": 1794590484.35, "n": 22}
+{"task": 2, "role": "static", "letter": "S", "label": "Static", "limit": 2400, "round": 1, "k": "task_start", "t": 1794590484.35, "n": 24}
+{"task": 4, "role": "crypto", "letter": "C", "label": "Crypto/Config", "limit": 2400, "round": 1, "k": "task_start", "t": 1794590484.35, "n": 23}
+{"task": 3, "role": "ioc", "letter": "I", "label": "Strings/IOC", "limit": 2400, "round": 1, "k": "task_start", "t": 1794590484.36, "n": 25}
+{"queue": {}, "busy": null, "k": "tool_queue", "t": 1794590484.41, "n": 26}
+{"state": "wait", "role": "static", "wait_ms": 0, "waiting": ["static"], "running": [], "k": "gate", "t": 1794590484.61, "n": 27}
+{"state": "go", "role": "static", "wait_ms": 0, "waiting": [], "running": ["static"], "k": "gate", "t": 1794590484.61, "n": 28}
+{"state": "end", "role": "static", "wait_ms": 1, "waiting": [], "running": [], "k": "gate", "t": 1794590484.61, "n": 29}
+{"state": "wait", "role": "crypto", "wait_ms": 0, "waiting": ["crypto"], "running": [], "k": "gate", "t": 1794590484.62, "n": 30}
+{"state": "go", "role": "crypto", "wait_ms": 0, "waiting": [], "running": ["crypto"], "k": "gate", "t": 1794590484.62, "n": 31}
+{"state": "wait", "role": "triage", "wait_ms": 0, "waiting": ["triage"], "running": ["crypto"], "k": "gate", "t": 1794590484.62, "n": 32}
+{"state": "go", "role": "triage", "wait_ms": 0, "waiting": [], "running": ["crypto", "triage"], "k": "gate", "t": 1794590484.62, "n": 33}
+{"state": "end", "role": "crypto", "wait_ms": 1, "waiting": [], "running": ["triage"], "k": "gate", "t": 1794590484.62, "n": 34}
+{"state": "end", "role": "triage", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.62, "n": 35}
+{"task": 4, "role": "crypto", "state": "thinking", "k": "lane", "t": 1794590484.62, "n": 36}
+{"task": 2, "role": "static", "state": "thinking", "k": "lane", "t": 1794590484.62, "n": 37}
+{"task": 1, "role": "triage", "state": "thinking", "k": "lane", "t": 1794590484.62, "n": 38}
+{"task": 2, "role": "static", "model_ms": 1, "tool_ms": 0, "wait_ms": 0, "in": 2594, "out": 8, "k": "tokens", "t": 1794590484.62, "n": 39}
+{"task": 2, "role": "static", "id": "call_5fccf30fb76b6574e061", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-say 'Reading the function index'", "k": "tool_start", "t": 1794590484.62, "n": 40}
+{"state": "wait", "role": "ioc", "wait_ms": 0, "waiting": ["ioc"], "running": [], "k": "gate", "t": 1794590484.62, "n": 41}
+{"task": 2, "role": "static", "state": "tool", "k": "lane", "t": 1794590484.62, "n": 42}
+{"state": "go", "role": "ioc", "wait_ms": 0, "waiting": [], "running": ["ioc"], "k": "gate", "t": 1794590484.62, "n": 43}
+{"state": "end", "role": "ioc", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.62, "n": 44}
+{"task": 4, "role": "crypto", "model_ms": 1, "tool_ms": 0, "wait_ms": 0, "in": 2524, "out": 8, "k": "tokens", "t": 1794590484.63, "n": 45}
+{"task": 4, "role": "crypto", "id": "call_ff2c27775b5c6c8a4948", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-say 'Looking for configuration'", "k": "tool_start", "t": 1794590484.63, "n": 47}
+{"task": 1, "role": "triage", "model_ms": 0, "tool_ms": 0, "wait_ms": 0, "in": 2571, "out": 8, "k": "tokens", "t": 1794590484.63, "n": 46}
+{"task": 4, "role": "crypto", "state": "tool", "k": "lane", "t": 1794590484.63, "n": 48}
+{"task": 1, "role": "triage", "id": "call_627e072c23e44aeecc7e", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-say 'Reading the prepared overview'", "k": "tool_start", "t": 1794590484.63, "n": 49}
+{"task": 1, "role": "triage", "state": "tool", "k": "lane", "t": 1794590484.63, "n": 50}
+{"task": 3, "role": "ioc", "state": "thinking", "k": "lane", "t": 1794590484.63, "n": 51}
+{"task": 3, "role": "ioc", "model_ms": 0, "tool_ms": 0, "wait_ms": 0, "in": 2544, "out": 8, "k": "tokens", "t": 1794590484.63, "n": 52}
+{"task": 3, "role": "ioc", "id": "call_1b849d610e0c5e66b571", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-say 'Reading the strings file'", "k": "tool_start", "t": 1794590484.63, "n": 53}
+{"task": 3, "role": "ioc", "state": "tool", "k": "lane", "t": 1794590484.63, "n": 54}
+{"task": 2, "role": "static", "text": "Reading the function index", "k": "say", "t": 1794590484.65, "n": 55}
+{"task": 2, "role": "static", "id": "call_5fccf30fb76b6574e061", "ok": true, "ms": 27, "k": "tool_end", "t": 1794590484.65, "n": 56}
+{"task": 2, "role": "static", "state": "thinking", "k": "lane", "t": 1794590484.65, "n": 57}
+{"task": 4, "role": "crypto", "text": "Looking for configuration", "k": "say", "t": 1794590484.65, "n": 58}
+{"task": 1, "role": "triage", "text": "Reading the prepared overview", "k": "say", "t": 1794590484.65, "n": 59}
+{"task": 4, "role": "crypto", "id": "call_ff2c27775b5c6c8a4948", "ok": true, "ms": 25, "k": "tool_end", "t": 1794590484.65, "n": 60}
+{"task": 1, "role": "triage", "id": "call_627e072c23e44aeecc7e", "ok": true, "ms": 25, "k": "tool_end", "t": 1794590484.65, "n": 61}
+{"task": 4, "role": "crypto", "state": "thinking", "k": "lane", "t": 1794590484.65, "n": 62}
+{"task": 1, "role": "triage", "state": "thinking", "k": "lane", "t": 1794590484.65, "n": 63}
+{"state": "wait", "role": "static", "wait_ms": 0, "waiting": ["static"], "running": [], "k": "gate", "t": 1794590484.65, "n": 64}
+{"state": "wait", "role": "crypto", "wait_ms": 0, "waiting": ["static", "crypto"], "running": [], "k": "gate", "t": 1794590484.65, "n": 65}
+{"state": "wait", "role": "triage", "wait_ms": 0, "waiting": ["static", "crypto", "triage"], "running": [], "k": "gate", "t": 1794590484.65, "n": 66}
+{"state": "go", "role": "triage", "wait_ms": 1, "waiting": ["static", "crypto"], "running": ["triage"], "k": "gate", "t": 1794590484.66, "n": 67}
+{"state": "go", "role": "static", "wait_ms": 2, "waiting": ["crypto"], "running": ["triage", "static"], "k": "gate", "t": 1794590484.66, "n": 68}
+{"state": "go", "role": "crypto", "wait_ms": 2, "waiting": [], "running": ["triage", "static", "crypto"], "k": "gate", "t": 1794590484.66, "n": 69}
+{"task": 1, "role": "triage", "state": "writing", "k": "lane", "t": 1794590484.66, "n": 70}
+{"task": 3, "role": "ioc", "text": "Reading the strings file", "k": "say", "t": 1794590484.66, "n": 71}
+{"task": 1, "role": "triage", "state": "thinking", "k": "lane", "t": 1794590484.66, "n": 72}
+{"task": 3, "role": "ioc", "id": "call_1b849d610e0c5e66b571", "ok": true, "ms": 25, "k": "tool_end", "t": 1794590484.66, "n": 74}
+{"task": 1, "role": "triage", "state": "writing", "k": "lane", "t": 1794590484.66, "n": 75}
+{"task": 2, "role": "static", "model_ms": 1, "tool_ms": 27, "wait_ms": 2, "in": 5314, "out": 16, "k": "tokens", "t": 1794590484.66, "n": 73}
+{"state": "end", "role": "triage", "wait_ms": 2, "waiting": [], "running": ["static", "crypto"], "k": "gate", "t": 1794590484.66, "n": 76}
+{"task": 1, "role": "triage", "state": "thinking", "k": "lane", "t": 1794590484.66, "n": 79}
+{"task": 2, "role": "static", "id": "call_5947351f3d1bba33967e", "tool": "bash", "text": "cat /prep/decomp/INDEX.txt 2>/dev/null | head -20", "k": "tool_start", "t": 1794590484.66, "n": 78}
+{"task": 3, "role": "ioc", "state": "thinking", "k": "lane", "t": 1794590484.66, "n": 77}
+{"state": "wait", "role": "ioc", "wait_ms": 0, "waiting": ["ioc"], "running": ["static", "crypto"], "k": "gate", "t": 1794590484.66, "n": 81}
+{"task": 4, "role": "crypto", "model_ms": 1, "tool_ms": 25, "wait_ms": 2, "in": 5174, "out": 16, "k": "tokens", "t": 1794590484.66, "n": 80}
+{"state": "go", "role": "ioc", "wait_ms": 0, "waiting": [], "running": ["static", "crypto", "ioc"], "k": "gate", "t": 1794590484.66, "n": 84}
+{"task": 1, "role": "triage", "model_ms": 1, "tool_ms": 25, "wait_ms": 1, "in": 5269, "out": 21, "k": "tokens", "t": 1794590484.66, "n": 83}
+{"state": "end", "role": "static", "wait_ms": 3, "waiting": [], "running": ["crypto", "ioc"], "k": "gate", "t": 1794590484.66, "n": 85}
+{"task": 2, "role": "static", "state": "tool", "k": "lane", "t": 1794590484.66, "n": 82}
+{"task": 1, "role": "triage", "id": "call_5e4d0620e03782d08f6e", "tool": "read", "text": "/prep/overview.md", "k": "tool_start", "t": 1794590484.66, "n": 87}
+{"task": 4, "role": "crypto", "id": "call_87ca3ad1760dba4ac1d2", "tool": "bash", "text": "grep -c example /prep/strings.txt", "k": "tool_start", "t": 1794590484.66, "n": 86}
+{"state": "wait", "role": "triage", "wait_ms": 0, "waiting": ["triage"], "running": ["crypto", "ioc"], "k": "gate", "t": 1794590484.66, "n": 88}
+{"state": "end", "role": "crypto", "wait_ms": 3, "waiting": ["triage"], "running": ["ioc"], "k": "gate", "t": 1794590484.66, "n": 89}
+{"task": 1, "role": "triage", "state": "tool", "k": "lane", "t": 1794590484.66, "n": 90}
+{"task": 1, "role": "triage", "id": "call_5e4d0620e03782d08f6e", "ok": true, "ms": 1, "k": "tool_end", "t": 1794590484.67, "n": 93}
+{"task": 2, "role": "static", "id": "call_5947351f3d1bba33967e", "ok": true, "ms": 4, "k": "tool_end", "t": 1794590484.67, "n": 91}
+{"task": 3, "role": "ioc", "model_ms": 0, "tool_ms": 25, "wait_ms": 0, "in": 5213, "out": 16, "k": "tokens", "t": 1794590484.67, "n": 95}
+{"state": "end", "role": "ioc", "wait_ms": 2, "waiting": ["triage", "crypto"], "running": [], "k": "gate", "t": 1794590484.67, "n": 97}
+{"task": 3, "role": "ioc", "id": "call_c93878efc3cbac5bf360", "tool": "bash", "text": "head -40 /prep/strings.txt", "k": "tool_start", "t": 1794590484.67, "n": 100}
+{"task": 2, "role": "static", "state": "thinking", "k": "lane", "t": 1794590484.67, "n": 96}
+{"state": "wait", "role": "crypto", "wait_ms": 0, "waiting": ["triage", "crypto"], "running": ["ioc"], "k": "gate", "t": 1794590484.67, "n": 94}
+{"task": 1, "role": "triage", "state": "thinking", "k": "lane", "t": 1794590484.67, "n": 99}
+{"task": 3, "role": "ioc", "state": "tool", "k": "lane", "t": 1794590484.67, "n": 101}
+{"state": "go", "role": "triage", "wait_ms": 2, "waiting": ["crypto"], "running": ["triage"], "k": "gate", "t": 1794590484.67, "n": 98}
+{"state": "wait", "role": "static", "wait_ms": 0, "waiting": ["crypto", "static"], "running": ["triage"], "k": "gate", "t": 1794590484.67, "n": 102}
+{"task": 4, "role": "crypto", "state": "tool", "k": "lane", "t": 1794590484.67, "n": 92}
+{"task": 4, "role": "crypto", "id": "call_87ca3ad1760dba4ac1d2", "ok": true, "ms": 5, "k": "tool_end", "t": 1794590484.67, "n": 104}
+{"state": "go", "role": "crypto", "wait_ms": 3, "waiting": ["static"], "running": ["triage", "crypto"], "k": "gate", "t": 1794590484.67, "n": 103}
+{"state": "go", "role": "static", "wait_ms": 1, "waiting": [], "running": ["triage", "crypto", "static"], "k": "gate", "t": 1794590484.67, "n": 105}
+{"task": 3, "role": "ioc", "id": "call_c93878efc3cbac5bf360", "ok": true, "ms": 3, "places": [[30, 19], [143, 14], [159, 86], [249, 16], [269, 14], [287, 32], [323, 30], [369, 54], [427, 22], [479, 16], [499, 58], [561, 16], [999, 14], [1215, 12], [1229, 31], [1262, 18], [1285, 23], [1309, 34], [1345, 8], [1536, 19], [1556, 47], [1604, 22], [1627, 29], [1688, 18]], "k": "tool_end", "t": 1794590484.67, "n": 106}
+{"task": 4, "role": "crypto", "state": "thinking", "k": "lane", "t": 1794590484.67, "n": 107}
+{"task": 3, "role": "ioc", "state": "thinking", "k": "lane", "t": 1794590484.67, "n": 108}
+{"state": "end", "role": "triage", "wait_ms": 5, "waiting": [], "running": ["crypto", "static"], "k": "gate", "t": 1794590484.67, "n": 109}
+{"task": 1, "role": "triage", "model_ms": 4, "tool_ms": 26, "wait_ms": 3, "in": 8372, "out": 29, "k": "tokens", "t": 1794590484.67, "n": 110}
+{"task": 4, "role": "crypto", "model_ms": 2, "tool_ms": 30, "wait_ms": 5, "in": 7897, "out": 24, "k": "tokens", "t": 1794590484.67, "n": 113}
+{"task": 2, "role": "static", "model_ms": 2, "tool_ms": 31, "wait_ms": 3, "in": 8131, "out": 24, "k": "tokens", "t": 1794590484.67, "n": 111}
+{"state": "wait", "role": "ioc", "wait_ms": 0, "waiting": ["ioc"], "running": ["crypto", "static"], "k": "gate", "t": 1794590484.67, "n": 112}
+{"task": 4, "role": "crypto", "id": "call_76e9ae72c9b2b9029a4c", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind config --title 'Configuration string' --value 203.0.113.50 --off 0x4bf --confidence medium --detail 'Looks like configuration.'", "k": "tool_start", "t": 1794590484.67, "n": 115}
+{"task": 4, "role": "crypto", "state": "tool", "k": "lane", "t": 1794590484.68, "n": 118}
+{"task": 1, "role": "triage", "id": "call_67ffd8ee0e943ef69207", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind note --title 'Small APK sample' --detail 'A tiny generated file; nothing is packed.' --off 0 --confidence high", "k": "tool_start", "t": 1794590484.67, "n": 114}
+{"task": 2, "role": "static", "id": "call_20504a127badd8aae596", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind function --title 'Entry point' --func com.example.demo.MainActivity --detail 'The entry point; it only exits.' --confidence medium", "k": "tool_start", "t": 1794590484.68, "n": 117}
+{"state": "end", "role": "static", "wait_ms": 3, "waiting": ["ioc"], "running": ["crypto"], "k": "gate", "t": 1794590484.68, "n": 116}
+{"task": 1, "role": "triage", "state": "tool", "k": "lane", "t": 1794590484.68, "n": 119}
+{"task": 2, "role": "static", "state": "tool", "k": "lane", "t": 1794590484.68, "n": 121}
+{"state": "go", "role": "ioc", "wait_ms": 1, "waiting": [], "running": ["crypto", "ioc"], "k": "gate", "t": 1794590484.68, "n": 120}
+{"state": "end", "role": "crypto", "wait_ms": 5, "waiting": [], "running": ["ioc"], "k": "gate", "t": 1794590484.68, "n": 122}
+{"state": "end", "role": "ioc", "wait_ms": 3, "waiting": [], "running": [], "k": "gate", "t": 1794590484.68, "n": 123}
+{"task": 3, "role": "ioc", "model_ms": 4, "tool_ms": 28, "wait_ms": 1, "in": 8161, "out": 24, "k": "tokens", "t": 1794590484.68, "n": 124}
+{"task": 3, "role": "ioc", "id": "call_6a8fc278d172927003e8", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind ioc --title 'C2 URL' --value http://c2.example.test/apk-beacon --off 0x51e --confidence high --detail 'A made-up value on a reserved name.'", "k": "tool_start", "t": 1794590484.68, "n": 125}
+{"task": 3, "role": "ioc", "state": "tool", "k": "lane", "t": 1794590484.68, "n": 126}
+{"task": 1, "role": "triage", "op": "add", "f": {"id": "f1", "agent": "triage", "agents": ["triage"], "task": 1, "kind": "note", "title": "Small APK sample", "detail": "A tiny generated file; nothing is packed.", "value": "", "enc": "text", "off": 0, "len": 1, "evidence": [{"off": 0, "len": 1, "section": "AndroidManifest.xml"}], "confidence": "high", "level": "claimed", "status": "unconfirmed", "disputes": [], "t": 1794590484.7}, "k": "finding", "t": 1794590484.69, "n": 127}
+{"task": 1, "role": "triage", "id": "call_67ffd8ee0e943ef69207", "ok": true, "ms": 14, "k": "tool_end", "t": 1794590484.69, "n": 128}
+{"task": 1, "role": "triage", "state": "thinking", "k": "lane", "t": 1794590484.69, "n": 129}
+{"task": 4, "role": "crypto", "op": "add", "f": {"id": "f2", "agent": "crypto", "agents": ["crypto"], "task": 4, "kind": "config", "title": "Configuration string", "detail": "Looks like configuration.", "value": "203.0.113.50", "enc": "text", "off": 1215, "len": 12, "evidence": [{"off": 1215, "len": 12, "section": "classes.dex"}], "confidence": "medium", "level": "byte-checked", "status": "verified", "disputes": [], "t": 1794590484.7}, "k": "finding", "t": 1794590484.69, "n": 130}
+{"state": "wait", "role": "triage", "wait_ms": 0, "waiting": ["triage"], "running": [], "k": "gate", "t": 1794590484.69, "n": 131}
+{"state": "go", "role": "triage", "wait_ms": 0, "waiting": [], "running": ["triage"], "k": "gate", "t": 1794590484.69, "n": 132}
+{"state": "end", "role": "triage", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.69, "n": 133}
+{"task": 1, "role": "triage", "state": "writing", "k": "lane", "t": 1794590484.69, "n": 134}
+{"state": "wait", "role": "crypto", "wait_ms": 0, "waiting": ["crypto"], "running": [], "k": "gate", "t": 1794590484.69, "n": 135}
+{"task": 1, "role": "triage", "model_ms": 4, "tool_ms": 40, "wait_ms": 3, "in": 11686, "out": 32, "k": "tokens", "t": 1794590484.69, "n": 136}
+{"state": "go", "role": "crypto", "wait_ms": 0, "waiting": [], "running": ["crypto"], "k": "gate", "t": 1794590484.69, "n": 137}
+{"state": "end", "role": "crypto", "wait_ms": 1, "waiting": [], "running": [], "k": "gate", "t": 1794590484.69, "n": 138}
+{"task": 4, "role": "crypto", "id": "call_76e9ae72c9b2b9029a4c", "ok": true, "ms": 24, "k": "tool_end", "t": 1794590484.7, "n": 139}
+{"task": 4, "role": "crypto", "state": "thinking", "k": "lane", "t": 1794590484.7, "n": 140}
+{"task": 4, "role": "crypto", "state": "writing", "k": "lane", "t": 1794590484.7, "n": 141}
+{"task": 4, "role": "crypto", "model_ms": 5, "tool_ms": 54, "wait_ms": 5, "in": 10837, "out": 29, "k": "tokens", "t": 1794590484.7, "n": 142}
+{"task": 2, "role": "static", "op": "add", "f": {"id": "f3", "agent": "static", "agents": ["static"], "task": 2, "kind": "function", "title": "Entry point", "detail": "The entry point; it only exits.", "value": "", "enc": "text", "off": null, "len": null, "evidence": [{"func": "com.example.demo.MainActivity"}], "confidence": "medium", "level": "claimed", "status": "unconfirmed", "disputes": [], "t": 1794590484.7}, "k": "finding", "t": 1794590484.7, "n": 143}
+{"task": 2, "role": "static", "id": "call_20504a127badd8aae596", "ok": true, "ms": 27, "k": "tool_end", "t": 1794590484.7, "n": 144}
+{"task": 2, "role": "static", "state": "thinking", "k": "lane", "t": 1794590484.7, "n": 145}
+{"task": 5, "role": "behaviour", "letter": "B", "label": "Behaviour", "limit": 2400, "round": 1, "k": "task_start", "t": 1794590484.7, "n": 146}
+{"state": "wait", "role": "static", "wait_ms": 0, "waiting": ["static"], "running": [], "k": "gate", "t": 1794590484.7, "n": 147}
+{"state": "go", "role": "static", "wait_ms": 0, "waiting": [], "running": ["static"], "k": "gate", "t": 1794590484.7, "n": 148}
+{"state": "end", "role": "static", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.7, "n": 149}
+{"task": 2, "role": "static", "state": "writing", "k": "lane", "t": 1794590484.71, "n": 150}
+{"task": 2, "role": "static", "model_ms": 4, "tool_ms": 58, "wait_ms": 3, "in": 11167, "out": 27, "k": "tokens", "t": 1794590484.71, "n": 151}
+{"task": 3, "role": "ioc", "op": "add", "f": {"id": "f4", "agent": "ioc", "agents": ["ioc"], "task": 3, "kind": "ioc", "title": "C2 URL", "detail": "A made-up value on a reserved name.", "value": "http://c2.example.test/apk-beacon", "enc": "text", "off": 1310, "len": 33, "evidence": [{"off": 1310, "len": 33, "section": "classes.dex"}], "confidence": "high", "level": "byte-checked", "status": "verified", "disputes": [], "t": 1794590484.7}, "k": "finding", "t": 1794590484.71, "n": 152}
+{"task": 3, "role": "ioc", "id": "call_6a8fc278d172927003e8", "ok": true, "ms": 31, "k": "tool_end", "t": 1794590484.71, "n": 153}
+{"task": 3, "role": "ioc", "state": "thinking", "k": "lane", "t": 1794590484.71, "n": 154}
+{"state": "wait", "role": "ioc", "wait_ms": 0, "waiting": ["ioc"], "running": [], "k": "gate", "t": 1794590484.71, "n": 155}
+{"state": "go", "role": "ioc", "wait_ms": 0, "waiting": [], "running": ["ioc"], "k": "gate", "t": 1794590484.71, "n": 156}
+{"state": "end", "role": "ioc", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.71, "n": 157}
+{"task": 3, "role": "ioc", "model_ms": 4, "tool_ms": 59, "wait_ms": 1, "in": 11333, "out": 32, "k": "tokens", "t": 1794590484.71, "n": 158}
+{"task": 3, "role": "ioc", "id": "call_d83c783316b361e7bfe1", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind ioc --title 'Mutex or package' --value 203.0.113.50 --off 0x4bf --confidence high --detail 'A made-up value on a reserved name.'", "k": "tool_start", "t": 1794590484.71, "n": 159}
+{"task": 3, "role": "ioc", "state": "tool", "k": "lane", "t": 1794590484.71, "n": 160}
+{"task": 3, "role": "ioc", "op": "add", "f": {"id": "f5", "agent": "ioc", "agents": ["ioc"], "task": 3, "kind": "ioc", "title": "Mutex or package", "detail": "A made-up value on a reserved name.", "value": "203.0.113.50", "enc": "text", "off": 1215, "len": 12, "evidence": [{"off": 1215, "len": 12, "section": "classes.dex"}], "confidence": "high", "level": "byte-checked", "status": "verified", "disputes": [], "t": 1794590484.7}, "k": "finding", "t": 1794590484.74, "n": 161}
+{"task": 3, "role": "ioc", "id": "call_d83c783316b361e7bfe1", "ok": true, "ms": 31, "k": "tool_end", "t": 1794590484.75, "n": 162}
+{"task": 3, "role": "ioc", "state": "thinking", "k": "lane", "t": 1794590484.75, "n": 163}
+{"state": "wait", "role": "ioc", "wait_ms": 0, "waiting": ["ioc"], "running": [], "k": "gate", "t": 1794590484.76, "n": 164}
+{"state": "go", "role": "ioc", "wait_ms": 0, "waiting": [], "running": ["ioc"], "k": "gate", "t": 1794590484.76, "n": 165}
+{"state": "end", "role": "ioc", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.76, "n": 166}
+{"task": 3, "role": "ioc", "model_ms": 4, "tool_ms": 90, "wait_ms": 1, "in": 14723, "out": 40, "k": "tokens", "t": 1794590484.76, "n": 167}
+{"task": 3, "role": "ioc", "id": "call_163843b4a8ab9cdef012", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind ioc --title Address --value com.example.demo.secret --off 0x505 --confidence high --detail 'A made-up value on a reserved name.'", "k": "tool_start", "t": 1794590484.76, "n": 168}
+{"task": 3, "role": "ioc", "state": "tool", "k": "lane", "t": 1794590484.76, "n": 169}
+{"task": 3, "role": "ioc", "op": "add", "f": {"id": "f6", "agent": "ioc", "agents": ["ioc"], "task": 3, "kind": "ioc", "title": "Address", "detail": "A made-up value on a reserved name.", "value": "com.example.demo.secret", "enc": "text", "off": 1285, "len": 23, "evidence": [{"off": 1285, "len": 23, "section": "classes.dex"}], "confidence": "high", "level": "byte-checked", "status": "verified", "disputes": [], "t": 1794590484.8}, "k": "finding", "t": 1794590484.78, "n": 170}
+{"task": 3, "role": "ioc", "id": "call_163843b4a8ab9cdef012", "ok": true, "ms": 17, "k": "tool_end", "t": 1794590484.78, "n": 171}
+{"task": 3, "role": "ioc", "state": "thinking", "k": "lane", "t": 1794590484.78, "n": 172}
+{"state": "wait", "role": "ioc", "wait_ms": 0, "waiting": ["ioc"], "running": [], "k": "gate", "t": 1794590484.78, "n": 173}
+{"state": "go", "role": "ioc", "wait_ms": 0, "waiting": [], "running": ["ioc"], "k": "gate", "t": 1794590484.78, "n": 174}
+{"state": "end", "role": "ioc", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.78, "n": 175}
+{"task": 3, "role": "ioc", "state": "writing", "k": "lane", "t": 1794590484.78, "n": 176}
+{"task": 3, "role": "ioc", "model_ms": 4, "tool_ms": 107, "wait_ms": 1, "in": 18331, "out": 43, "k": "tokens", "t": 1794590484.78, "n": 177}
+{"task": 4, "role": "crypto", "state": "done", "tokens": {"in": 10837, "out": 29}, "findings": 1, "text": "Crypto and config done.", "model_ms": 5, "tool_ms": 54, "wait_ms": 5, "ms": 521, "k": "task_end", "t": 1794590484.88, "n": 178}
+{"task": 2, "role": "static", "state": "done", "tokens": {"in": 11167, "out": 27}, "findings": 1, "text": "Static done.", "model_ms": 4, "tool_ms": 58, "wait_ms": 3, "ms": 527, "k": "task_end", "t": 1794590484.88, "n": 179}
+{"task": 1, "role": "triage", "state": "done", "tokens": {"in": 11686, "out": 32}, "findings": 1, "text": "Triage done.", "model_ms": 4, "tool_ms": 40, "wait_ms": 3, "ms": 542, "k": "task_end", "t": 1794590484.89, "n": 180}
+{"state": "wait", "role": "behaviour", "wait_ms": 0, "waiting": ["behaviour"], "running": [], "k": "gate", "t": 1794590484.95, "n": 181}
+{"state": "go", "role": "behaviour", "wait_ms": 0, "waiting": [], "running": ["behaviour"], "k": "gate", "t": 1794590484.95, "n": 182}
+{"state": "end", "role": "behaviour", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.95, "n": 183}
+{"task": 5, "role": "behaviour", "state": "thinking", "k": "lane", "t": 1794590484.96, "n": 184}
+{"task": 5, "role": "behaviour", "model_ms": 0, "tool_ms": 0, "wait_ms": 0, "in": 3394, "out": 8, "k": "tokens", "t": 1794590484.96, "n": 185}
+{"task": 5, "role": "behaviour", "id": "call_9a13d47b73811fa85802", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-say 'Mapping to techniques'", "k": "tool_start", "t": 1794590484.96, "n": 186}
+{"task": 5, "role": "behaviour", "state": "tool", "k": "lane", "t": 1794590484.96, "n": 187}
+{"task": 3, "role": "ioc", "state": "done", "tokens": {"in": 18331, "out": 43}, "findings": 3, "text": "Strings done.", "model_ms": 4, "tool_ms": 107, "wait_ms": 1, "ms": 630, "k": "task_end", "t": 1794590484.98, "n": 188}
+{"task": 5, "role": "behaviour", "text": "Mapping to techniques", "k": "say", "t": 1794590484.99, "n": 189}
+{"task": 5, "role": "behaviour", "id": "call_9a13d47b73811fa85802", "ok": true, "ms": 26, "k": "tool_end", "t": 1794590484.99, "n": 190}
+{"task": 5, "role": "behaviour", "state": "thinking", "k": "lane", "t": 1794590484.99, "n": 191}
+{"state": "wait", "role": "behaviour", "wait_ms": 0, "waiting": ["behaviour"], "running": [], "k": "gate", "t": 1794590484.99, "n": 192}
+{"state": "go", "role": "behaviour", "wait_ms": 0, "waiting": [], "running": ["behaviour"], "k": "gate", "t": 1794590484.99, "n": 193}
+{"state": "end", "role": "behaviour", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590484.99, "n": 194}
+{"task": 5, "role": "behaviour", "model_ms": 0, "tool_ms": 26, "wait_ms": 0, "in": 6912, "out": 16, "k": "tokens", "t": 1794590484.99, "n": 195}
+{"task": 5, "role": "behaviour", "id": "call_d99dcd8196e29b2c7813", "tool": "bash", "text": "python3 /skills/rea-swarm/scripts/swarm-post --kind technique --title 'T1437 Application Layer Protocol' --detail 'Rests on f1 and f2: a URL string and a second value.' --confidence low", "k": "tool_start", "t": 1794590484.99, "n": 196}
+{"task": 5, "role": "behaviour", "state": "tool", "k": "lane", "t": 1794590484.99, "n": 197}
+{"task": 5, "role": "behaviour", "op": "add", "f": {"id": "f7", "agent": "behaviour", "agents": ["behaviour"], "task": 5, "kind": "technique", "title": "T1437 Application Layer Protocol", "detail": "Rests on f1 and f2: a URL string and a second value.", "value": "T1437", "enc": "text", "off": null, "len": null, "evidence": [], "confidence": "low", "level": "claimed", "status": "unconfirmed", "disputes": [], "t": 1794590485.0, "attack": {"id": "T1437", "name": "Application Layer Protocol", "tactics": [{"id": "command-and-control", "name": "Command and Control"}], "domain": "mobile", "version": "20.0"}, "basis": ["f1", "f2"], "basis_ok": true}, "k": "finding", "t": 1794590485.01, "n": 198}
+{"task": 5, "role": "behaviour", "id": "call_d99dcd8196e29b2c7813", "ok": true, "ms": 18, "k": "tool_end", "t": 1794590485.01, "n": 199}
+{"task": 5, "role": "behaviour", "state": "thinking", "k": "lane", "t": 1794590485.01, "n": 200}
+{"state": "wait", "role": "behaviour", "wait_ms": 0, "waiting": ["behaviour"], "running": [], "k": "gate", "t": 1794590485.01, "n": 201}
+{"state": "go", "role": "behaviour", "wait_ms": 0, "waiting": [], "running": ["behaviour"], "k": "gate", "t": 1794590485.01, "n": 202}
+{"state": "end", "role": "behaviour", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590485.01, "n": 203}
+{"task": 5, "role": "behaviour", "state": "writing", "k": "lane", "t": 1794590485.02, "n": 204}
+{"task": 5, "role": "behaviour", "model_ms": 0, "tool_ms": 44, "wait_ms": 0, "in": 10652, "out": 19, "k": "tokens", "t": 1794590485.02, "n": 205}
+{"task": 5, "role": "behaviour", "state": "done", "tokens": {"in": 10652, "out": 19}, "findings": 1, "text": "Behaviour done.", "model_ms": 0, "tool_ms": 44, "wait_ms": 0, "ms": 519, "k": "task_end", "t": 1794590485.22, "n": 206}
+{"phase": "round2", "k": "phase", "t": 1794590485.23, "n": 207}
+{"state": "planning", "round": 2, "k": "orchestrator", "t": 1794590485.23, "n": 208}
+{"state": "wait", "role": "orchestrator", "wait_ms": 0, "waiting": ["orchestrator"], "running": [], "k": "gate", "t": 1794590485.23, "n": 209}
+{"state": "go", "role": "orchestrator", "wait_ms": 0, "waiting": [], "running": ["orchestrator"], "k": "gate", "t": 1794590485.23, "n": 210}
+{"state": "end", "role": "orchestrator", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590485.23, "n": 211}
+{"state": "none", "round": 2, "why": "the model planned no further work", "summary": "Round 1 covered the brief.", "resolutions": 0, "dropped": 0, "k": "orchestrator", "t": 1794590485.23, "n": 212}
+{"phase": "merge", "k": "phase", "t": 1794590485.23, "n": 213}
+{"task": 6, "role": "reporter", "letter": "R", "label": "Reporter", "limit": 600, "round": 1, "k": "task_start", "t": 1794590485.23, "n": 214}
+{"state": "wait", "role": "reporter", "wait_ms": 0, "waiting": ["reporter"], "running": [], "k": "gate", "t": 1794590485.49, "n": 215}
+{"state": "go", "role": "reporter", "wait_ms": 0, "waiting": [], "running": ["reporter"], "k": "gate", "t": 1794590485.49, "n": 216}
+{"state": "end", "role": "reporter", "wait_ms": 0, "waiting": [], "running": [], "k": "gate", "t": 1794590485.49, "n": 217}
+{"task": 6, "role": "reporter", "state": "writing", "k": "lane", "t": 1794590485.5, "n": 218}
+{"task": 6, "role": "reporter", "model_ms": 0, "tool_ms": 0, "wait_ms": 0, "in": 2527, "out": 118, "k": "tokens", "t": 1794590485.5, "n": 219}
+{"task": 6, "role": "reporter", "state": "done", "tokens": {"in": 2527, "out": 118}, "findings": 0, "text": "## Executive summary\nA tiny generated test file with made-up network names. It only exits when run.\n\n## What it is\nA small generated APK file.\n\n## Capabilities\n- It names a web address, but nothing in the file uses it.\n\n## Recommendations\n- Treat it as a test file.\n\n## What we don't know\n- Whether anything else loads it.\n\nASSESSMENT {\"verdict\": \"benign\", \"confidence\": \"moderate\", \"family\": \"\", \"basis\": [\"f1\", \"f2\"], \"rationale\": \"Made-up strings; the code only exits.\"}", "model_ms": 0, "tool_ms": 0, "wait_ms": 0, "ms": 496, "k": "task_end", "t": 1794590485.73, "n": 220}
+{"status": "done", "reason": null, "k": "done", "t": 1794590486.52, "n": 221}

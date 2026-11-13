@@ -1,0 +1,56 @@
+# swarmlabre.example.toml: every key has a default; copy to swarmlabre.toml (gitignored) and change what you need.
+# Search order: --config, $SWARMLABRE_CONFIG, ./swarmlabre.toml, ~/.config/swarmlabre/swarmlabre.toml. The tool only reads this file.
+
+[paths]
+state = "~/.local/state/swarmlabre"   # runs live in <state>/runs/<run id>; a folder this tool creates is mode 0700
+
+# The model: any OpenAI-compatible endpoint. The key is read from the environment variable named here, never from this file.
+[model]
+base_url    = ""                      # for example http://127.0.0.1:8080/v1
+api_key_env = "SWARMLABRE_API_KEY"
+model       = ""                      # empty = the first model the endpoint lists
+temperature = 0.0                     # pinned on every request the agents make (the gate overwrites what the agent's client asked for)
+seed        = 1                       # sent with every request; the manifest of a run says whether the backend honoured it
+# What the agent program (pi) is told about the model. All optional; 0 / false = say nothing.
+context_window  = 0                   # tokens; above 0 pi gets it (and a default output cap of min(32768, context_window / 4) unless max_tokens is set)
+max_tokens      = 0                   # output tokens per request; also the cap the request gate puts on every agent request (never below 32768 there); 0 = the default above
+reasoning       = false               # true: the model thinks before it answers; pi sends its thinking level
+thinking_toggle = false               # with reasoning: the endpoint's chat template has an enable_thinking switch pi may turn off
+thinking_level  = "medium"            # with reasoning: the thinking level pi starts with (a level name pi knows)
+# Fields added to the planning request that swarmlabre itself makes between rounds (the agents' requests are not changed), for example
+# extra_body = { chat_template_kwargs = { enable_thinking = false } }
+extra_body      = {}
+# `mock` and `replay` are set by `run --mock FILE` and `run --replay RUN`; you rarely write them here. A path to a scripted mock model, or to a recorded run's folder.
+mock            = ""
+replay          = ""
+
+# The web UI (`swarmlabre serve`). It listens on this machine only unless you say otherwise; a non-loopback host prints a warning, because the token is the only protection
+# and the traffic is not encrypted. `--host` and `--port` on the command line win over these.
+[serve]
+host = "127.0.0.1"
+port = 8810                           # 0 = any free port
+
+[swarm]
+enabled              = true
+tlp                  = "AMBER"        # report marking: CLEAR, GREEN, AMBER, AMBER+STRICT, RED (the launch sheet can change it per run)
+report_org           = ""             # "Prepared by" on the cover of a report; empty = no brand bar
+report_contact       = ""             # contact line on the cover; empty = none
+report_logo          = false          # draw swarmlabre/data/logo.png on the cover of report.html (needs report_org; the file is not shipped)
+detection_rules      = true           # write YARA rules from byte-checked strings; each rule is matched against the sample before it is shown
+keep_runs            = 20             # newest finished runs kept
+keep_sample          = true           # false: delete the run's copy of the sample once its report is written
+max_rounds           = 2              # 1 = round 1 only; 2 = the model may plan one more round and settle disputes
+max_parallel         = 4              # model requests in flight (1 to 6)
+task_minutes         = 20             # one agent task
+run_minutes          = 0              # whole run after preparing; 0 = derived from task_minutes
+prep_minutes         = 25             # the preparing phase in the tools container
+prewarm_functions    = 40             # functions decompiled before the agents start
+sample_mb            = 256            # upload limit
+max_sample_native_mb = 4              # ELF and PE above this are refused: Ghidra's memory grows with the binary
+max_sample_apk_mb    = 16
+tools_memory_gb      = 0              # tools container cap; 0 = by sample (APK 4, small native 6, larger native 12)
+tools_cpus           = 4
+agent_memory_gb      = 0              # 0 = 0.5 + 0.15 per agent (at least 1)
+wait_minutes         = 30
+memory_reserve_gb    = 4              # memory kept free for the host when checking that a run fits
+notify_cmd           = ""             # run when a run ends or waits, with the title and a fixed-template text as two extra arguments, e.g. "notify-send"

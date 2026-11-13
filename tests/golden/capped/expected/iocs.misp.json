@@ -1,0 +1,19 @@
+{
+ "Event": {
+  "uuid": "a1b1caad-f0cb-5276-aef3-0c9160a15b7b",
+  "info": "Malware analysis report: demo.elf (static analysis, run s5a194219)",
+  "date": "2026-09-21",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1790000060",
+  "Tag": [
+   {
+    "name": "tlp:clear",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": []
+ }
+}

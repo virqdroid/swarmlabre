@@ -1,0 +1,13 @@
+{"code": null, "why": "", "k": "waiting", "t": 1790000000.0, "n": 1}
+{"phase": "prepare", "k": "phase", "t": 1790000000.0, "n": 2}
+{"step": "sample", "status": "ok", "msg": "generated sample", "k": "step", "t": 1790000000.0, "n": 3}
+{"k": "layout", "t": 1790000001.0, "n": 4}
+{"phase": "round1", "k": "phase", "t": 1790000002.0, "n": 5}
+{"task": 1, "role": "ioc", "letter": "I", "label": "Strings/IOC", "limit": 600, "round": 1, "k": "task_start", "t": 1790000002.0, "n": 6}
+{"task": 1, "role": "ioc", "op": "add", "f": {"id": "f1", "agent": "ioc", "agents": ["ioc"], "task": 1, "kind": "ioc", "title": "C2 URL", "detail": "A made-up value.", "value": "http://c2.example.test/beacon", "enc": "text", "off": 149, "len": 29, "evidence": [{"off": 149, "len": 29, "section": ".rodata"}], "confidence": "high", "level": "byte-checked", "status": "verified", "disputes": [], "t": 1790000002.5}, "k": "finding", "t": 1790000003.0, "n": 7}
+{"task": 1, "role": "ioc", "op": "add", "f": {"id": "f2", "agent": "ioc", "agents": ["ioc"], "task": 1, "kind": "ioc", "title": "Mutex name", "detail": "A made-up value.", "value": "Mutex\\Global\\DemoSwarmMutex", "enc": "text", "off": 179, "len": 27, "evidence": [{"off": 179, "len": 27, "section": ".rodata"}], "confidence": "high", "level": "byte-checked", "status": "verified", "disputes": [], "t": 1790000003.0}, "k": "finding", "t": 1790000003.01, "n": 8}
+{"task": 1, "role": "ioc", "state": "done", "k": "task_end", "t": 1790000026.0, "n": 9}
+{"phase": "merge", "k": "phase", "t": 1790000032.0, "n": 10}
+{"task": 2, "role": "reporter", "letter": "R", "label": "Reporter", "limit": 600, "round": 1, "k": "task_start", "t": 1790000032.0, "n": 11}
+{"task": 2, "role": "reporter", "state": "done", "k": "task_end", "t": 1790000055.0, "n": 12}
+{"status": "done", "reason": null, "k": "done", "t": 1790000060.0, "n": 13}
