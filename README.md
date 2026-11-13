@@ -6,9 +6,9 @@ A finished run is sealed and **replays offline to byte-identical report files**.
 
 ![The web UI playing a recorded run of a harmless demo program: a result card, five byte-checked findings and one unconfirmed claim](docs/img/demo-1280.png)
 
-**Try it without installing anything:** the [live demo](https://virqdroid.github.io/swarmlabre/demo/) is the real web UI playing a recorded run in your browser. It runs
+**Try it without installing anything:** the [live demo](https://swrm.re/demo/) is the real web UI playing a recorded run in your browser. It runs
 no model and sends nothing anywhere. The sample is a harmless generated program that only exits; the agents were a scripted mock, so what you see is the pipeline and the
-checks, not the quality of any model.
+checks, not the quality of any model. The same demo, a sample report and a short summary are on the one-page site, [swrm.re](https://swrm.re/).
 
 **Status: alpha, 0.1.0.** It was built and checked on one machine (Linux arm64, Python 3.12.3). The checks that exist, and the ones that do not, are listed in
 [docs/determinism.md](docs/determinism.md) and [SECURITY.md](SECURITY.md); please read the second before you point it at a real malware sample.
