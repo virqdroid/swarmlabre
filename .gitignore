@@ -6,3 +6,7 @@ runs/
 *.bak
 .DS_Store
 site/demo/
+site/architecture.svg
+site/img/
+site/sample/
+site/fonts/

@@ -1,17 +1,18 @@
-# Publishes the static demo (site/demo/) to GitHub Pages.
+# Publishes the one-pager (site/index.html) and the static demo (site/demo/) to GitHub Pages.
 #
-# UNEXERCISED: this workflow has never run. It cannot run before the repository is uploaded to GitHub, and Pages has to be switched on once in the repository
-# settings (Settings -> Pages -> Source: GitHub Actions). The build step it relies on is exercised locally (`python3 tools/build-demo.py BUNDLE`, tests/test_demo_build.py).
+# Pages is switched on in the repository settings with the source "GitHub Actions". The custom domain is NOT set here: a CNAME file is ignored when a workflow publishes,
+# so the domain lives in those settings too.
 #
-# What it does: builds the demo from a recorded run, then uploads site/ as the Pages artifact. The run is the committed bundle at DEMO_BUNDLE below: the benign generated
-# sample (`swarmlabre demo --variant two`) analysed with the scripted mock model and exported (`swarmlabre export --with-sample`); it is also the golden case `elf-dispute`.
+# What it does: replays the recorded run, builds the demo from it, copies the files the one-pager links (diagram, screenshot, sample report, fonts) into site/, checks the
+# one-pager (tests/test_site.py), then uploads site/ as the Pages artifact. The run is the committed bundle at DEMO_BUNDLE below: the benign generated sample
+# (`swarmlabre demo --variant two`) analysed with the scripted mock model and exported (`swarmlabre export --with-sample`); it is also the golden case `elf-dispute`.
 # Nothing is installed: the build is Python 3.12 standard library only.
 name: pages
 
 on:
   push:
     branches: [main]
-    paths: ["swarmlabre/**", "ui/**", "tools/build-demo.py", "tools/shim.js", "demo/**", "site/**", ".github/workflows/pages.yml"]
+    paths: ["swarmlabre/**", "ui/**", "tools/build-demo.py", "tools/shim.js", "demo/**", "site/**", "docs/architecture.svg", "docs/img/demo-1280.png", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 env:
@@ -47,6 +48,17 @@ jobs:
           bad = [u for u in re.findall(r"https?://[^\s'\"<>)\\]+", t) if u != "http://www.w3.org/2000/svg"]
           assert not bad, bad
           PY
+      - name: Copy the files the one-pager links into site/
+        run: |
+          mkdir -p site/img site/sample site/fonts
+          cp docs/architecture.svg site/architecture.svg
+          cp docs/img/demo-1280.png site/img/demo-1280.png
+          cp "$DEMO_BUNDLE/out/report.html" site/sample/report.html
+          cp ui/fonts/geist.woff2 site/fonts/geist.woff2
+          cp ui/fonts/geistmono.woff2 site/fonts/geistmono.woff2
+          cp ui/fonts/OFL.txt site/fonts/OFL.txt
+      - name: Check the one-pager (no fetchable address, every link resolves)
+        run: python3 -m unittest discover -s tests -p test_site.py -v
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
