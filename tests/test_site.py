@@ -327,6 +327,22 @@ class SiteTest(unittest.TestCase):
         chips = re.findall(r'<button type="button" class="chip" data-f="(f\d+)" aria-pressed="false"><b>(f\d+)</b>([^<]+)</button>', self.raw)
         self.assertEqual([(c[0], c[2]) for c in chips], [(f["id"], f["title"]) for f in self.board["findings"] if f["level"] == "byte-checked"])
 
+    def test_socrates_is_drawn_in_the_demo_files_characters_and_credited(self):
+        # The hero's figure is decoration: the statue shaded with characters that occur in the demo file (its hex digits and its printable bytes). It is an adaptation
+        # of a CC BY-SA 4.0 photo, so the page credits the photographer and the licence, and THIRD_PARTY.md lists it.
+        m = re.search(r'<pre class="soc" aria-hidden="true">(.*?)</pre>', self.raw, re.S)
+        self.assertTrue(m, "the hero has its figure, hidden from screen readers")
+        self.assertIsNone(re.search(r"<(?!/?i\b)", m.group(1)), "only <i> runs inside the figure")
+        glyphs = set(re.sub(r"<[^>]+>|\s", "", m.group(1)).replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&#x27;", "'").replace("&quot;", '"'))
+        allowed = set("0123456789abcdef") | {chr(c) for c in self.sample if 32 < c < 127}
+        self.assertTrue(glyphs)
+        self.assertLessEqual(glyphs, allowed, "glyphs not from the demo file: %r" % sorted(glyphs - allowed))
+        page = words("".join(t for t, _ in self.s.text))
+        self.assertIn("after a photo by C messier (CC BY-SA 4.0, credits)", page)
+        third = (ROOT / "THIRD_PARTY.md").read_text(encoding="utf-8")
+        self.assertIn("C messier", third)
+        self.assertIn("CC BY-SA 4.0", third)
+
     def test_the_table_is_the_boards(self):
         rows = re.findall(r"<tr class=\"(chk|rej|)\" data-v=\"(\w+)\"([^>]*)><th scope=\"row\">(\w+)</th><td>([^<]*)</td><td>(.*?)</td><td class=\"o\">([^<]*)</td><td class=\"res\">(.*?)</td></tr>", self.raw)
         want = self.board["findings"] + self.board["rejected"]
