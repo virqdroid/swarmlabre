@@ -6,10 +6,10 @@ Up to six AI agents analyse one binary (ELF, PE or APK) and post to one board. S
 
 **Try it without installing anything:** the [live demo](https://swrm.re/demo/) is the real web UI playing a recorded run in your browser. It runs
 no model and sends nothing anywhere. The sample is a harmless generated program that only exits; the agents were a scripted mock, so what you see is the pipeline and the
-checks, not the quality of any model. The same demo, a sample report and a short summary are on the one-page site, [swrm.re](https://swrm.re/).
+checks, not the quality of any model. The same demo, a sample report and a short summary are on the one-page site, [swrm.re](https://swrm.re/). The documentation is at [swrm.re/docs](https://swrm.re/docs/).
 
 **Status: alpha, 0.1.0.** It was built and checked on one machine (Linux arm64, Python 3.12.3). The checks that exist, and the ones that do not, are listed on the
-[Golden cases](site/docs/golden-cases.html), [CI](site/docs/ci.html) and [Security](site/docs/security.html) pages; please read the last one before you point it at a real malware sample.
+[Golden cases](https://swrm.re/docs/golden-cases.html), [CI](https://swrm.re/docs/ci.html) and [Security](https://swrm.re/docs/security.html) pages; please read the last one before you point it at a real malware sample.
 
 ## Tested so far
 
@@ -22,7 +22,7 @@ checks, not the quality of any model. The same demo, a sample report and a short
 ![Architecture: the sample is parsed on the host; two containers without a network prepare it and run the agents; a board on the host checks every post; reports are written from the checked findings; the run is sealed and can be replayed offline](docs/architecture.svg)
 
 The agents run in containers with `--network none` and never hold the model's key; the model reaches them only through a socket SwarmLabRE owns.
-Everything they or the sample print is untrusted text. See the [Architecture page](site/docs/architecture.html) for the parts, the trust boundaries and the files of a run.
+Everything they or the sample print is untrusted text. See the [Architecture page](https://swrm.re/docs/architecture.html) for the parts, the trust boundaries and the files of a run.
 
 ## Look first: Python 3.12 only, no Docker, no GPU, no key, no network
 
@@ -79,7 +79,7 @@ python3 tools/build-demo.py demo/sfaef16e6 --out site/demo      # a folder you c
 
 One page (`ui/swarms.html`, vanilla JavaScript, no external request, its two fonts self-hosted): the launch sheet, the Live tab (map of the file, call graph, hex peek, agents,
 who is reading what), the Findings tab and the result card, and "How it ran". The server listens on this machine only and asks for a token that `serve` prints in its address at every start. Replay and the static
-demo show a *recording*: see [site/docs/web-ui.html](site/docs/web-ui.html) for what a recording does and does not hold.
+demo show a *recording*: see [The web UI](https://swrm.re/docs/web-ui.html) for what a recording does and does not hold.
 
 ### More of the page and the report
 
@@ -110,7 +110,7 @@ would be empty. They fill in when a run has a verified technique, or functions w
 
 Every run is sealed with a `manifest.json` (tool version, sample hash, model and sampling, image ids, and the SHA-256 of every input and output file), the board's inputs
 in order, and every model exchange. `swarmlabre replay` rebuilds the board and every report file offline and exits 1 if one byte differs. A *live* run is
-pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model. See [site/docs/reproducibility.html](site/docs/reproducibility.html).
+pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model. See [Reproducibility](https://swrm.re/docs/reproducibility.html).
 
 ## Commands
 
@@ -139,7 +139,7 @@ Unix socket the run owns; the key stays outside. Whatever an agent, the sample o
 ```sh
 python3 -m unittest discover -s tests                       # no Docker, no model (the browser checks skip without Firefox; SWARMLABRE_SKIP_BROWSER=1 skips them)
 python3 tests/goldenrun.py --check --twice                  # the 11 golden cases (tests/golden): replay each twice, compare every output byte for byte
-python3 tests/goldenrun.py --update-golden                  # PROPOSES new golden files: shows the diff and a review token, writes nothing (see site/docs/golden-cases.html)
+python3 tests/goldenrun.py --update-golden                  # PROPOSES new golden files: shows the diff and a review token, writes nothing (see https://swrm.re/docs/golden-cases.html)
 python3 tests/ui/parity.py                                  # text parity of the page at 1280 and 500 px in live, replay and static (headless Firefox + geckodriver)
 python3 tests/ui/tour.py                                    # walks every tab, drawer and download of the page, offline
 SWARMLABRE_E2E=1 python3 -m unittest discover -s tests      # adds a whole run in real containers with the mock model (needs the two images; about a minute and a half)
@@ -150,7 +150,7 @@ SWARMLABRE_E2E=1 python3 -m unittest discover -s tests      # adds a whole run i
 - SwarmLabRE only reads the sample and never executes it. Do not point it at a file you could not safely open in a disassembler.
 - A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked *byte-checked*
   means the bytes are there at that offset. The agent's reading of those bytes can still be wrong.
-- A second live run on the same file can differ. Only the replay of a recording is byte-identical ([site/docs/reproducibility.html](site/docs/reproducibility.html)).
+- A second live run on the same file can differ. Only the replay of a recording is byte-identical ([Reproducibility](https://swrm.re/docs/reproducibility.html)).
 - No check in this repository involves real malware: the tests and the demo use generated benign files only. Nothing was tested on other CPU architectures, and the tools image builds for arm64 only today.
 - Nothing signs `manifest.json`. Someone who edits a file and recomputes the hashes gets a replay that agrees.
 
@@ -158,14 +158,14 @@ SWARMLABRE_E2E=1 python3 -m unittest discover -s tests      # adds a whole run i
 
 | | |
 |---|---|
-| [site/docs/cli.html](site/docs/cli.html) | every command and flag |
-| [site/docs/config.html](site/docs/config.html) | every configuration key with its default |
-| [site/docs/architecture.html](site/docs/architecture.html) | the parts, what is trusted, the modules, the rules the code keeps |
-| [site/docs/reproducibility.html](site/docs/reproducibility.html) | what "reproducible" covers: replay, a pinned live run, the files of a run |
-| [site/docs/golden-cases.html](site/docs/golden-cases.html) | the golden cases, how a golden file is changed, what they do not cover |
-| [site/docs/ci.html](site/docs/ci.html) | the two workflows, how to run their checks locally, what CI does not run |
-| [site/docs/web-ui.html](site/docs/web-ui.html) | the web UI: three modes, the server, what a recording does not hold |
-| [site/docs/security.html](site/docs/security.html) | the threat model, the defences, what is not claimed |
+| [Command line](https://swrm.re/docs/cli.html) | every command and flag |
+| [Configuration](https://swrm.re/docs/config.html) | every configuration key with its default |
+| [Architecture](https://swrm.re/docs/architecture.html) | the parts, what is trusted, the modules, the rules the code keeps |
+| [Reproducibility](https://swrm.re/docs/reproducibility.html) | what "reproducible" covers: replay, a pinned live run, the files of a run |
+| [Golden cases](https://swrm.re/docs/golden-cases.html) | the golden cases, how a golden file is changed, what they do not cover |
+| [CI](https://swrm.re/docs/ci.html) | the two workflows, how to run their checks locally, what CI does not run |
+| [The web UI](https://swrm.re/docs/web-ui.html) | the web UI: three modes, the server, what a recording does not hold |
+| [Security](https://swrm.re/docs/security.html) | the threat model, the defences, what is not claimed |
 | [SECURITY.md](SECURITY.md) | how to report a problem |
 | [THIRD_PARTY.md](THIRD_PARTY.md) | every third-party component with its licence |
 

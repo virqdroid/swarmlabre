@@ -1,6 +1,6 @@
 # Security
 
-The threat model, the defences and what the repository does not claim are on the [Security page](site/docs/security.html).
+The threat model, the defences and what the repository does not claim are on the [Security page](https://swrm.re/docs/security.html).
 
 ## Reporting a problem
 

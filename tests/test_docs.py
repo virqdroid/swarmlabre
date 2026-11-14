@@ -623,7 +623,7 @@ class OverviewTest(unittest.TestCase):
         bullets = re.findall(r"^- (.*?)(?=\n- |\n\n)", README_RAW.split("## What this is not")[1], re.S | re.M)
         items = [plain(x) for x in re.findall(r"<li>(.*?)</li>", sec(self.raw, "limits"), re.S)]
         self.assertEqual(len(bullets), 5)
-        self.assertEqual([i.split(" (see")[0] for i in items], [one_pager.words(b).split(" (site/docs/")[0].split(" (docs/")[0] for b in bullets])
+        self.assertEqual([i.split(" (see")[0] for i in items], [one_pager.words(b).split(" (https://swrm.re/docs/")[0].split(" (Reproducibility")[0] for b in bullets])
 
     def test_the_status_and_the_container_sentences_are_the_readmes(self):
         text = plain(self.raw)
@@ -3108,7 +3108,7 @@ class SecurityPageTest(unittest.TestCase):
 
     def test_security_md_keeps_what_github_needs_and_points_to_the_page(self):
         md = read(ROOT / "SECURITY.md")
-        self.assertIn("(site/docs/security.html)", md)
+        self.assertIn("(https://swrm.re/docs/security.html)", md)
         self.assertEqual(re.findall(r"^## (.*)$", md, re.M), ["Reporting a problem", "Supported versions"])
         self.assertLess(len(md.splitlines()), 25)
         for s in ("Report a vulnerability", "GitHub private vulnerability reporting", "there is no response-time promise", "Only the latest commit on `main`. There are no releases yet."):
@@ -3520,16 +3520,16 @@ class ArchitecturePageTest(unittest.TestCase):
 
     def test_architecture_md_is_a_pointer_with_the_diagram(self):
         md = read(ROOT / "docs" / "architecture.md")
-        self.assertIn("(../site/docs/architecture.html)", md)
-        self.assertIn("(../site/docs/security.html)", md)
+        self.assertIn("(https://swrm.re/docs/architecture.html)", md)
+        self.assertIn("(https://swrm.re/docs/security.html)", md)
         self.assertIn("![Architecture diagram](architecture.svg)", md)
         self.assertLess(len(md.splitlines()), 12)
         for moved in ("## The parts", "## Modules", "## Rules the code keeps", "What is trusted, and what is not"):
             self.assertNotIn(moved, md)
         readme = read(ROOT / "README.md")
         self.assertNotIn("(docs/architecture.md)", readme)
-        self.assertIn("(site/docs/architecture.html)", readme)
-        self.assertIn("(site/docs/security.html)", readme)
+        self.assertIn("(https://swrm.re/docs/architecture.html)", readme)
+        self.assertIn("(https://swrm.re/docs/security.html)", readme)
         self.assertIn("(SECURITY.md)", readme)
 
     def test_the_lead_and_the_runtime_claims(self):
@@ -4214,20 +4214,40 @@ class NoTextInTwoPlacesTest(unittest.TestCase):
                 for name, page in pages.items():
                     self.assertNotIn(sentence.strip("-| "), page, "%s says what %s says: %r" % (md.name, name, sentence[:80]))
 
+    def test_markdown_links_to_a_docs_page_use_the_site_and_never_the_repository_path(self):
+        """A link to site/docs/X.html on GitHub shows the page's source; the reader wants the page on the site."""
+        files = [ROOT / "README.md", ROOT / "SECURITY.md", ROOT / "THIRD_PARTY.md"] + sorted((ROOT / "docs").glob("*.md"))
+        seen = 0
+        for md in files:
+            text = read(md)
+            self.assertNotRegex(text, r"\]\((?:\.\./)?site/docs/", "%s links a docs page by its repository path" % md.name)
+            self.assertNotRegex(text, r"\[site/docs/[\w-]+\.html\]", "%s shows a repository path as link text" % md.name)
+            for page in re.findall(r"https://swrm\.re/docs/([\w.-]*)", text):
+                seen += 1
+                self.assertTrue(page == "" or (ROOT / "site" / "docs" / page).is_file(), "%s: %s is not a docs page" % (md.name, page))
+        self.assertGreater(seen, 10)
+        self.assertIn("(https://swrm.re/docs/)", read(ROOT / "README.md"))
+
+    def test_the_one_pager_has_a_docs_button_in_the_hero_and_at_the_end(self):
+        index = read(one_pager.PAGE)
+        self.assertEqual(re.findall(r'<a class="btn" href="docs/index.html">Read the docs</a>', index), ["<a class=\"btn\" href=\"docs/index.html\">Read the docs</a>"] * 2)
+        hero = index.split('<div class="cta">', 1)[1].split("</div>", 1)[0]
+        self.assertIn('href="docs/index.html">Read the docs</a>', hero)
+
     def test_the_docs_md_files_point_at_the_pages_that_took_over(self):
         arch, det = read(ROOT / "docs" / "architecture.md"), read(ROOT / "docs" / "determinism.md")
-        self.assertIn("(../site/docs/architecture.html)", arch)
-        self.assertIn("(../site/docs/security.html)", arch)
+        self.assertIn("(https://swrm.re/docs/architecture.html)", arch)
+        self.assertIn("(https://swrm.re/docs/security.html)", arch)
         for page in ("golden-cases", "ci", "reproducibility"):
-            self.assertIn("(../site/docs/%s.html)" % page, det)
+            self.assertIn("(https://swrm.re/docs/%s.html)" % page, det)
         self.assertLess(len(det.splitlines()), 12, "docs/determinism.md is a pointer now")
         for md in (arch, det):
-            for target in re.findall(r"\(\.\./(site/docs/[\w-]+\.html)\)", md):
-                self.assertTrue((ROOT / target).is_file(), target)
+            for target in re.findall(r"\(https://swrm\.re/docs/([\w-]+\.html)\)", md):
+                self.assertTrue((ROOT / "site" / "docs" / target).is_file(), target)
         self.assertNotIn("## 1. A recorded run replays", det)
         self.assertNotIn("A live run is pinned and recorded", det)
         ui = read(ROOT / "docs" / "ui.md")
-        self.assertIn("(../site/docs/web-ui.html)", ui)
+        self.assertIn("(https://swrm.re/docs/web-ui.html)", ui)
         self.assertLess(len(ui.splitlines()), 12, "docs/ui.md is a pointer now")
         self.assertTrue((ROOT / "site" / "docs" / "web-ui.html").is_file())
         for name in ("README.md", "SECURITY.md", "docs/architecture.md", "docs/determinism.md"):
