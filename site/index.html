@@ -86,6 +86,13 @@ i.f1{animation-delay:.3s}i.f2{animation-delay:.7s}i.f3{animation-delay:1.1s}i.f4
 i.f.on{background:var(--ok);color:var(--lens);box-shadow:none}
 @keyframes chk{from{background:transparent;color:var(--dim);box-shadow:none}}
 .dumpcap{color:var(--dim);font-size:.88rem;margin:10px 2px 0;max-width:80ch}
+.tested{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:30px 0 0}
+.tested h2{grid-column:1/-1;margin:0;font:600 .8rem var(--mono);letter-spacing:0;color:var(--gold)}
+.tested>div{border:1px solid var(--rule);border-radius:10px;background:var(--card);padding:12px 14px;font-size:.9rem;color:var(--dim)}
+.tested h3{color:var(--text);font-size:.95rem}
+.tested p{margin:0}
+.seal{margin:0 0 14px}
+.key{display:flex;flex-wrap:wrap;gap:6px 22px;margin:12px 2px 0;color:var(--dim);font-size:.88rem}
 section{padding:72px 0 0}
 section>.w>p.k{margin:0 0 6px;font:600 .8rem var(--mono);color:var(--gold)}
 /* stepper */
@@ -148,7 +155,6 @@ tr[data-f].on{background:var(--ok-bg)}
 .term figcaption{padding:8px 14px;border-bottom:1px solid #223034;color:#8b9b99;font-size:.8rem;margin:0}
 .term pre{margin:0;padding:12px 14px;border:0;border-radius:0;background:transparent;font:12px/1.5 var(--mono);color:#dbe4e1;overflow-x:auto;min-height:20em}
 .term .tc{color:#cdab6b}.term .tg{color:#6fcf9f;font-weight:600}.term .tb{color:#e5705f;font-weight:600}
-.warn{border-left:3px solid var(--gold);padding:2px 0 2px 14px;color:var(--dim);margin:16px 0}
 pre{margin:14px 0;padding:14px 16px;background:var(--code);border:1px solid var(--rule);border-radius:10px;overflow-x:auto;font:13px/1.65 var(--mono)}
 .shot,.dia{display:block;margin:20px 0 0}
 .shot img,.dia img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:12px;background:#0d1315}
@@ -157,8 +163,7 @@ figure{margin:0}
 ul{margin:0 0 14px;padding-left:1.2em}li{margin:0 0 8px}
 footer{margin-top:80px;padding:28px 0 56px;border-top:1px solid var(--line);color:var(--dim);font-size:.9rem}
 footer a{color:var(--dim)}
-.safe{border:1px solid var(--rule);border-radius:10px;padding:12px 16px;margin:0 0 18px;background:var(--card)}
-@media (max-width:860px){.stepper{grid-template-columns:1fr}.scenes{order:-1}.terms{grid-template-columns:1fr}.hero{padding-top:32px}}
+@media (max-width:860px){.tested{grid-template-columns:1fr}.stepper{grid-template-columns:1fr}.scenes{order:-1}.terms{grid-template-columns:1fr}.hero{padding-top:32px}}
 @media (max-width:720px){.nav{position:static}.nav .w{flex-direction:column;align-items:stretch;gap:0;flex-wrap:nowrap}.nav nav{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 6px;scrollbar-width:none}.nav nav a{flex:none;padding:0 9px}.nav nav a.gh{margin-left:4px}.js .hero{padding-top:132px}}
 @media (max-width:560px){.tablewrap table,.tablewrap tbody,.tablewrap th,.tablewrap td{display:block}.tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap tbody tr{display:grid;grid-template-columns:auto 1fr;column-gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)}.tablewrap tbody tr:last-child{border-bottom:0}.tablewrap tbody th,.tablewrap td{border:0;padding:2px 0}.tablewrap tbody td:nth-child(n+3){grid-column:1/-1}.tablewrap td:nth-child(2){color:var(--dim)}.tablewrap td.o::before{content:'offset ';color:var(--dim);font-family:var(--sans)}}
 @media (max-width:520px){.btn{flex:1 1 100%;justify-content:center}.tally{gap:20px}table{font-size:.84rem}th,td{padding:8px 7px}td.o{white-space:normal}td code{overflow-wrap:anywhere}}
@@ -176,12 +181,18 @@ footer a{color:var(--dim)}
 <main>
 <div class="hz" id="hz"><canvas id="bg" aria-hidden="true"></canvas>
 <div class="w hero" id="top">
-  <h1>Up to six agents read the file. Every finding is checked against it.</h1>
-  <p class="lead">Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and SwarmLabRE checks every finding against the file's own bytes and against the run's own tool log. The report is built from the checked facts; the agents' prose is labelled as model text. A finished run is sealed and <strong>replays offline to byte-identical report files</strong>.</p>
+  <h1>Agents claim. The bytes confirm.</h1>
+  <p class="lead">Up to six AI agents analyse one binary (ELF, PE or APK) and post to one board. SwarmLabRE checks every finding against the file's own bytes and the run's own tool log. The report is built from the checked facts, the agents' prose is labelled as model text, and a finished run <strong>replays offline to byte-identical report files</strong>.</p>
   <div class="cta">
     <a class="btn pri" href="demo/">Open the demo</a>
     <a class="btn" href="sample/report.html">Read a sample report</a>
     <a class="btn" href="https://github.com/virqdroid/swarmlabre">View the source on GitHub</a>
+  </div>
+  <div class="tested">
+    <h2>Tested so far</h2>
+    <div><h3>Platform</h3><p>Linux arm64 on one machine (NVIDIA GB10). amd64 is next.</p></div>
+    <div><h3>SwarmLabRE</h3><p>The tests, the demo and the golden cases use a scripted mock. One live six-role run used Qwen3.8 Flash Next on a generated benign ELF: 44 findings, 12 checked against the bytes and 31 against the tool log; 8 posts rejected.</p></div>
+    <div><h3>Tested</h3><p>Qwen3.8 Flash Next, Qwen3.8 27B and CYBER-FROST 3.8.</p></div>
   </div>
 </div></div>
 <div class="w">
@@ -228,17 +239,17 @@ footer a{color:var(--dim)}
 <div class="r"><b>0220</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
     </div>
   </div>
-  <p class="dumpcap">All 552 bytes of <code>demo2.elf</code>, a harmless generated program that only exits. The five lit ranges are the findings the board confirmed by reading those bytes. The table further down lists them as text.</p>
+  <p class="dumpcap">All 552 bytes of <code>demo2.elf</code>, a harmless test program. The five lit ranges are the findings the board confirmed.</p>
 </div>
 
 <section id="steps"><div class="w">
   <h2>One run, in five steps</h2>
-  <p class="t-narrow">These steps follow the recorded run of <code>demo2.elf</code>. A scripted mock played the agents, so the run shows the pipeline and its checks. It says nothing about the quality of a model.</p>
+  <p class="t-narrow">The recorded run of <code>demo2.elf</code>, with a scripted mock as the agents.</p>
   <div class="stepper" id="stepper">
     <div>
       <ol class="steps">
 <li><h3>The host parses the file</h3><p><code>demo2.elf</code> is an ELF of 552 bytes, SHA-256 <code>4f514261553c…</code>. SwarmLabRE reads and parses it on the host and never runs it.</p></li>
-<li><h3>Two containers, both without a network</h3><p>A tools container opens the file and writes what the agents read. The agents run in a second container. The model reaches them only through a socket SwarmLabRE owns.</p></li>
+<li><h3>Two containers, both without a network</h3><p>A tools container opens the file and writes what the agents read. The agents run in a second container.</p></li>
 <li><h3>The agents post findings</h3><p>Up to six roles work at once. In this run, seven posts reached the board.</p></li>
 <li><h3>The board checks every post</h3><p>Five were byte-checked, one stayed unconfirmed and one was rejected as a duplicate.</p></li>
 <li><h3>The report is written and the run sealed</h3><p>The report is built from the checked findings. <code>manifest.json</code> holds the SHA-256 of every input and output.</p></li>
@@ -271,7 +282,7 @@ footer a{color:var(--dim)}
 
 <section id="run"><div class="w" aria-labelledby="run-h">
   <h2 id="run-h">The recorded run, event by event</h2>
-  <p class="t-narrow">The same run, drawn like the clips the web UI exports: a map of the file, the six roles, and each finding landing on the bytes it was checked against. <span class="jsonly">Pause it, change the speed or drag to any moment.</span></p>
+  <p class="t-narrow">Each finding lands on the bytes it was checked against. <span class="jsonly">Pause, change the speed or drag.</span></p>
   <p class="t-narrow nojs">The animation needs JavaScript. The table below lists the same posts.</p>
   <div class="stagewrap">
     <canvas id="stage" role="img" aria-label="Animation of the recorded run of demo2.elf: the roles post findings, and each byte-checked finding lands on a map of the file. The table below lists the same posts." width="1280" height="720"></canvas>
@@ -282,12 +293,12 @@ footer a{color:var(--dim)}
     </div>
     <script type="application/json" id="stage-data">{"beats":[{"c":0.4,"k":"phase","n":2,"p":"prepare","t":0.0},{"c":1.0,"k":"step","label":"File","msg":"ELF64 x86-64, 4f514261553c","n":3,"t":0.0},{"c":1.6,"k":"step","label":"Host parse","msg":"5 regions, 3 cells of 256 bytes, 7 strings","n":6,"t":0.0},{"c":4.2,"k":"step","label":"Functions","msg":"2 functions","n":10,"t":7.58},{"c":4.8,"k":"step","label":"Call edges","msg":"1 edges","n":12,"t":7.62},{"c":5.5,"k":"phase","n":17,"p":"round1","t":7.74},{"c":5.85,"k":"start","n":22,"role":"static","t":8.1},{"c":6.2,"k":"start","n":23,"role":"ioc","t":8.1},{"c":6.55,"k":"start","n":24,"role":"crypto","t":8.1},{"c":6.9,"k":"start","n":25,"role":"triage","t":8.1},{"c":8.4,"id":"f1","k":"find","len":16,"n":104,"off":184,"ok":true,"role":"crypto","t":8.41,"title":"Lock name"},{"c":9.9,"id":"f2","k":"find","len":34,"n":114,"off":149,"ok":true,"role":"ioc","t":8.42,"title":"Update URL"},{"c":11.4,"id":"f3","k":"find","len":11,"n":123,"off":218,"ok":true,"role":"ioc","t":8.46,"title":"Documentation IP"},{"c":11.75,"k":"start","n":126,"role":"behaviour","t":8.46},{"c":13.25,"id":"f4","k":"find","len":16,"n":133,"off":201,"ok":true,"role":"ioc","t":8.48,"title":"Temp path"},{"c":14.75,"id":"f5","k":"find","len":34,"n":142,"off":230,"ok":true,"role":"ioc","t":8.5,"title":"Wide library name"},{"c":15.15,"k":"end","n":150,"role":"triage","t":8.6},{"c":15.55,"k":"end","n":151,"role":"crypto","t":8.61},{"c":15.95,"k":"end","n":155,"role":"ioc","t":8.71},{"c":17.15,"id":"f6","k":"find","len":1,"n":169,"off":0,"ok":false,"role":"behaviour","t":8.77,"title":"No code reads the strings"},{"c":17.55,"k":"end","n":177,"role":"behaviour","t":8.98},{"c":20.15,"id":"f1","k":"dispute","n":186,"role":"static","t":28.41},{"c":20.55,"k":"end","n":194,"role":"static","t":28.66},{"c":21.25,"k":"phase","n":195,"p":"round2","t":28.67},{"c":22.55,"id":"f1","k":"resolve","n":200,"t":28.67,"verdict":"stands"},{"c":22.9,"k":"start","n":202,"role":"crypto","t":28.67},{"c":24.8,"code":"duplicate","id":"x1","k":"reject","n":219,"role":"crypto","t":28.98,"target":"f1"},{"c":25.2,"k":"end","n":227,"role":"crypto","t":29.21},{"c":25.9,"k":"phase","n":228,"p":"merge","t":29.22},{"c":26.25,"k":"start","n":229,"role":"reporter","t":29.22},{"c":26.65,"k":"end","n":235,"role":"reporter","t":29.72},{"c":29.05,"k":"done","n":236,"t":30.52}],"bytes":"7f454c4602010100000000000000000002003e00010000007800400000000000400000000000000028010000000000000000000040003800010040000400030001000000050000000000000000000000000040000000000000004000000000000a010000000000000a010000000000000010000000000000e809000000b83c00000031ff0f05554889e55dc390909090909090909068747470733a2f2f757064617465732e6578616d706c652e746573742f636865636b00476c6f62616c5c44656d6f324c6f636b002f746d702f2e64656d6f2d6361636865003230332e302e3131332e390043003a005c00440065006d006f005c006100670065006e0074002e0064006c006c000000002e74657874002e726f64617461002e73687374727461620000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000001000000010000000600000000000000780040000000000078000000000000001d00000000000000000000000000000001000000000000000000000000000000070000000100000002000000000000009500400000000000950000000000000075000000000000000000000000000000010000000000000000000000000000000f00000003000000000000000000000000000000000000000a010000000000001900000000000000000000000000000001000000000000000000000000000000","cell":2,"cols":28,"ebytes":256,"edges":[[0,1]],"end":32.05,"entropy":[128,44,20],"funcs":[{"name":"entry","off":120},{"name":"FUN_00400086","off":134}],"lanes":[[6.9,"crypto","thinking"],[6.9,"static","thinking"],[6.9,"crypto","tool"],[6.9,"static","tool"],[6.9,"ioc","thinking"],[6.9,"ioc","tool"],[6.9,"static","thinking"],[6.9,"static","tool"],[6.9,"crypto","thinking"],[6.9,"triage","thinking"],[6.9,"triage","tool"],[6.9,"crypto","tool"],[6.9,"ioc","thinking"],[6.9,"triage","thinking"],[6.9,"ioc","tool"],[6.9,"triage","tool"],[6.9,"ioc","thinking"],[6.9,"triage","thinking"],[6.9,"triage","writing"],[8.4,"ioc","tool"],[8.4,"crypto","thinking"],[8.4,"crypto","writing"],[9.9,"ioc","thinking"],[9.9,"ioc","tool"],[11.4,"ioc","thinking"],[11.75,"ioc","tool"],[13.25,"ioc","thinking"],[13.25,"ioc","tool"],[14.75,"ioc","thinking"],[14.75,"ioc","writing"],[15.95,"behaviour","thinking"],[15.95,"behaviour","tool"],[15.95,"behaviour","thinking"],[15.95,"behaviour","tool"],[17.15,"behaviour","thinking"],[17.15,"behaviour","writing"],[17.55,"static","thinking"],[17.55,"static","tool"],[20.15,"static","thinking"],[20.15,"static","writing"],[22.9,"crypto","thinking"],[22.9,"crypto","tool"],[22.9,"crypto","thinking"],[22.9,"crypto","tool"],[24.8,"crypto","thinking"],[24.8,"crypto","writing"],[26.25,"reporter","writing"]],"note":{"c0":17.55,"c1":20.15,"text":"Shortened: Static waited 20 s on one tool call"},"regions":[{"id":"r0","kind":"header","len":120,"name":"ELF header and program headers","off":0},{"id":"r1","kind":"section","len":29,"name":".text","off":120,"perm":"r-x","va":4194424},{"id":"r2","kind":"section","len":117,"name":".rodata","off":149,"perm":"r--","va":4194453},{"id":"r3","kind":"section","len":25,"name":".shstrtab","off":266,"perm":"","va":null},{"id":"r4","kind":"table","len":256,"name":"section header table","off":296}],"roles":[{"id":"triage","label":"Triage","letter":"T"},{"id":"static","label":"Static","letter":"S"},{"id":"ioc","label":"Strings/IOC","letter":"I"},{"id":"crypto","label":"Crypto/Config","letter":"C"},{"id":"behaviour","label":"Behaviour","letter":"B"},{"id":"reporter","label":"Reporter","letter":"R"}],"rows":10,"sample":{"format":"ELF64 x86-64","name":"demo2.elf"},"size":552,"tools":[6.9,6.9,6.9,6.9,6.9,6.9,6.9,6.9,8.4,9.9,11.75,13.25,15.95,15.95,17.55,22.9,22.9]}</script>
   </div>
-  <p class="dumpcap jsonly">Every event comes from the run's log. The gaps between events are shortened; the run-time counter shows the recorded clock. Each cell of the map is 2 bytes. A real sample is much larger and fills a bigger map. The animation plays a recording and adds no evidence.</p>
+  <p class="dumpcap jsonly">From the run's log, with the gaps shortened. One cell of the map is 2 bytes.</p>
 </div></section>
 
 <section id="gate"><div class="w">
   <h2>Seven posts, each checked by the board</h2>
-  <p class="t-narrow">The table lists every post in the order the board received it. A finding is <em>byte-checked</em> when the bytes at its offset are the value the agent gave. A finding the board cannot check stays <em>unconfirmed</em>, and the report labels it that way. A repeated finding is rejected; the log keeps it with the reason.</p>
+  <p class="t-narrow">Every post, in the order the board got it.</p>
   <div class="tally" aria-label="Board result"><div class="o"><b data-t="ok">5</b><span>byte-checked</span></div><div class="u"><b data-t="un">1</b><span>unconfirmed</span></div><div class="b"><b data-t="bad">1</b><span>rejected</span></div></div>
   <div class="tablewrap"><table>
     <thead><tr><th scope="col">No.</th><th scope="col">Agent</th><th scope="col">Finding</th><th scope="col">Offset</th><th scope="col">Result</th></tr></thead>
@@ -301,6 +312,7 @@ footer a{color:var(--dim)}
 <tr class="rej" data-v="bad"><th scope="row">x1</th><td>Crypto/Config</td><td>Lock name<span class="t"><span class="n">posted a second time</span></span></td><td class="o">none</td><td class="res"><span class="bad">rejected</span><span class="n">This agent had already posted the same finding.</span></td></tr>
     </tbody>
   </table></div>
+  <p class="key"><span><span class="ok">byte-checked</span> the bytes at the offset match</span><span><span class="un">unconfirmed</span> nothing to check, and the report says so</span><span><span class="bad">rejected</span> a repeat, kept in the log</span></p>
 </div></section>
 
 <section id="how"><div class="w">
@@ -314,7 +326,13 @@ footer a{color:var(--dim)}
 
 <section id="replay"><div class="w">
   <h2>Replay rebuilds every file, or exits 1</h2>
-  <p class="t-narrow">Every run is sealed with a <code>manifest.json</code> (tool version, sample hash, model and sampling, image ids, and the SHA-256 of every input and output file), the board's inputs in order, and every model exchange. <code>swarmlabre replay</code> rebuilds the board and all report files offline from that record and fails if one byte differs. A <em>live</em> run is pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model.</p>
+  <p class="t-narrow">Every run is sealed with:</p>
+  <ul class="t-narrow seal">
+    <li><code>manifest.json</code>: the tool version, the sample hash, the model and sampling, the image ids, and the SHA-256 of every input and output file</li>
+    <li>the board's inputs, in order</li>
+    <li>every model exchange</li>
+  </ul>
+  <p class="t-narrow"><code>swarmlabre replay</code> rebuilds the board and every report file offline and exits 1 if one byte differs.</p>
   <div class="terms">
     <figure class="term"><figcaption>Recorded output: the demo run, unchanged</figcaption><pre id="t-ok">$ python3 -m swarmlabre replay demo/sfaef16e6
 {
@@ -387,8 +405,7 @@ exit 1</pre></figure>
   </div>
   <div class="tools"><button type="button" class="btn pri" id="t-change">Show the copy with one letter changed</button></div>
   <script type="application/json" id="term-data">{"ok":{"cmd":"python3 -m swarmlabre replay demo/sfaef16e6","lines":["{"," \"checks\": {","  \"board\": \"identical\",","  \"bundle_outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"identical\"","  },","  \"inputs_untouched\": \"identical\",","  \"outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"identical\"","  },","  \"record\": \"identical\",","  \"sample\": \"identical\",","  \"summary\": \"identical\""," },"," \"level\": \"full\","," \"ok\": true,"," \"run\": \"sfaef16e6\"","}"],"exit":0},"bad":{"cmd":"python3 -m swarmlabre replay edited-copy/sfaef16e6","lines":["{"," \"checks\": {","  \"board\": \"identical\",","  \"bundle_outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"differs\"","  },","  \"inputs_untouched\": \"identical\",","  \"outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"identical\"","  },","  \"record\": \"identical\",","  \"sample\": \"identical\",","  \"summary\": \"identical\""," },"," \"level\": \"full\","," \"ok\": false,"," \"run\": \"sfaef16e6\"","}"],"exit":1}}</script>
-  <p class="dumpcap">Both terminals show real output of <code>python3 -m swarmlabre replay</code>, recorded once. The second run used a copy of the demo run in which the <code>d</code> of "demo" in <code>out/report.md</code> became <code>D</code>. Your browser runs nothing here.</p>
-  <p class="warn t-narrow">Nothing signs <code>manifest.json</code>. The hashes catch accidents and forgeries that left the manifest alone. Someone who edits a file and recomputes the hashes gets a replay that agrees. <a href="https://github.com/virqdroid/swarmlabre/blob/main/docs/determinism.md">docs/determinism.md</a> has the details and lists what the 11 golden cases do not cover.</p>
+  <p class="dumpcap">Real output, recorded once. The second copy has the <code>d</code> of "demo" in <code>out/report.md</code> changed to <code>D</code>. <a href="https://github.com/virqdroid/swarmlabre/blob/main/docs/determinism.md">docs/determinism.md</a> lists what the 11 golden cases do not cover.</p>
 </div></section>
 
 <section id="look"><div class="w">
@@ -411,7 +428,7 @@ python3 tests/goldenrun.py --check --twice</pre>
   <p class="t-narrow">You need Docker only to <strong>analyse a new file</strong>: the agents and Ghidra/jadx run in containers. The tools image compiles Ghidra's decompiler for arm64, so analysis runs on arm64 Linux only today.</p>
   <figure class="shot">
     <a href="demo/"><img src="img/demo-1280.png" width="1280" height="914" alt="The web UI playing a recorded run of a harmless demo program: a result card, five byte-checked findings and one unconfirmed claim"></a>
-    <figcaption>The demo is the real web UI playing a recorded run in your browser. It runs no model and sends nothing anywhere. The sample is a harmless generated program that only exits; the agents were a scripted mock, so what you see is the pipeline and the checks, not the quality of any model.</figcaption>
+    <figcaption>The real web UI playing a recorded run in your browser. It runs no model and sends nothing anywhere.</figcaption>
   </figure>
   <div class="cta"><a class="btn pri" href="demo/">Open the demo</a><a class="btn" href="sample/report.html">Read a sample report</a><a class="btn" href="https://github.com/virqdroid/swarmlabre">View the source on GitHub</a></div>
 </div></section>
@@ -422,20 +439,20 @@ python3 tests/goldenrun.py --check --twice</pre>
     <li>Not a sandbox for <strong>running</strong> malware: the sample is only read, never executed. Do not point it at a file you could not safely open in a disassembler.</li>
     <li>Not a claim that a verdict is right. A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked <em>byte-checked</em> means the bytes are there at that offset; it does not mean the agent's reading of them is correct.</li>
     <li>Not repeatable for a <em>live</em> model run. Replay of a recording is byte-identical; a second live run on the same file can differ.</li>
-    <li>Not tested on other CPU architectures or with more than one model, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.</li>
+    <li>Not tested on other CPU architectures, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.</li>
+    <li>Not tamper-proof. Nothing signs <code>manifest.json</code>; someone who edits a file and recomputes the hashes gets a replay that agrees.</li>
   </ul>
 </div></section>
 
 <section id="status"><div class="w">
   <h2>Status</h2>
-  <p class="t-narrow"><strong>Alpha, 0.1.0.</strong> It was built and checked on one machine (Linux arm64, Python 3.12.3). This page and the demo were tested in headless Firefox only. Before you point SwarmLabRE at real malware, read <a href="https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md">SECURITY.md</a>: it lists what is defended against and what is not claimed. It is a one-person project.</p>
+  <p class="t-narrow"><strong>Alpha 0.1.0</strong>, a one-person project. It was built and checked on one machine (Linux arm64, Python 3.12.3). Read <a href="https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md">SECURITY.md</a> before using real malware.</p>
   <p class="t-narrow">Licence: MIT; third-party components keep their own (<a href="https://github.com/virqdroid/swarmlabre/blob/main/THIRD_PARTY.md">THIRD_PARTY.md</a>).</p>
 </div></section>
 </main>
 
 <footer><div class="w">
-  <p class="safe t-narrow">SwarmLabRE reads files that may be malware and never runs them. Analyse a file only on a machine where opening it in a disassembler would be safe.</p>
-  <p class="t-narrow">This page sets no cookies, has no tracking and requests nothing from any other site. One inline script draws the animations and shows the bytes behind a finding; with scripts off, the text, the table and the recorded output stay. The birds at the top are drawn with the hex digits and printable characters of the demo file. The fonts are Geist and Geist Mono (SIL OFL 1.1, <a href="fonts/OFL.txt">licence</a>).</p>
+  <p class="t-narrow">No cookies, no tracking, no requests to other sites. The birds are drawn from the demo file's bytes. Fonts: Geist and Geist Mono (SIL OFL 1.1, <a href="fonts/OFL.txt">licence</a>).</p>
   <p><a href="https://github.com/virqdroid/swarmlabre">github.com/virqdroid/swarmlabre</a></p>
 </div></footer>
 </div>

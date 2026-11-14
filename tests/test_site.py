@@ -250,14 +250,18 @@ class SiteTest(unittest.TestCase):
         readme = words((ROOT / "README.md").read_text(encoding="utf-8"))
         page = words("".join(t for t, _ in self.s.text))
         sentences = [
-            "Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and SwarmLabRE checks every finding against the file's own bytes and against the run's own tool log. The report is built from the checked facts; the agents' prose is labelled as model text. A finished run is sealed and replays offline to byte-identical report files.",
-            "Every run is sealed with a manifest.json (tool version, sample hash, model and sampling, image ids, and the SHA-256 of every input and output file), the board's inputs in order, and every model exchange. swarmlabre replay rebuilds the board and all report files offline from that record and fails if one byte differs. A live run is pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model.",
+            "Up to six AI agents analyse one binary (ELF, PE or APK) and post to one board. SwarmLabRE checks every finding against the file's own bytes and the run's own tool log. The report is built from the checked facts, the agents' prose is labelled as model text, and a finished run replays offline to byte-identical report files.",
+            "swarmlabre replay rebuilds the board and every report file offline and exits 1 if one byte differs.",
             "The agents run in containers with --network none and never hold the model's key; the model reaches them only through a socket SwarmLabRE owns.",
+            "Linux arm64 on one machine (NVIDIA GB10). amd64 is next.",
+            "The tests, the demo and the golden cases use a scripted mock. One live six-role run used Qwen3.8 Flash Next on a generated benign ELF: 44 findings, 12 checked against the bytes and 31 against the tool log; 8 posts rejected.",
+            "Qwen3.8 Flash Next, Qwen3.8 27B and CYBER-FROST 3.8.",
             "Not a sandbox for running malware: the sample is only read, never executed. Do not point it at a file you could not safely open in a disassembler.",
             "Not a claim that a verdict is right. A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked byte-checked means the bytes are there at that offset; it does not mean the agent's reading of them is correct.",
             "Not repeatable for a live model run. Replay of a recording is byte-identical; a second live run on the same file can differ",
-            "Not tested on other CPU architectures or with more than one model, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.",
-            "It runs no model and sends nothing anywhere. The sample is a harmless generated program that only exits; the agents were a scripted mock, so what you see is the pipeline and the checks, not the quality of any model.",
+            "Not tested on other CPU architectures, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.",
+            "Not tamper-proof. Nothing signs manifest.json; someone who edits a file and recomputes the hashes gets a replay that agrees.",
+            "It runs no model and sends nothing anywhere.",
             "It was built and checked on one machine (Linux arm64, Python 3.12.3).",
         ]
         for s in sentences:

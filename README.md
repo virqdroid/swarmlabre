@@ -1,8 +1,6 @@
 # SwarmLabRE
 
-Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and SwarmLabRE checks every finding against the
-file's own bytes and against the run's own tool log. The report is built from the checked facts; the agents' prose is labelled as model text.
-A finished run is sealed and **replays offline to byte-identical report files**.
+Up to six AI agents analyse one binary (ELF, PE or APK) and post to one board. SwarmLabRE checks every finding against the file's own bytes and the run's own tool log. The report is built from the checked facts, the agents' prose is labelled as model text, and a finished run **replays offline to byte-identical report files**.
 
 ![The web UI playing a recorded run of a harmless demo program: a result card, five byte-checked findings and one unconfirmed claim](docs/img/demo-1280.png)
 
@@ -12,6 +10,12 @@ checks, not the quality of any model. The same demo, a sample report and a short
 
 **Status: alpha, 0.1.0.** It was built and checked on one machine (Linux arm64, Python 3.12.3). The checks that exist, and the ones that do not, are listed in
 [docs/determinism.md](docs/determinism.md) and [SECURITY.md](SECURITY.md); please read the second before you point it at a real malware sample.
+
+## Tested so far
+
+- **Platform:** Linux arm64 on one machine (NVIDIA GB10). amd64 is next.
+- **SwarmLabRE:** The tests, the demo and the golden cases use a scripted mock. One live six-role run used Qwen3.8 Flash Next on a generated benign ELF: 44 findings, 12 checked against the bytes and 31 against the tool log; 8 posts rejected.
+- **Tested:** Qwen3.8 Flash Next, Qwen3.8 27B and CYBER-FROST 3.8.
 
 ## How it fits together
 
@@ -105,7 +109,7 @@ would be empty. They fill in when a run has a verified technique, or functions w
 ## Reproducibility in one paragraph
 
 Every run is sealed with a `manifest.json` (tool version, sample hash, model and sampling, image ids, and the SHA-256 of every input and output file), the board's inputs
-in order, and every model exchange. `swarmlabre replay` rebuilds the board and all report files offline from that record and fails if one byte differs. A *live* run is
+in order, and every model exchange. `swarmlabre replay` rebuilds the board and every report file offline and exits 1 if one byte differs. A *live* run is
 pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model. See [docs/determinism.md](docs/determinism.md).
 
 ## Commands
@@ -147,7 +151,8 @@ SWARMLABRE_E2E=1 python3 -m unittest discover -s tests      # adds a whole run i
 - Not a claim that a verdict is right. A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked *byte-checked*
   means the bytes are there at that offset; it does not mean the agent's reading of them is correct.
 - Not repeatable for a *live* model run. Replay of a recording is byte-identical; a second live run on the same file can differ ([docs/determinism.md](docs/determinism.md)).
-- Not tested on other CPU architectures or with more than one model, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.
+- Not tested on other CPU architectures, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.
+- Not tamper-proof. Nothing signs `manifest.json`; someone who edits a file and recomputes the hashes gets a replay that agrees.
 
 ## More
 
