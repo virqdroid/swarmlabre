@@ -18,6 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PAGE = ROOT / "site" / "index.html"
 FAVICON = ROOT / "site" / "favicon.svg"
+OG_IMAGE = ROOT / "site" / "og.png"     # the link preview: made from the hero at 1200x630, served next to the page
+OG_ABSOLUTE = {"og:url": "https://swrm.re/", "og:image": "https://swrm.re/og.png"}
 WORKFLOW = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
 REPO = "https://github.com/virqdroid/swarmlabre"
 DEMO_BUNDLE = "demo/sfaef16e6"
@@ -238,11 +240,26 @@ class SiteTest(unittest.TestCase):
         # No list of forbidden names here (a list would name them in a public repo): every address on the page, and in the workflow, must be the repository's or none.
         # The one exception is a finding's value from the demo run, shown as data: it must be one of the board's values and under a reserved name (RFC 2606).
         values = {f["value"] for f in self.board["findings"] if re.match(r"https?://[^/]+\.(test|example|invalid)(/|$)", f["value"])}
-        for name, text in (("index.html", self.raw), ("pages.yml", WORKFLOW)):
+        # The second exception is the link preview: it needs an absolute address, so og:url and og:image (and only they) name the site's own address.
+        raw = self.raw
+        for prop, want in OG_ABSOLUTE.items():
+            tag = '<meta property="%s" content="%s">' % (prop, want)
+            self.assertEqual(raw.count(tag), 1, "missing or repeated: " + tag)
+            raw = raw.replace(tag, "")
+        for name, text in (("index.html", raw), ("pages.yml", WORKFLOW)):
             for u in re.findall(r"https?://[^\s'\"<>)\\]+", text):
                 ok = u == REPO or u.startswith(REPO + "/") or (name == "pages.yml" and u == SVG_NS) or (name == "index.html" and (u in values or (u.endswith("…") and any(v.startswith(u[:-1]) for v in values))))
                 self.assertTrue(ok, "%s names %s" % (name, u))
-        self.assertNotRegex(self.raw, r"swrm\.re|github\.io")          # the page works on any host: it does not know its own address
+        self.assertNotRegex(raw, r"swrm\.re|github\.io")          # the page works on any host: apart from the link preview it does not know its own address
+
+    def test_the_link_preview_image_is_1200_by_630(self):
+        png = OG_IMAGE.read_bytes()
+        self.assertEqual(png[:8], b"\x89PNG\r\n\x1a\n")
+        self.assertEqual((int.from_bytes(png[16:20], "big"), int.from_bytes(png[20:24], "big")), (1200, 630))
+        self.assertLess(len(png), 1_000_000, "link previews skip large images")
+        self.assertIn('<meta property="og:image:width" content="1200">', self.raw)
+        self.assertIn('<meta property="og:image:height" content="630">', self.raw)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', self.raw)
 
     # ---- what it says ----
 
