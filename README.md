@@ -147,12 +147,12 @@ SWARMLABRE_E2E=1 python3 -m unittest discover -s tests      # adds a whole run i
 
 ## What this is not
 
-- Not a sandbox for **running** malware: the sample is only read, never executed. Do not point it at a file you could not safely open in a disassembler.
-- Not a claim that a verdict is right. A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked *byte-checked*
-  means the bytes are there at that offset; it does not mean the agent's reading of them is correct.
-- Not repeatable for a *live* model run. Replay of a recording is byte-identical; a second live run on the same file can differ ([site/docs/reproducibility.html](site/docs/reproducibility.html)).
-- Not tested on other CPU architectures, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.
-- Not tamper-proof. Nothing signs `manifest.json`; someone who edits a file and recomputes the hashes gets a replay that agrees.
+- SwarmLabRE only reads the sample and never executes it. Do not point it at a file you could not safely open in a disassembler.
+- A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked *byte-checked*
+  means the bytes are there at that offset. The agent's reading of those bytes can still be wrong.
+- A second live run on the same file can differ. Only the replay of a recording is byte-identical ([site/docs/reproducibility.html](site/docs/reproducibility.html)).
+- No check in this repository involves real malware: the tests and the demo use generated benign files only. Nothing was tested on other CPU architectures, and the tools image builds for arm64 only today.
+- Nothing signs `manifest.json`. Someone who edits a file and recomputes the hashes gets a replay that agrees.
 
 ## More
 

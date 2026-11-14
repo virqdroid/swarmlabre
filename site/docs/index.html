@@ -227,11 +227,11 @@ td[colspan]{white-space:normal}
   <h2 id="limits">What it does not claim<a class="anc" href="#limits" aria-label="Link to this section">#</a></h2>
   <div class="prose">
   <ul>
-    <li>Not a sandbox for running malware: the sample is only read, never executed. Do not point it at a file you could not safely open in a disassembler.</li>
-    <li>Not a claim that a verdict is right. A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked byte-checked means the bytes are there at that offset; it does not mean the agent's reading of them is correct.</li>
-    <li>Not repeatable for a live model run. Replay of a recording is byte-identical; a second live run on the same file can differ (see <a href="reproducibility.html">Reproducibility</a>).</li>
-    <li>Not tested on other CPU architectures, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.</li>
-    <li>Not tamper-proof. Nothing signs <code>manifest.json</code>; someone who edits a file and recomputes the hashes gets a replay that agrees.</li>
+    <li>SwarmLabRE only reads the sample and never executes it. Do not point it at a file you could not safely open in a disassembler.</li>
+    <li>A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked byte-checked means the bytes are there at that offset. The agent's reading of those bytes can still be wrong.</li>
+    <li>A second live run on the same file can differ. Only the replay of a recording is byte-identical (see <a href="reproducibility.html">Reproducibility</a>).</li>
+    <li>No check in this repository involves real malware: the tests and the demo use generated benign files only. Nothing was tested on other CPU architectures, and the tools image builds for arm64 only today.</li>
+    <li>Nothing signs <code>manifest.json</code>. Someone who edits a file and recomputes the hashes gets a replay that agrees.</li>
   </ul>
   </div>
 

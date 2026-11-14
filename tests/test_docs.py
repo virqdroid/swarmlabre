@@ -620,7 +620,7 @@ class OverviewTest(unittest.TestCase):
         self.assertEqual(lead, one_pager.words(README_RAW.split("\n\n")[1]))
 
     def test_the_five_limits_are_the_readmes(self):
-        bullets = re.findall(r"^- (Not .*?)(?=\n- |\n\n)", README_RAW.split("## What this is not")[1], re.S | re.M)
+        bullets = re.findall(r"^- (.*?)(?=\n- |\n\n)", README_RAW.split("## What this is not")[1], re.S | re.M)
         items = [plain(x) for x in re.findall(r"<li>(.*?)</li>", sec(self.raw, "limits"), re.S)]
         self.assertEqual(len(bullets), 5)
         self.assertEqual([i.split(" (see")[0] for i in items], [one_pager.words(b).split(" (site/docs/")[0].split(" (docs/")[0] for b in bullets])
@@ -3164,7 +3164,7 @@ class SecurityPageTest(unittest.TestCase):
         uids = [r["uid"] for r in swarms.ROLES.values()]
         self.assertEqual((len(uids), len(set(uids)), 0 in uids), (6, 6, False), "each role has its own uid, and none is root")
         self.assertTrue(any(t.startswith("/work/ioc:") and "uid=20003,gid=20003,mode=0700" in t for t in (a[i + 1] for i, x in enumerate(a) if x == "--tmpfs")))
-        self.assertIn("the sample is only read, never executed", README)
+        self.assertIn("SwarmLabRE only reads the sample and never executes it", README)
         for sentence in ("The sample is only read, never executed.", "with --read-only, --cap-drop ALL, no-new-privileges, limits on memory, processors and processes, and --network none.", "Each agent role has its own uid and its own private tmpfs."):
             self.assertIn(sentence, s)
         self.assertIn("The agents run in containers as the host user's uid and not as root", s)
