@@ -3,95 +3,397 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
-<title>swarmlabre</title>
-<meta name="description" content="Up to six AI agents analyse one binary at the same time; every finding is checked against the file's own bytes; a finished run replays offline to byte-identical report files.">
-<meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-lsCnAi1OwTmAlVHR2q/QHTlrMm/wbzgQ1MVVkC5tBME='; img-src 'self'; font-src 'self'">
+<title>SwarmLabRE: checked multi-agent binary analysis</title>
+<meta name="description" content="SwarmLabRE: up to six AI agents analyse one binary (ELF, PE or APK). Every finding is checked against the file's own bytes, and a finished run replays offline to byte-identical report files.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 @font-face{font-family:"Geist";src:url(fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
 @font-face{font-family:"Geist Mono";src:url(fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
 :root{
-  --bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--text:#14232b;--dim:#51626a;--accent:#7d5a10;--accent-bg:#14232b;--accent-ink:#fff;--code:#e9eeee;--ok:#12794f;
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--btn:#cdab6b;--btn-ink:#17120a;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.17);--un:#cdab6b;--bad:#e5705f;--lens:#0a0f11;--fx:207,216,214;--nav:#0d1315;
   --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
 }
-@media (prefers-color-scheme:dark){
-  :root{--bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--text:#e7eeeb;--dim:#8b9b99;--accent:#cdab6b;--accent-bg:#cdab6b;--accent-ink:#17120a;--code:#0a0f11;--ok:#6fcf9f}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--btn:#14232b;--btn-ink:#fff;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.14);--un:#7d5a10;--bad:#a8402f;--lens:#fff;--fx:58,74,80;--nav:#f3f5f4}
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;
-  padding:0 max(16px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(16px,env(safe-area-inset-left))}
-main,footer{max-width:760px;margin:0 auto}
-header{max-width:760px;margin:0 auto;padding:40px 0 8px}
-h1{font-size:2.4rem;line-height:1.1;margin:0 0 4px;letter-spacing:-.02em}
-h2{font-size:1.3rem;line-height:1.25;margin:0 0 12px;letter-spacing:-.01em}
-.tag{color:var(--dim);margin:0 0 20px;font-size:.95rem}
-p{margin:0 0 14px}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:72px;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.hz{position:relative}
+#bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.hz>.w{position:relative;z-index:1}
+.page{position:relative;z-index:1}
+.w{max-width:1040px;margin:0 auto;padding:0 16px}
+.t-narrow{max-width:66ch}
 a{color:var(--text);text-underline-offset:3px}
-a:hover{color:var(--accent)}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-section{padding:28px 0;border-top:1px solid var(--rule)}
-.lead{font-size:1.1rem}
-.cta{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 4px}
-.btn{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;border:1px solid var(--rule);border-radius:8px;text-decoration:none;font-weight:500;background:var(--card)}
-.btn.pri{background:var(--accent-bg);border-color:var(--accent-bg);color:var(--accent-ink);font-weight:600}
-.btn:hover{border-color:var(--accent);color:var(--text)}
-.btn.pri:hover{color:var(--accent-ink);filter:brightness(1.08)}
-figure{margin:18px 0 0}
-figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:12px;background:#0d1315}
-figcaption{color:var(--dim);font-size:.9rem;margin-top:8px}
-pre{margin:14px 0;padding:14px 16px;background:var(--code);border:1px solid var(--rule);border-radius:10px;overflow-x:auto;font:13px/1.65 var(--mono);tab-size:4}
-code{font-family:var(--mono);font-size:.92em}
-p code,li code{background:var(--code);padding:1px 5px;border-radius:5px}
-ul{margin:0 0 14px;padding-left:1.2em}
-li{margin:0 0 8px}
-.note{border-left:3px solid var(--accent);padding:2px 0 2px 14px;color:var(--dim);margin:16px 0}
-.pill{display:inline-block;font:600 .75rem/1 var(--mono);padding:4px 8px;border:1px solid var(--rule);border-radius:99px;color:var(--dim);vertical-align:middle;margin-left:8px}
-footer{padding:28px 0 48px;border-top:1px solid var(--rule);color:var(--dim);font-size:.9rem}
+a:hover{color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+.jsonly,.lens,.stagewrap{display:none}
+.js .jsonly{display:inline}.js .lens,.js .stagewrap{display:block}.js .nojs{display:none}
+code{font-family:var(--mono);font-size:.9em}
+p code,li code,td code,th code{background:var(--code);padding:1px 5px;border-radius:5px}
+h1{font-size:clamp(2.1rem,5.6vw,3.9rem);line-height:1.03;letter-spacing:-.03em;margin:0 0 20px;font-weight:600;max-width:19ch}
+h2{font-size:clamp(1.5rem,3.2vw,2rem);line-height:1.15;letter-spacing:-.02em;margin:0 0 12px;font-weight:600}
+h3{font-size:1.02rem;line-height:1.3;margin:0 0 4px;font-weight:600}
+/* nav */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .w{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:56px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.pill{font:600 .7rem/1 var(--mono);padding:4px 8px;border:1px solid var(--rule);border-radius:99px;color:var(--dim)}
+.nav nav{display:flex;gap:2px;flex-wrap:wrap;align-items:center}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;color:var(--dim);text-decoration:none;font-size:.93rem}
+.nav nav a:hover{color:var(--text)}
+.nav nav a.gh{border:1px solid var(--rule);border-radius:8px;margin-left:6px;color:var(--text)}
+/* hero */
+.hero{padding-top:56px;padding-bottom:8px}
+.lead{font-size:1.12rem;max-width:62ch}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 0}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;border:1px solid var(--rule);border-radius:8px;text-decoration:none;font-weight:500;background:var(--card);color:var(--text);font-family:var(--sans);font-size:1rem;cursor:pointer}
+.btn.pri{background:var(--btn);border-color:var(--btn);color:var(--btn-ink);font-weight:600}
+.btn:hover{border-color:var(--gold);color:var(--text)}
+.btn.pri:hover{color:var(--btn-ink);filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:default}
+/* the dump */
+.dumpwrap{margin:34px 0 0;border:1px solid var(--rule);border-radius:12px;background:var(--lens);overflow:hidden}
+.lens{padding:14px 16px;border-bottom:1px solid var(--line);font-size:.92rem}
+.lens .read{min-height:5.6rem;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--rule);border-radius:8px;background:transparent;color:var(--text);font:500 .88rem var(--sans);cursor:pointer}
+.chip b{font:600 .8rem var(--mono);color:var(--ok)}
+.chip:hover{border-color:var(--ok)}
+.chip.on{border-color:var(--ok);background:var(--ok-bg)}
+.lens [data-k=title]{font-weight:600;font-size:1rem;overflow-wrap:anywhere}
+.lens [data-k=where]{color:var(--dim);font-family:var(--mono);font-size:.82rem;margin-top:2px}
+.lens [data-k=bytes]{font-family:var(--mono);font-size:.8rem;color:var(--ok);margin-top:6px;overflow-wrap:anywhere}
+.lens [data-k=says]{color:var(--dim);margin-top:4px}
+.dump{overflow-x:auto;padding:12px 16px;font:12px/1.75 var(--mono);color:var(--dim)}
+.r{display:flex;gap:18px;white-space:nowrap;width:max-content}
+.r b{font-weight:400;color:var(--dim)}
+.h i,.a i{font-style:normal;display:inline-block;text-align:center}
+.h i{padding:0 .5ch;min-width:3ch}
+.h i:nth-child(8){margin-right:1ch}
+.a i{min-width:1ch}
+i.f{color:var(--ok);background:var(--ok-bg);box-shadow:inset 0 -2px 0 var(--ok);cursor:default;animation:chk .5s ease-out both}
+i.f1{animation-delay:.3s}i.f2{animation-delay:.7s}i.f3{animation-delay:1.1s}i.f4{animation-delay:1.5s}i.f5{animation-delay:1.9s}
+i.f.on{background:var(--ok);color:var(--lens);box-shadow:none}
+@keyframes chk{from{background:transparent;color:var(--dim);box-shadow:none}}
+.dumpcap{color:var(--dim);font-size:.88rem;margin:10px 2px 0;max-width:80ch}
+section{padding:72px 0 0}
+section>.w>p.k{margin:0 0 6px;font:600 .8rem var(--mono);color:var(--gold)}
+/* stepper */
+.stepper{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:28px;margin-top:22px;align-items:start}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s;padding:14px 14px 12px 46px;position:relative;border-left:2px solid var(--line);color:var(--dim);font-size:.94rem;transition:border-color .2s,color .2s}
+.steps li::before{content:counter(s);position:absolute;left:12px;top:14px;font:600 .8rem var(--mono);color:var(--gold)}
+.steps h3{color:var(--text)}
+.steps p{margin:0}
+.js .steps li{cursor:pointer}
+.js .steps li.on{border-left-color:var(--gold);color:var(--text);background:var(--card)}
+.scenes{display:none;position:relative;aspect-ratio:640/360;border:1px solid var(--rule);border-radius:12px;background:var(--lens);overflow:hidden}
+.js .scenes{display:block}
+.scene{position:absolute;inset:0;opacity:0;transition:opacity .35s;pointer-events:none}
+.scene.on{opacity:1}
+.scene svg{width:100%;height:100%;display:block}
+.scene text{fill:var(--text);font:16px var(--sans)}
+.scene .t1{font:600 20px var(--sans)}.scene .t2{fill:var(--dim);font-size:16px}.scene .mono{font-family:var(--mono);font-size:14.5px}.scene .mono.s{font-size:13px}.scene .hl{fill:var(--ok)}
+.scene .fl,.scene .bx{fill:var(--card);stroke:var(--rule);stroke-width:1.3}
+.scene .host{fill:none;stroke:var(--rule);stroke-width:1.3;stroke-dasharray:2 5}
+.scene .jail{fill:var(--card);stroke:var(--ok);stroke-width:1.4;stroke-dasharray:7 5}
+.scene .ln{fill:none;stroke:var(--dim);stroke-width:1.5}.scene .ln.dim{opacity:.5}
+.scene .okc{fill:none;stroke:var(--ok);stroke-width:2}.scene .ck{fill:none;stroke:var(--ok);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.scene.on .a{animation:rise .7s both;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.stbar{display:none;gap:8px;margin-top:14px;flex-wrap:wrap}
+.js .stbar{display:flex}
+.stbar .btn{min-width:44px;padding:8px 14px}
+/* run + gate + replay */
+.stagewrap{margin-top:18px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:#0d1315}
+#stage{display:block;width:100%;height:auto}
+.pl-ctl{display:none;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px 12px;border-top:1px solid #223034}
+.js .pl-ctl{display:flex}
+.pl-ctl button{font:500 .9rem var(--sans);min-height:44px;min-width:44px;padding:0 14px;color:#e7eeeb;background:transparent;border:1px solid #2e3f44;border-radius:8px;cursor:pointer}
+.pl-ctl button:hover{border-color:#cdab6b}
+.pl-ctl button[aria-pressed=true]{background:#cdab6b;border-color:#cdab6b;color:#17120a}
+.pl-ctl #pl-play{min-width:92px}
+.pl-sp{display:inline-flex;gap:6px}
+#pl-seek{flex:1 1 200px;min-width:140px;accent-color:#cdab6b;height:44px}
+.tally{display:flex;gap:28px;flex-wrap:wrap;margin:18px 0 0}
+.tally div{display:flex;flex-direction:column}
+.tally b{font:600 2.2rem/1 var(--mono);font-variant-numeric:tabular-nums}
+.tally span{color:var(--dim);font-size:.85rem}
+.tally .o b{color:var(--ok)}.tally .u b{color:var(--un)}.tally .b b{color:var(--bad)}
+.tablewrap{position:relative;overflow-x:auto;border:1px solid var(--rule);border-radius:12px;background:var(--card);margin-top:16px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child>*{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.82rem}
+tbody th{font:500 .85rem var(--mono);color:var(--dim)}
+td.o{font-family:var(--mono);font-size:.85rem;white-space:nowrap}
+.t,.n{display:block;color:var(--dim);font-size:.85rem;margin-top:2px}
+.ok{color:var(--ok);font-weight:600}.un{color:var(--un);font-weight:600}.bad{color:var(--bad);font-weight:600}
+tr[data-f]{cursor:default}
+tr[data-f].on{background:var(--ok-bg)}
+.tools{display:none;margin-top:14px}
+.js .tools{display:flex}
+.terms{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;align-items:start}
+.term{margin:0;background:#0a0f11;border:1px solid var(--rule);border-radius:10px;overflow:hidden;color:#dbe4e1}
+.term figcaption{padding:8px 14px;border-bottom:1px solid #223034;color:#8b9b99;font-size:.8rem;margin:0}
+.term pre{margin:0;padding:12px 14px;border:0;border-radius:0;background:transparent;font:12px/1.5 var(--mono);color:#dbe4e1;overflow-x:auto;min-height:20em}
+.term .tc{color:#cdab6b}.term .tg{color:#6fcf9f;font-weight:600}.term .tb{color:#e5705f;font-weight:600}
+.warn{border-left:3px solid var(--gold);padding:2px 0 2px 14px;color:var(--dim);margin:16px 0}
+pre{margin:14px 0;padding:14px 16px;background:var(--code);border:1px solid var(--rule);border-radius:10px;overflow-x:auto;font:13px/1.65 var(--mono)}
+.shot,.dia{display:block;margin:20px 0 0}
+.shot img,.dia img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:12px;background:#0d1315}
+figcaption{color:var(--dim);font-size:.88rem;margin-top:8px}
+figure{margin:0}
+ul{margin:0 0 14px;padding-left:1.2em}li{margin:0 0 8px}
+footer{margin-top:80px;padding:28px 0 56px;border-top:1px solid var(--line);color:var(--dim);font-size:.9rem}
 footer a{color:var(--dim)}
-@media (max-width:520px){h1{font-size:2rem}.btn{flex:1 1 100%;justify-content:center}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.safe{border:1px solid var(--rule);border-radius:10px;padding:12px 16px;margin:0 0 18px;background:var(--card)}
+@media (max-width:860px){.stepper{grid-template-columns:1fr}.scenes{order:-1}.terms{grid-template-columns:1fr}.hero{padding-top:32px}}
+@media (max-width:720px){.nav{position:static}.nav .w{flex-direction:column;align-items:stretch;gap:0;flex-wrap:nowrap}.nav nav{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 6px;scrollbar-width:none}.nav nav a{flex:none;padding:0 9px}.nav nav a.gh{margin-left:4px}.js .hero{padding-top:132px}}
+@media (max-width:560px){.tablewrap table,.tablewrap tbody,.tablewrap th,.tablewrap td{display:block}.tablewrap thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap tbody tr{display:grid;grid-template-columns:auto 1fr;column-gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)}.tablewrap tbody tr:last-child{border-bottom:0}.tablewrap tbody th,.tablewrap td{border:0;padding:2px 0}.tablewrap tbody td:nth-child(n+3){grid-column:1/-1}.tablewrap td:nth-child(2){color:var(--dim)}.tablewrap td.o::before{content:'offset ';color:var(--dim);font-family:var(--sans)}}
+@media (max-width:520px){.btn{flex:1 1 100%;justify-content:center}.tally{gap:20px}table{font-size:.84rem}th,td{padding:8px 7px}td.o{white-space:normal}td code{overflow-wrap:anywhere}}
+@media (prefers-reduced-motion:reduce){i.f{animation:none}.scene.on .a{animation:none}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<header>
-  <h1>swarmlabre <span class="pill">alpha 0.1.0</span></h1>
-  <p class="tag">Static malware analysis by a swarm of AI agents, with findings checked against the file.</p>
-</header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8b9b99"/></marker></defs></svg>
+<div class="page">
+<header class="nav"><div class="w">
+  <a class="mark" href="./"><svg class="logo" viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE<span class="pill">alpha 0.1.0</span></a>
+  <nav aria-label="Site"><a href="#steps">Steps</a><a href="#run">Run</a><a href="#gate">Board</a><a href="#replay">Replay</a><a href="#look">Try it</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
 <main>
-<section style="border-top:0;padding-top:8px">
-  <p class="lead">Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and swarmlabre checks every finding against the file's own bytes and against the tool calls the run really made. The report is built from the checked facts; the agents' prose is labelled as model text. A finished run is sealed and <strong>replays offline to byte-identical report files</strong>.</p>
+<div class="hz" id="hz"><canvas id="bg" aria-hidden="true"></canvas>
+<div class="w hero" id="top">
+  <h1>Up to six agents read the file. Every finding is checked against it.</h1>
+  <p class="lead">Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and SwarmLabRE checks every finding against the file's own bytes and against the run's own tool log. The report is built from the checked facts; the agents' prose is labelled as model text. A finished run is sealed and <strong>replays offline to byte-identical report files</strong>.</p>
   <div class="cta">
-    <a class="btn pri" href="demo/">Open the live demo</a>
+    <a class="btn pri" href="demo/">Open the demo</a>
     <a class="btn" href="sample/report.html">Read a sample report</a>
-    <a class="btn" href="https://github.com/virqdroid/swarmlabre">Source on GitHub</a>
+    <a class="btn" href="https://github.com/virqdroid/swarmlabre">View the source on GitHub</a>
   </div>
-  <figure>
-    <a href="demo/"><img src="img/demo-1280.png" width="1280" height="914" alt="The web UI playing a recorded run of a harmless demo program: a result card, five byte-checked findings and one unconfirmed claim"></a>
-    <figcaption>The demo is the real web UI playing a recorded run in your browser. It runs no model and sends nothing anywhere. The sample is a harmless generated program that only exits; the agents were a scripted mock, so what you see is the pipeline and the checks, not the quality of any model.</figcaption>
-  </figure>
-</section>
+</div></div>
+<div class="w">
+  <div class="dumpwrap">
+    <div class="lens" id="lens" data-idle="Pick a finding to see the bytes the board checked.">
+      <div class="chips" role="group" aria-label="Byte-checked findings"><button type="button" class="chip" data-f="f1" aria-pressed="false"><b>f1</b>Lock name</button><button type="button" class="chip" data-f="f2" aria-pressed="false"><b>f2</b>Update URL</button><button type="button" class="chip" data-f="f3" aria-pressed="false"><b>f3</b>Documentation IP</button><button type="button" class="chip" data-f="f4" aria-pressed="false"><b>f4</b>Temp path</button><button type="button" class="chip" data-f="f5" aria-pressed="false"><b>f5</b>Wide library name</button></div>
+      <div class="read" aria-live="polite"><div data-k="title">Pick a finding to see the bytes the board checked.</div><div data-k="where"></div><div data-k="bytes"></div><div data-k="says"></div></div>
+    </div>
+    <div class="dump" id="dump" aria-hidden="true">
+<div class="r"><b>0000</b><span class="h"><i>7f</i><i>45</i><i>4c</i><i>46</i><i>02</i><i>01</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>E</i><i>L</i><i>F</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0010</b><span class="h"><i>02</i><i>00</i><i>3e</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i><i>78</i><i>00</i><i>40</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>&gt;</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>x</i><i>.</i><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0020</b><span class="h"><i>40</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>28</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>(</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0030</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>40</i><i>00</i><i>38</i><i>00</i><i>01</i><i>00</i><i>40</i><i>00</i><i>04</i><i>00</i><i>03</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>@</i><i>.</i><i>8</i><i>.</i><i>.</i><i>.</i><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0040</b><span class="h"><i>01</i><i>00</i><i>00</i><i>00</i><i>05</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0050</b><span class="h"><i>00</i><i>00</i><i>40</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>40</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0060</b><span class="h"><i>0a</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>0a</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0070</b><span class="h"><i>00</i><i>10</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>e8</i><i>09</i><i>00</i><i>00</i><i>00</i><i>b8</i><i>3c</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>&lt;</i><i>.</i></span></div>
+<div class="r"><b>0080</b><span class="h"><i>00</i><i>00</i><i>31</i><i>ff</i><i>0f</i><i>05</i><i>55</i><i>48</i><i>89</i><i>e5</i><i>5d</i><i>c3</i><i>90</i><i>90</i><i>90</i><i>90</i></span><span class="a"><i>.</i><i>.</i><i>1</i><i>.</i><i>.</i><i>.</i><i>U</i><i>H</i><i>.</i><i>.</i><i>]</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0090</b><span class="h"><i>90</i><i>90</i><i>90</i><i>90</i><i>90</i><i class="f f2">68</i><i class="f f2">74</i><i class="f f2">74</i><i class="f f2">70</i><i class="f f2">73</i><i class="f f2">3a</i><i class="f f2">2f</i><i class="f f2">2f</i><i class="f f2">75</i><i class="f f2">70</i><i class="f f2">64</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i class="f f2">h</i><i class="f f2">t</i><i class="f f2">t</i><i class="f f2">p</i><i class="f f2">s</i><i class="f f2">:</i><i class="f f2">/</i><i class="f f2">/</i><i class="f f2">u</i><i class="f f2">p</i><i class="f f2">d</i></span></div>
+<div class="r"><b>00a0</b><span class="h"><i class="f f2">61</i><i class="f f2">74</i><i class="f f2">65</i><i class="f f2">73</i><i class="f f2">2e</i><i class="f f2">65</i><i class="f f2">78</i><i class="f f2">61</i><i class="f f2">6d</i><i class="f f2">70</i><i class="f f2">6c</i><i class="f f2">65</i><i class="f f2">2e</i><i class="f f2">74</i><i class="f f2">65</i><i class="f f2">73</i></span><span class="a"><i class="f f2">a</i><i class="f f2">t</i><i class="f f2">e</i><i class="f f2">s</i><i class="f f2">.</i><i class="f f2">e</i><i class="f f2">x</i><i class="f f2">a</i><i class="f f2">m</i><i class="f f2">p</i><i class="f f2">l</i><i class="f f2">e</i><i class="f f2">.</i><i class="f f2">t</i><i class="f f2">e</i><i class="f f2">s</i></span></div>
+<div class="r"><b>00b0</b><span class="h"><i class="f f2">74</i><i class="f f2">2f</i><i class="f f2">63</i><i class="f f2">68</i><i class="f f2">65</i><i class="f f2">63</i><i class="f f2">6b</i><i>00</i><i class="f f1">47</i><i class="f f1">6c</i><i class="f f1">6f</i><i class="f f1">62</i><i class="f f1">61</i><i class="f f1">6c</i><i class="f f1">5c</i><i class="f f1">44</i></span><span class="a"><i class="f f2">t</i><i class="f f2">/</i><i class="f f2">c</i><i class="f f2">h</i><i class="f f2">e</i><i class="f f2">c</i><i class="f f2">k</i><i>.</i><i class="f f1">G</i><i class="f f1">l</i><i class="f f1">o</i><i class="f f1">b</i><i class="f f1">a</i><i class="f f1">l</i><i class="f f1">\</i><i class="f f1">D</i></span></div>
+<div class="r"><b>00c0</b><span class="h"><i class="f f1">65</i><i class="f f1">6d</i><i class="f f1">6f</i><i class="f f1">32</i><i class="f f1">4c</i><i class="f f1">6f</i><i class="f f1">63</i><i class="f f1">6b</i><i>00</i><i class="f f4">2f</i><i class="f f4">74</i><i class="f f4">6d</i><i class="f f4">70</i><i class="f f4">2f</i><i class="f f4">2e</i><i class="f f4">64</i></span><span class="a"><i class="f f1">e</i><i class="f f1">m</i><i class="f f1">o</i><i class="f f1">2</i><i class="f f1">L</i><i class="f f1">o</i><i class="f f1">c</i><i class="f f1">k</i><i>.</i><i class="f f4">/</i><i class="f f4">t</i><i class="f f4">m</i><i class="f f4">p</i><i class="f f4">/</i><i class="f f4">.</i><i class="f f4">d</i></span></div>
+<div class="r"><b>00d0</b><span class="h"><i class="f f4">65</i><i class="f f4">6d</i><i class="f f4">6f</i><i class="f f4">2d</i><i class="f f4">63</i><i class="f f4">61</i><i class="f f4">63</i><i class="f f4">68</i><i class="f f4">65</i><i>00</i><i class="f f3">32</i><i class="f f3">30</i><i class="f f3">33</i><i class="f f3">2e</i><i class="f f3">30</i><i class="f f3">2e</i></span><span class="a"><i class="f f4">e</i><i class="f f4">m</i><i class="f f4">o</i><i class="f f4">-</i><i class="f f4">c</i><i class="f f4">a</i><i class="f f4">c</i><i class="f f4">h</i><i class="f f4">e</i><i>.</i><i class="f f3">2</i><i class="f f3">0</i><i class="f f3">3</i><i class="f f3">.</i><i class="f f3">0</i><i class="f f3">.</i></span></div>
+<div class="r"><b>00e0</b><span class="h"><i class="f f3">31</i><i class="f f3">31</i><i class="f f3">33</i><i class="f f3">2e</i><i class="f f3">39</i><i>00</i><i class="f f5">43</i><i class="f f5">00</i><i class="f f5">3a</i><i class="f f5">00</i><i class="f f5">5c</i><i class="f f5">00</i><i class="f f5">44</i><i class="f f5">00</i><i class="f f5">65</i><i class="f f5">00</i></span><span class="a"><i class="f f3">1</i><i class="f f3">1</i><i class="f f3">3</i><i class="f f3">.</i><i class="f f3">9</i><i>.</i><i class="f f5">C</i><i class="f f5">.</i><i class="f f5">:</i><i class="f f5">.</i><i class="f f5">\</i><i class="f f5">.</i><i class="f f5">D</i><i class="f f5">.</i><i class="f f5">e</i><i class="f f5">.</i></span></div>
+<div class="r"><b>00f0</b><span class="h"><i class="f f5">6d</i><i class="f f5">00</i><i class="f f5">6f</i><i class="f f5">00</i><i class="f f5">5c</i><i class="f f5">00</i><i class="f f5">61</i><i class="f f5">00</i><i class="f f5">67</i><i class="f f5">00</i><i class="f f5">65</i><i class="f f5">00</i><i class="f f5">6e</i><i class="f f5">00</i><i class="f f5">74</i><i class="f f5">00</i></span><span class="a"><i class="f f5">m</i><i class="f f5">.</i><i class="f f5">o</i><i class="f f5">.</i><i class="f f5">\</i><i class="f f5">.</i><i class="f f5">a</i><i class="f f5">.</i><i class="f f5">g</i><i class="f f5">.</i><i class="f f5">e</i><i class="f f5">.</i><i class="f f5">n</i><i class="f f5">.</i><i class="f f5">t</i><i class="f f5">.</i></span></div>
+<div class="r"><b>0100</b><span class="h"><i class="f f5">2e</i><i class="f f5">00</i><i class="f f5">64</i><i class="f f5">00</i><i class="f f5">6c</i><i class="f f5">00</i><i class="f f5">6c</i><i class="f f5">00</i><i>00</i><i>00</i><i>00</i><i>2e</i><i>74</i><i>65</i><i>78</i><i>74</i></span><span class="a"><i class="f f5">.</i><i class="f f5">.</i><i class="f f5">d</i><i class="f f5">.</i><i class="f f5">l</i><i class="f f5">.</i><i class="f f5">l</i><i class="f f5">.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>t</i><i>e</i><i>x</i><i>t</i></span></div>
+<div class="r"><b>0110</b><span class="h"><i>00</i><i>2e</i><i>72</i><i>6f</i><i>64</i><i>61</i><i>74</i><i>61</i><i>00</i><i>2e</i><i>73</i><i>68</i><i>73</i><i>74</i><i>72</i><i>74</i></span><span class="a"><i>.</i><i>.</i><i>r</i><i>o</i><i>d</i><i>a</i><i>t</i><i>a</i><i>.</i><i>.</i><i>s</i><i>h</i><i>s</i><i>t</i><i>r</i><i>t</i></span></div>
+<div class="r"><b>0120</b><span class="h"><i>61</i><i>62</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>a</i><i>b</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0130</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0140</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0150</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0160</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0170</b><span class="h"><i>06</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>78</i><i>00</i><i>40</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>x</i><i>.</i><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0180</b><span class="h"><i>78</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>1d</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>x</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0190</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>01a0</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>07</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>01b0</b><span class="h"><i>02</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>95</i><i>00</i><i>40</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>@</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>01c0</b><span class="h"><i>95</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>75</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>u</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>01d0</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>01e0</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>0f</i><i>00</i><i>00</i><i>00</i><i>03</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>01f0</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0200</b><span class="h"><i>0a</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>19</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0210</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>01</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+<div class="r"><b>0220</b><span class="h"><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i><i>00</i></span><span class="a"><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i><i>.</i></span></div>
+    </div>
+  </div>
+  <p class="dumpcap">All 552 bytes of <code>demo2.elf</code>, a harmless generated program that only exits. The five lit ranges are the findings the board confirmed by reading those bytes. The table further down lists them as text.</p>
+</div>
 
-<section id="how">
-  <h2>How it fits together</h2>
-  <figure style="margin:0 0 16px">
+<section id="steps"><div class="w">
+  <h2>One run, in five steps</h2>
+  <p class="t-narrow">These steps follow the recorded run of <code>demo2.elf</code>. A scripted mock played the agents, so the run shows the pipeline and its checks. It says nothing about the quality of a model.</p>
+  <div class="stepper" id="stepper">
+    <div>
+      <ol class="steps">
+<li><h3>The host parses the file</h3><p><code>demo2.elf</code> is an ELF of 552 bytes, SHA-256 <code>4f514261553c…</code>. SwarmLabRE reads and parses it on the host and never runs it.</p></li>
+<li><h3>Two containers, both without a network</h3><p>A tools container opens the file and writes what the agents read. The agents run in a second container. The model reaches them only through a socket SwarmLabRE owns.</p></li>
+<li><h3>The agents post findings</h3><p>Up to six roles work at once. In this run, seven posts reached the board.</p></li>
+<li><h3>The board checks every post</h3><p>Five were byte-checked, one stayed unconfirmed and one was rejected as a duplicate.</p></li>
+<li><h3>The report is written and the run sealed</h3><p>The report is built from the checked findings. <code>manifest.json</code> holds the SHA-256 of every input and output.</p></li>
+      </ol>
+      <div class="stbar"><button type="button" class="btn" id="st-first">First step</button><button type="button" class="btn" id="st-prev">Previous</button><button type="button" class="btn pri" id="st-next">Next step</button></div>
+    </div>
+    <div class="scenes" aria-hidden="true">
+<div class="scene" data-s="0"><svg viewBox="0 0 640 360" role="img" aria-label="The host parses the file and never runs it">
+<g class="a" style="--d:.1s"><path d="M40 46h130l34 34v210H40z" class="fl"/><path d="M170 46v34h34" class="ln"/><text x="58" y="150" class="t1">demo2.elf</text><text x="58" y="180" class="t2">ELF64 x86-64</text><text x="58" y="206" class="t2">552 bytes</text><text x="58" y="242" class="t2">SHA-256</text><text x="58" y="266" class="t2 mono">4f514261553c…</text></g>
+<g class="a" style="--d:.6s"><path d="M214 160h112" class="ln" marker-end="url(#ah)"/><text x="270" y="144" class="t2" text-anchor="middle">read, never run</text></g>
+<g class="a" style="--d:1s"><rect x="340" y="46" width="270" height="244" rx="10" class="bx"/><text x="362" y="84" class="t1">Host parse</text><text x="362" y="122" class="t2">5 regions</text><text x="362" y="150" class="t2">3 cells of 256 bytes</text><text x="362" y="178" class="t2">7 strings</text><text x="362" y="240" class="t2">hashes, header, regions</text></g>
+<text x="320" y="334" class="t2" text-anchor="middle">The map and the numbers in the report come from this parse.</text></svg></div>
+<div class="scene" data-s="1"><svg viewBox="0 0 640 360" role="img" aria-label="Two containers without a network: one prepares the file, one runs the agents. The model reaches the agents only through a socket.">
+<g class="a" style="--d:.1s"><rect x="14" y="14" width="612" height="262" rx="14" class="host"/><text x="34" y="42" class="t2">SwarmLabRE, on the host</text></g>
+<g class="a" style="--d:.5s"><rect x="36" y="62" width="264" height="180" rx="10" class="jail"/><text x="56" y="98" class="t1">Tools container</text><text x="56" y="126" class="t2 mono">--network none</text><text x="56" y="176" class="t2">prepares what</text><text x="56" y="200" class="t2">the agents read</text></g>
+<g class="a" style="--d:1s"><path d="M302 152h34" class="ln" marker-end="url(#ah)"/></g>
+<g class="a" style="--d:1.2s"><rect x="340" y="62" width="264" height="180" rx="10" class="jail"/><text x="360" y="98" class="t1">Agents container</text><text x="360" y="126" class="t2 mono">--network none</text><text x="360" y="176" class="t2">up to six roles,</text><text x="360" y="200" class="t2">each with its own uid</text></g>
+<g class="a" style="--d:1.8s"><path d="M472 312V246" class="ln" marker-end="url(#ah)"/><rect x="392" y="312" width="160" height="36" rx="8" class="bx"/><text x="472" y="336" class="t2" text-anchor="middle">the model</text><text x="460" y="298" class="t2" text-anchor="end">by a socket SwarmLabRE owns</text></g></svg></div>
+<div class="scene" data-s="2"><svg viewBox="0 0 640 360" role="img" aria-label="Six agent roles post findings to one board"><g class="a" style="--d:0.20s"><circle cx="46" cy="40" r="13" fill="#e68ab8"/><text x="72" y="46" class="t2">Triage</text><path d="M196 40 H326" class="ln dim" marker-end="url(#ah)"/></g><g class="a" style="--d:0.35s"><rect x="34.95" y="74.95" width="22.1" height="22.1" rx="1.5" fill="#3cc7d6"/><text x="72" y="92" class="t2">Static</text><path d="M196 86 H326" class="ln dim" marker-end="url(#ah)"/></g><g class="a" style="--d:0.50s"><polygon points="46.0,119.0 59.0,132.0 46.0,145.0 33.0,132.0" fill="#b4d04a"/><text x="72" y="138" class="t2">Strings/IOC</text><path d="M196 132 H326" class="ln dim" marker-end="url(#ah)"/></g><g class="a" style="--d:0.65s"><polygon points="46.0,165.0 57.3,171.5 57.3,184.5 46.0,191.0 34.7,184.5 34.7,171.5" fill="#c58be0"/><text x="72" y="184" class="t2">Crypto/Config</text><path d="M196 178 H326" class="ln dim" marker-end="url(#ah)"/></g><g class="a" style="--d:0.80s"><polygon points="46.0,211.0 58.4,220.0 53.6,234.5 38.4,234.5 33.6,220.0" fill="#e8906f"/><text x="72" y="230" class="t2">Behaviour</text><path d="M196 224 H326" class="ln dim" marker-end="url(#ah)"/></g><g class="a" style="--d:0.95s"><polygon points="46.0,257.0 55.2,260.8 59.0,270.0 55.2,279.2 46.0,283.0 36.8,279.2 33.0,270.0 36.8,260.8" fill="#a9b7bb"/><text x="72" y="276" class="t2">Reporter</text><path d="M196 270 H326" class="ln dim" marker-end="url(#ah)"/></g><g class="a" style="--d:1.00s"><rect x="338" y="14" width="282" height="32" rx="6" class="bx"/><text x="352" y="36" class="t2">f1 Lock name</text></g><g class="a" style="--d:1.25s"><rect x="338" y="54" width="282" height="32" rx="6" class="bx"/><text x="352" y="76" class="t2">f2 Update URL</text></g><g class="a" style="--d:1.50s"><rect x="338" y="94" width="282" height="32" rx="6" class="bx"/><text x="352" y="116" class="t2">f3 Documentation IP</text></g><g class="a" style="--d:1.75s"><rect x="338" y="134" width="282" height="32" rx="6" class="bx"/><text x="352" y="156" class="t2">f4 Temp path</text></g><g class="a" style="--d:2.00s"><rect x="338" y="174" width="282" height="32" rx="6" class="bx"/><text x="352" y="196" class="t2">f5 Wide library name</text></g><g class="a" style="--d:2.25s"><rect x="338" y="214" width="282" height="32" rx="6" class="bx"/><text x="352" y="236" class="t2">f6 No code reads the strings</text></g><g class="a" style="--d:2.50s"><rect x="338" y="254" width="282" height="32" rx="6" class="bx"/><text x="352" y="276" class="t2">x1 Lock name (second post)</text></g><text x="479" y="334" class="t2" text-anchor="middle">Seven posts reached the board</text></svg></div>
+<div class="scene" data-s="3"><svg viewBox="0 0 640 360" role="img" aria-label="The board reads the bytes at the posted offset and finds the value the agent gave">
+<g class="a" style="--d:.1s"><rect x="14" y="30" width="318" height="140" rx="10" class="bx"/><text x="32" y="64" class="t1">Posted: Update URL</text><text x="32" y="100" class="t2 mono s">https://updates.example.test/check</text><text x="32" y="144" class="t2">offset 149 (0x95), 34 bytes</text></g>
+<g class="a" style="--d:.7s"><path d="M334 100h40" class="ln" marker-end="url(#ah)"/></g>
+<g class="a" style="--d:1s"><rect x="382" y="30" width="244" height="140" rx="10" class="bx"/><text x="400" y="64" class="t1">The file at 0x95</text><text x="400" y="100" class="t2 mono hl">68 74 74 70 73 3a 2f 2f</text><text x="400" y="128" class="t2 mono hl">https://…</text></g>
+<g class="a" style="--d:1.7s"><circle cx="196" cy="246" r="24" class="okc"/><path d="M184 246l8 8 15-17" class="ck"/><text x="236" y="242" class="t1">byte-checked</text><text x="236" y="268" class="t2">the bytes are there at that offset</text></g>
+<text x="320" y="334" class="t2" text-anchor="middle">A finding the board cannot check stays unconfirmed in the report.</text></svg></div>
+<div class="scene" data-s="4"><svg viewBox="0 0 640 360" role="img" aria-label="The report files are written and the run is sealed with a manifest of hashes"><g class="a" style="--d:0.20s"><rect x="30" y="14" width="214" height="30" rx="6" class="bx"/><text x="44" y="35" class="t2 mono">board.json</text></g><g class="a" style="--d:0.36s"><rect x="30" y="50" width="214" height="30" rx="6" class="bx"/><text x="44" y="71" class="t2 mono">detection.yar</text></g><g class="a" style="--d:0.52s"><rect x="30" y="86" width="214" height="30" rx="6" class="bx"/><text x="44" y="107" class="t2 mono">iocs.csv</text></g><g class="a" style="--d:0.68s"><rect x="30" y="122" width="214" height="30" rx="6" class="bx"/><text x="44" y="143" class="t2 mono">iocs.misp.json</text></g><g class="a" style="--d:0.84s"><rect x="30" y="158" width="214" height="30" rx="6" class="bx"/><text x="44" y="179" class="t2 mono">iocs.stix.json</text></g><g class="a" style="--d:1.00s"><rect x="30" y="194" width="214" height="30" rx="6" class="bx"/><text x="44" y="215" class="t2 mono">report.html</text></g><g class="a" style="--d:1.16s"><rect x="30" y="230" width="214" height="30" rx="6" class="bx"/><text x="44" y="251" class="t2 mono">report.json</text></g><g class="a" style="--d:1.32s"><rect x="30" y="266" width="214" height="30" rx="6" class="bx"/><text x="44" y="287" class="t2 mono">report.md</text></g><g class="a" style="--d:1.7s"><path d="M252 150h66" class="ln" marker-end="url(#ah)"/></g><g class="a" style="--d:2s"><rect x="326" y="62" width="296" height="176" rx="10" class="bx"/><text x="346" y="98" class="t1">manifest.json</text><text x="346" y="132" class="t2">the SHA-256 of every input</text><text x="346" y="156" class="t2">and every output</text><text x="346" y="206" class="t2 mono">replay: exit 0 or 1</text></g><text x="320" y="340" class="t2" text-anchor="middle">Replay rebuilds the files and compares every byte.</text></svg></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="run"><div class="w" aria-labelledby="run-h">
+  <h2 id="run-h">The recorded run, event by event</h2>
+  <p class="t-narrow">The same run, drawn like the clips the web UI exports: a map of the file, the six roles, and each finding landing on the bytes it was checked against. <span class="jsonly">Pause it, change the speed or drag to any moment.</span></p>
+  <p class="t-narrow nojs">The animation needs JavaScript. The table below lists the same posts.</p>
+  <div class="stagewrap">
+    <canvas id="stage" role="img" aria-label="Animation of the recorded run of demo2.elf: the roles post findings, and each byte-checked finding lands on a map of the file. The table below lists the same posts." width="1280" height="720"></canvas>
+    <div class="pl-ctl">
+      <button type="button" id="pl-play">Play again</button>
+      <span class="pl-sp" role="group" aria-label="Speed"><button type="button" data-sp="1" aria-pressed="true">1x</button><button type="button" data-sp="2" aria-pressed="false">2x</button></span>
+      <input type="range" id="pl-seek" min="0" max="3204" value="3204" aria-label="Position in the recorded run">
+    </div>
+    <script type="application/json" id="stage-data">{"beats":[{"c":0.4,"k":"phase","n":2,"p":"prepare","t":0.0},{"c":1.0,"k":"step","label":"File","msg":"ELF64 x86-64, 4f514261553c","n":3,"t":0.0},{"c":1.6,"k":"step","label":"Host parse","msg":"5 regions, 3 cells of 256 bytes, 7 strings","n":6,"t":0.0},{"c":4.2,"k":"step","label":"Functions","msg":"2 functions","n":10,"t":7.58},{"c":4.8,"k":"step","label":"Call edges","msg":"1 edges","n":12,"t":7.62},{"c":5.5,"k":"phase","n":17,"p":"round1","t":7.74},{"c":5.85,"k":"start","n":22,"role":"static","t":8.1},{"c":6.2,"k":"start","n":23,"role":"ioc","t":8.1},{"c":6.55,"k":"start","n":24,"role":"crypto","t":8.1},{"c":6.9,"k":"start","n":25,"role":"triage","t":8.1},{"c":8.4,"id":"f1","k":"find","len":16,"n":104,"off":184,"ok":true,"role":"crypto","t":8.41,"title":"Lock name"},{"c":9.9,"id":"f2","k":"find","len":34,"n":114,"off":149,"ok":true,"role":"ioc","t":8.42,"title":"Update URL"},{"c":11.4,"id":"f3","k":"find","len":11,"n":123,"off":218,"ok":true,"role":"ioc","t":8.46,"title":"Documentation IP"},{"c":11.75,"k":"start","n":126,"role":"behaviour","t":8.46},{"c":13.25,"id":"f4","k":"find","len":16,"n":133,"off":201,"ok":true,"role":"ioc","t":8.48,"title":"Temp path"},{"c":14.75,"id":"f5","k":"find","len":34,"n":142,"off":230,"ok":true,"role":"ioc","t":8.5,"title":"Wide library name"},{"c":15.15,"k":"end","n":150,"role":"triage","t":8.6},{"c":15.55,"k":"end","n":151,"role":"crypto","t":8.61},{"c":15.95,"k":"end","n":155,"role":"ioc","t":8.71},{"c":17.15,"id":"f6","k":"find","len":1,"n":169,"off":0,"ok":false,"role":"behaviour","t":8.77,"title":"No code reads the strings"},{"c":17.55,"k":"end","n":177,"role":"behaviour","t":8.98},{"c":20.15,"id":"f1","k":"dispute","n":186,"role":"static","t":28.41},{"c":20.55,"k":"end","n":194,"role":"static","t":28.66},{"c":21.25,"k":"phase","n":195,"p":"round2","t":28.67},{"c":22.55,"id":"f1","k":"resolve","n":200,"t":28.67,"verdict":"stands"},{"c":22.9,"k":"start","n":202,"role":"crypto","t":28.67},{"c":24.8,"code":"duplicate","id":"x1","k":"reject","n":219,"role":"crypto","t":28.98,"target":"f1"},{"c":25.2,"k":"end","n":227,"role":"crypto","t":29.21},{"c":25.9,"k":"phase","n":228,"p":"merge","t":29.22},{"c":26.25,"k":"start","n":229,"role":"reporter","t":29.22},{"c":26.65,"k":"end","n":235,"role":"reporter","t":29.72},{"c":29.05,"k":"done","n":236,"t":30.52}],"bytes":"7f454c4602010100000000000000000002003e00010000007800400000000000400000000000000028010000000000000000000040003800010040000400030001000000050000000000000000000000000040000000000000004000000000000a010000000000000a010000000000000010000000000000e809000000b83c00000031ff0f05554889e55dc390909090909090909068747470733a2f2f757064617465732e6578616d706c652e746573742f636865636b00476c6f62616c5c44656d6f324c6f636b002f746d702f2e64656d6f2d6361636865003230332e302e3131332e390043003a005c00440065006d006f005c006100670065006e0074002e0064006c006c000000002e74657874002e726f64617461002e73687374727461620000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000001000000010000000600000000000000780040000000000078000000000000001d00000000000000000000000000000001000000000000000000000000000000070000000100000002000000000000009500400000000000950000000000000075000000000000000000000000000000010000000000000000000000000000000f00000003000000000000000000000000000000000000000a010000000000001900000000000000000000000000000001000000000000000000000000000000","cell":2,"cols":28,"ebytes":256,"edges":[[0,1]],"end":32.05,"entropy":[128,44,20],"funcs":[{"name":"entry","off":120},{"name":"FUN_00400086","off":134}],"lanes":[[6.9,"crypto","thinking"],[6.9,"static","thinking"],[6.9,"crypto","tool"],[6.9,"static","tool"],[6.9,"ioc","thinking"],[6.9,"ioc","tool"],[6.9,"static","thinking"],[6.9,"static","tool"],[6.9,"crypto","thinking"],[6.9,"triage","thinking"],[6.9,"triage","tool"],[6.9,"crypto","tool"],[6.9,"ioc","thinking"],[6.9,"triage","thinking"],[6.9,"ioc","tool"],[6.9,"triage","tool"],[6.9,"ioc","thinking"],[6.9,"triage","thinking"],[6.9,"triage","writing"],[8.4,"ioc","tool"],[8.4,"crypto","thinking"],[8.4,"crypto","writing"],[9.9,"ioc","thinking"],[9.9,"ioc","tool"],[11.4,"ioc","thinking"],[11.75,"ioc","tool"],[13.25,"ioc","thinking"],[13.25,"ioc","tool"],[14.75,"ioc","thinking"],[14.75,"ioc","writing"],[15.95,"behaviour","thinking"],[15.95,"behaviour","tool"],[15.95,"behaviour","thinking"],[15.95,"behaviour","tool"],[17.15,"behaviour","thinking"],[17.15,"behaviour","writing"],[17.55,"static","thinking"],[17.55,"static","tool"],[20.15,"static","thinking"],[20.15,"static","writing"],[22.9,"crypto","thinking"],[22.9,"crypto","tool"],[22.9,"crypto","thinking"],[22.9,"crypto","tool"],[24.8,"crypto","thinking"],[24.8,"crypto","writing"],[26.25,"reporter","writing"]],"note":{"c0":17.55,"c1":20.15,"text":"Shortened: Static waited 20 s on one tool call"},"regions":[{"id":"r0","kind":"header","len":120,"name":"ELF header and program headers","off":0},{"id":"r1","kind":"section","len":29,"name":".text","off":120,"perm":"r-x","va":4194424},{"id":"r2","kind":"section","len":117,"name":".rodata","off":149,"perm":"r--","va":4194453},{"id":"r3","kind":"section","len":25,"name":".shstrtab","off":266,"perm":"","va":null},{"id":"r4","kind":"table","len":256,"name":"section header table","off":296}],"roles":[{"id":"triage","label":"Triage","letter":"T"},{"id":"static","label":"Static","letter":"S"},{"id":"ioc","label":"Strings/IOC","letter":"I"},{"id":"crypto","label":"Crypto/Config","letter":"C"},{"id":"behaviour","label":"Behaviour","letter":"B"},{"id":"reporter","label":"Reporter","letter":"R"}],"rows":10,"sample":{"format":"ELF64 x86-64","name":"demo2.elf"},"size":552,"tools":[6.9,6.9,6.9,6.9,6.9,6.9,6.9,6.9,8.4,9.9,11.75,13.25,15.95,15.95,17.55,22.9,22.9]}</script>
+  </div>
+  <p class="dumpcap jsonly">Every event comes from the run's log. The gaps between events are shortened; the run-time counter shows the recorded clock. Each cell of the map is 2 bytes. A real sample is much larger and fills a bigger map. The animation plays a recording and adds no evidence.</p>
+</div></section>
+
+<section id="gate"><div class="w">
+  <h2>Seven posts, each checked by the board</h2>
+  <p class="t-narrow">The table lists every post in the order the board received it. A finding is <em>byte-checked</em> when the bytes at its offset are the value the agent gave. A finding the board cannot check stays <em>unconfirmed</em>, and the report labels it that way. A repeated finding is rejected; the log keeps it with the reason.</p>
+  <div class="tally" aria-label="Board result"><div class="o"><b data-t="ok">5</b><span>byte-checked</span></div><div class="u"><b data-t="un">1</b><span>unconfirmed</span></div><div class="b"><b data-t="bad">1</b><span>rejected</span></div></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th scope="col">No.</th><th scope="col">Agent</th><th scope="col">Finding</th><th scope="col">Offset</th><th scope="col">Result</th></tr></thead>
+    <tbody>
+<tr class="chk" data-v="ok" data-f="f1" data-title="Lock name" data-value="Global\Demo2Lock" data-off="184" data-len="16" data-sec=".rodata" data-enc="text" tabindex="0"><th scope="row">f1</th><td>Crypto/Config</td><td>Lock name<span class="t"><code>Global\Demo2Lock</code></span></td><td class="o">184 (0xb8)</td><td class="res"><span class="ok">byte-checked</span><span class="n">Static disputed it; the orchestrator ruled it stands.</span></td></tr>
+<tr class="chk" data-v="ok" data-f="f2" data-title="Update URL" data-value="https://updates.example.test/check" data-off="149" data-len="34" data-sec=".rodata" data-enc="text" tabindex="0"><th scope="row">f2</th><td>Strings/IOC</td><td>Update URL<span class="t"><code>https://updates.example.test/check</code></span></td><td class="o">149 (0x95)</td><td class="res"><span class="ok">byte-checked</span></td></tr>
+<tr class="chk" data-v="ok" data-f="f3" data-title="Documentation IP" data-value="203.0.113.9" data-off="218" data-len="11" data-sec=".rodata" data-enc="text" tabindex="0"><th scope="row">f3</th><td>Strings/IOC</td><td>Documentation IP<span class="t"><code>203.0.113.9</code></span></td><td class="o">218 (0xda)</td><td class="res"><span class="ok">byte-checked</span></td></tr>
+<tr class="chk" data-v="ok" data-f="f4" data-title="Temp path" data-value="/tmp/.demo-cache" data-off="201" data-len="16" data-sec=".rodata" data-enc="text" tabindex="0"><th scope="row">f4</th><td>Strings/IOC</td><td>Temp path<span class="t"><code>/tmp/.demo-cache</code></span></td><td class="o">201 (0xc9)</td><td class="res"><span class="ok">byte-checked</span></td></tr>
+<tr class="chk" data-v="ok" data-f="f5" data-title="Wide library name" data-value="C:\Demo\agent.dll" data-off="230" data-len="34" data-sec=".rodata" data-enc="utf16le" tabindex="0"><th scope="row">f5</th><td>Strings/IOC</td><td>Wide library name<span class="t"><code>C:\Demo\agent.dll</code></span></td><td class="o">230 (0xe6)</td><td class="res"><span class="ok">byte-checked</span></td></tr>
+<tr class="" data-v="un"><th scope="row">f6</th><td>Behaviour</td><td>No code reads the strings<span class="t"><span class="n">a note: no bytes to check</span></span></td><td class="o">none</td><td class="res"><span class="un">unconfirmed</span></td></tr>
+<tr class="rej" data-v="bad"><th scope="row">x1</th><td>Crypto/Config</td><td>Lock name<span class="t"><span class="n">posted a second time</span></span></td><td class="o">none</td><td class="res"><span class="bad">rejected</span><span class="n">This agent had already posted the same finding.</span></td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="how"><div class="w">
+  <h2>Where each part runs</h2>
+  <figure class="dia">
     <a href="architecture.svg"><img src="architecture.svg" width="1000" height="640" alt="Architecture: the sample is parsed on the host; two containers without a network prepare it and run the agents; a board on the host checks every post; reports are written from the checked findings; the run is sealed and can be replayed offline"></a>
-    <figcaption>Open the diagram on its own to read it at full size.</figcaption>
+    <figcaption>Select the diagram to open it at full size.</figcaption>
   </figure>
-  <p>The agents run in containers with <code>--network none</code> and never hold the model's key; the model reaches them only through a socket swarmlabre owns. Everything the agents or the sample print is untrusted text.</p>
-  <p>A report is a single file, <code>report.html</code>, that makes no request to any other site. <a href="sample/report.html">Here is one</a>, from the recorded demo run: a harmless generated program, analysed by a scripted mock model.</p>
-</section>
+  <p class="t-narrow" style="margin-top:16px">The agents run in containers with <code>--network none</code> and never hold the model's key; the model reaches them only through a socket SwarmLabRE owns. Everything the agents or the sample print is untrusted text.</p>
+</div></section>
 
-<section id="repeat">
-  <h2>What "reproducible" means here</h2>
-  <p>Every run is sealed with a <code>manifest.json</code> (tool version, sample hash, model and sampling, image ids, and the SHA-256 of every input and output file), the board's inputs in order, and every model exchange. <code>swarmlabre replay</code> rebuilds the board and all report files offline from that record and fails if one byte differs. A <em>live</em> run is pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model.</p>
-  <p class="note">Nothing signs <code>manifest.json</code>. The hashes catch accidents, and forgeries that forgot the manifest; someone who edits a file and recomputes the hashes gets a replay that agrees. The details, and what the 11 golden cases do not cover, are in <a href="https://github.com/virqdroid/swarmlabre/blob/main/docs/determinism.md">docs/determinism.md</a>.</p>
-</section>
+<section id="replay"><div class="w">
+  <h2>Replay rebuilds every file, or exits 1</h2>
+  <p class="t-narrow">Every run is sealed with a <code>manifest.json</code> (tool version, sample hash, model and sampling, image ids, and the SHA-256 of every input and output file), the board's inputs in order, and every model exchange. <code>swarmlabre replay</code> rebuilds the board and all report files offline from that record and fails if one byte differs. A <em>live</em> run is pinned (temperature and seed are forced on every request) and recorded, but not promised to repeat: six agents share one model.</p>
+  <div class="terms">
+    <figure class="term"><figcaption>Recorded output: the demo run, unchanged</figcaption><pre id="t-ok">$ python3 -m swarmlabre replay demo/sfaef16e6
+{
+ &quot;checks&quot;: {
+  &quot;board&quot;: &quot;identical&quot;,
+  &quot;bundle_outputs&quot;: {
+   &quot;board.json&quot;: &quot;identical&quot;,
+   &quot;detection.yar&quot;: &quot;identical&quot;,
+   &quot;iocs.csv&quot;: &quot;identical&quot;,
+   &quot;iocs.misp.json&quot;: &quot;identical&quot;,
+   &quot;iocs.stix.json&quot;: &quot;identical&quot;,
+   &quot;report.html&quot;: &quot;identical&quot;,
+   &quot;report.json&quot;: &quot;identical&quot;,
+   &quot;report.md&quot;: &quot;identical&quot;
+  },
+  &quot;inputs_untouched&quot;: &quot;identical&quot;,
+  &quot;outputs&quot;: {
+   &quot;board.json&quot;: &quot;identical&quot;,
+   &quot;detection.yar&quot;: &quot;identical&quot;,
+   &quot;iocs.csv&quot;: &quot;identical&quot;,
+   &quot;iocs.misp.json&quot;: &quot;identical&quot;,
+   &quot;iocs.stix.json&quot;: &quot;identical&quot;,
+   &quot;report.html&quot;: &quot;identical&quot;,
+   &quot;report.json&quot;: &quot;identical&quot;,
+   &quot;report.md&quot;: &quot;identical&quot;
+  },
+  &quot;record&quot;: &quot;identical&quot;,
+  &quot;sample&quot;: &quot;identical&quot;,
+  &quot;summary&quot;: &quot;identical&quot;
+ },
+ &quot;level&quot;: &quot;full&quot;,
+ &quot;ok&quot;: true,
+ &quot;run&quot;: &quot;sfaef16e6&quot;
+}
+exit 0</pre></figure>
+    <figure class="term" id="t-bad-box"><figcaption>Recorded output: a copy with one letter changed in <code>out/report.md</code></figcaption><pre id="t-bad">$ python3 -m swarmlabre replay edited-copy/sfaef16e6
+{
+ &quot;checks&quot;: {
+  &quot;board&quot;: &quot;identical&quot;,
+  &quot;bundle_outputs&quot;: {
+   &quot;board.json&quot;: &quot;identical&quot;,
+   &quot;detection.yar&quot;: &quot;identical&quot;,
+   &quot;iocs.csv&quot;: &quot;identical&quot;,
+   &quot;iocs.misp.json&quot;: &quot;identical&quot;,
+   &quot;iocs.stix.json&quot;: &quot;identical&quot;,
+   &quot;report.html&quot;: &quot;identical&quot;,
+   &quot;report.json&quot;: &quot;identical&quot;,
+   &quot;report.md&quot;: &quot;differs&quot;
+  },
+  &quot;inputs_untouched&quot;: &quot;identical&quot;,
+  &quot;outputs&quot;: {
+   &quot;board.json&quot;: &quot;identical&quot;,
+   &quot;detection.yar&quot;: &quot;identical&quot;,
+   &quot;iocs.csv&quot;: &quot;identical&quot;,
+   &quot;iocs.misp.json&quot;: &quot;identical&quot;,
+   &quot;iocs.stix.json&quot;: &quot;identical&quot;,
+   &quot;report.html&quot;: &quot;identical&quot;,
+   &quot;report.json&quot;: &quot;identical&quot;,
+   &quot;report.md&quot;: &quot;identical&quot;
+  },
+  &quot;record&quot;: &quot;identical&quot;,
+  &quot;sample&quot;: &quot;identical&quot;,
+  &quot;summary&quot;: &quot;identical&quot;
+ },
+ &quot;level&quot;: &quot;full&quot;,
+ &quot;ok&quot;: false,
+ &quot;run&quot;: &quot;sfaef16e6&quot;
+}
+exit 1</pre></figure>
+  </div>
+  <div class="tools"><button type="button" class="btn pri" id="t-change">Show the copy with one letter changed</button></div>
+  <script type="application/json" id="term-data">{"ok":{"cmd":"python3 -m swarmlabre replay demo/sfaef16e6","lines":["{"," \"checks\": {","  \"board\": \"identical\",","  \"bundle_outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"identical\"","  },","  \"inputs_untouched\": \"identical\",","  \"outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"identical\"","  },","  \"record\": \"identical\",","  \"sample\": \"identical\",","  \"summary\": \"identical\""," },"," \"level\": \"full\","," \"ok\": true,"," \"run\": \"sfaef16e6\"","}"],"exit":0},"bad":{"cmd":"python3 -m swarmlabre replay edited-copy/sfaef16e6","lines":["{"," \"checks\": {","  \"board\": \"identical\",","  \"bundle_outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"differs\"","  },","  \"inputs_untouched\": \"identical\",","  \"outputs\": {","   \"board.json\": \"identical\",","   \"detection.yar\": \"identical\",","   \"iocs.csv\": \"identical\",","   \"iocs.misp.json\": \"identical\",","   \"iocs.stix.json\": \"identical\",","   \"report.html\": \"identical\",","   \"report.json\": \"identical\",","   \"report.md\": \"identical\"","  },","  \"record\": \"identical\",","  \"sample\": \"identical\",","  \"summary\": \"identical\""," },"," \"level\": \"full\","," \"ok\": false,"," \"run\": \"sfaef16e6\"","}"],"exit":1}}</script>
+  <p class="dumpcap">Both terminals show real output of <code>python3 -m swarmlabre replay</code>, recorded once. The second run used a copy of the demo run in which the <code>d</code> of "demo" in <code>out/report.md</code> became <code>D</code>. Your browser runs nothing here.</p>
+  <p class="warn t-narrow">Nothing signs <code>manifest.json</code>. The hashes catch accidents and forgeries that left the manifest alone. Someone who edits a file and recomputes the hashes gets a replay that agrees. <a href="https://github.com/virqdroid/swarmlabre/blob/main/docs/determinism.md">docs/determinism.md</a> has the details and lists what the 11 golden cases do not cover.</p>
+</div></section>
 
-<section id="look">
-  <h2>Look first: Python 3.12 only, no Docker, no GPU, no key, no network</h2>
-  <p>The repository carries a recorded run and 11 golden cases. All of this works after a plain <code>git clone</code>:</p>
+<section id="look"><div class="w">
+  <h2>Try the recorded run with Python 3.12</h2>
+  <p class="t-narrow">The repository holds a recorded run and 11 golden cases. After <code>git clone</code>, these commands need no Docker, GPU, model key or network:</p>
 <pre>git clone https://github.com/virqdroid/swarmlabre
 cd swarmlabre
 
@@ -106,28 +408,332 @@ python3 -m unittest discover -s tests
 
 # replay every golden case twice and compare with the committed outputs
 python3 tests/goldenrun.py --check --twice</pre>
-  <p>Docker is needed only to <strong>analyse a new file</strong> (the agents and Ghidra/jadx run in containers). The tools image compiles Ghidra's decompiler for arm64, so that part runs on arm64 Linux only today.</p>
-</section>
+  <p class="t-narrow">You need Docker only to <strong>analyse a new file</strong>: the agents and Ghidra/jadx run in containers. The tools image compiles Ghidra's decompiler for arm64, so analysis runs on arm64 Linux only today.</p>
+  <figure class="shot">
+    <a href="demo/"><img src="img/demo-1280.png" width="1280" height="914" alt="The web UI playing a recorded run of a harmless demo program: a result card, five byte-checked findings and one unconfirmed claim"></a>
+    <figcaption>The demo is the real web UI playing a recorded run in your browser. It runs no model and sends nothing anywhere. The sample is a harmless generated program that only exits; the agents were a scripted mock, so what you see is the pipeline and the checks, not the quality of any model.</figcaption>
+  </figure>
+  <div class="cta"><a class="btn pri" href="demo/">Open the demo</a><a class="btn" href="sample/report.html">Read a sample report</a><a class="btn" href="https://github.com/virqdroid/swarmlabre">View the source on GitHub</a></div>
+</div></section>
 
-<section id="not">
+<section id="not"><div class="w">
   <h2>What this is not</h2>
-  <ul>
+  <ul class="t-narrow">
     <li>Not a sandbox for <strong>running</strong> malware: the sample is only read, never executed. Do not point it at a file you could not safely open in a disassembler.</li>
     <li>Not a claim that a verdict is right. A verdict, a family name and a confidence are a model's opinion, capped by what the board could check. A finding marked <em>byte-checked</em> means the bytes are there at that offset; it does not mean the agent's reading of them is correct.</li>
     <li>Not repeatable for a <em>live</em> model run. Replay of a recording is byte-identical; a second live run on the same file can differ.</li>
     <li>Not tested on other CPU architectures or with more than one model, and no check in this repository involves real malware: the tests and the demo use generated benign files only. The tools image builds for arm64 only today.</li>
   </ul>
-</section>
+</div></section>
 
-<section id="status">
+<section id="status"><div class="w">
   <h2>Status</h2>
-  <p><strong>Alpha, 0.1.0.</strong> It was built and checked on one machine (Linux arm64, Python 3.12.3). This page and the demo were opened in headless Firefox only, not in other browsers. Please read <a href="https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md">SECURITY.md</a>, which lists what is defended against and what is not claimed, before you point swarmlabre at a real malware sample. It is a one-person project.</p>
-  <p>Licence: MIT; third-party components keep their own (<a href="https://github.com/virqdroid/swarmlabre/blob/main/THIRD_PARTY.md">THIRD_PARTY.md</a>).</p>
-</section>
+  <p class="t-narrow"><strong>Alpha, 0.1.0.</strong> It was built and checked on one machine (Linux arm64, Python 3.12.3). This page and the demo were tested in headless Firefox only. Before you point SwarmLabRE at real malware, read <a href="https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md">SECURITY.md</a>: it lists what is defended against and what is not claimed. It is a one-person project.</p>
+  <p class="t-narrow">Licence: MIT; third-party components keep their own (<a href="https://github.com/virqdroid/swarmlabre/blob/main/THIRD_PARTY.md">THIRD_PARTY.md</a>).</p>
+</div></section>
 </main>
-<footer>
-  <p>This page is one static file: no script, no cookies, no tracking, no request to any other site. Its two fonts are Geist and Geist Mono (SIL OFL 1.1, <a href="fonts/OFL.txt">licence</a>).</p>
+
+<footer><div class="w">
+  <p class="safe t-narrow">SwarmLabRE reads files that may be malware and never runs them. Analyse a file only on a machine where opening it in a disassembler would be safe.</p>
+  <p class="t-narrow">This page sets no cookies, has no tracking and requests nothing from any other site. One inline script draws the animations and shows the bytes behind a finding; with scripts off, the text, the table and the recorded output stay. The birds at the top are drawn with the hex digits and printable characters of the demo file. The fonts are Geist and Geist Mono (SIL OFL 1.1, <a href="fonts/OFL.txt">licence</a>).</p>
   <p><a href="https://github.com/virqdroid/swarmlabre">github.com/virqdroid/swarmlabre</a></p>
-</footer>
+</div></footer>
+</div>
+<script>(function () {
+  document.documentElement.classList.add('js');
+  var dump = document.getElementById('dump'), lens = document.getElementById('lens');
+  if (!dump || !lens) return;
+  var rows = document.querySelectorAll('tr[data-f], .chip'), on = null;
+  var out = { t: lens.querySelector('[data-k=title]'), w: lens.querySelector('[data-k=where]'), b: lens.querySelector('[data-k=bytes]'), s: lens.querySelector('[data-k=says]') };
+  var idle = lens.getAttribute('data-idle');
+  function show(id) {
+    if (id === on) return;
+    on = id;
+    document.querySelectorAll('.on').forEach(function (e) { e.classList.remove('on'); }); document.querySelectorAll('.chip').forEach(function (e) { e.setAttribute('aria-pressed', e.getAttribute('data-f') === id ? 'true' : 'false'); });
+    if (!id) { out.t.textContent = idle; out.w.textContent = ''; out.b.textContent = ''; out.s.textContent = ''; return; }
+    document.querySelectorAll('.' + id + ', [data-f="' + id + '"]').forEach(function (e) { e.classList.add('on'); });
+    var r = document.querySelector('tr[data-f="' + id + '"]'), d = r.dataset;
+    var hex = Array.prototype.map.call(dump.querySelectorAll('.h .' + id), function (e) { return e.textContent; }).join(' ');
+    out.t.textContent = d.title + ': ' + d.value;
+    out.w.textContent = 'offset ' + d.off + ' (0x' + Number(d.off).toString(16) + '), ' + d.len + ' bytes' + (d.sec ? ', in ' + d.sec : '') + (d.enc === 'utf16le' ? ', UTF-16 text' : '');
+    out.b.textContent = hex;
+    out.s.textContent = 'The board read these bytes at this offset. They match the value the agent posted.';
+  }
+  function who(e) { var t = e.target.closest ? e.target.closest('.f, [data-f]') : null; if (!t) return null; var m = /\bf\d+\b/.exec(t.className); return t.getAttribute('data-f') || (m && m[0]); }
+  document.addEventListener('mouseover', function (e) { var id = who(e); if (id) show(id); });
+  document.addEventListener('click', function (e) { var id = who(e); if (id) show(id); });
+  rows.forEach(function (r) { r.addEventListener('focus', function () { show(r.getAttribute('data-f')); }); });
+
+  /* the recorded run, drawn on a canvas in the style of the hub's exported clip. Every frame is a pure function of the clip time c, so seeking is the same code as playing. */
+  var cv = document.getElementById('stage'), dEl = document.getElementById('stage-data');
+  if (cv && dEl) {
+    document.documentElement.classList.add('js');
+    var D = JSON.parse(dEl.textContent), ctx = cv.getContext('2d');
+    var INK = '#0d1315', TX = '#e7eeeb', DIM = '#8b9b99', GOLD = '#cdab6b', OK = '#6fcf9f', BAD = '#e5705f', BUSY = '#6aa8e0', RULE = '#223034';
+    var RC = { triage: '#e68ab8', static: '#3cc7d6', ioc: '#b4d04a', crypto: '#c58be0', behaviour: '#e8906f', reporter: '#a9b7bb' };
+    var RCOL = ['#46555c', '#7a6a3e', '#3f6b5c', '#5a4f73', '#3c5266'];
+    var SANS = 'Geist, ui-sans-serif, system-ui, sans-serif', MONO = '"Geist Mono", ui-monospace, monospace';
+    var LAB = {}, LET = {}, ORDER = D.roles.map(function (r) { LAB[r.id] = r.label; LET[r.id] = r.letter; return r.id; });
+    var WORD = { thinking: 'thinking', tool: 'running a tool', writing: 'writing', starting: 'starting' };
+    var BY = []; for (var q = 0; q < D.bytes.length; q += 2) BY.push(parseInt(D.bytes.substr(q, 2), 16));
+    var P = false, LW = 1280, LH = 720, fs = 1, S = 0, mapX = 24, mapY = 150, mapH = 0, dockY = 0, dpr = Math.min(2, window.devicePixelRatio || 1);
+    function layout() {
+      P = cv.parentNode.clientWidth < 700;
+      LW = P ? 480 : 1280; fs = P ? 1.3 : 1.2; var cols = P ? 16 : D.cols, rows = Math.ceil((D.size / D.cell) / cols);
+      mapX = 24; S = (LW - 48) / cols; mapY = P ? 236 : 182; mapH = S * rows; dockY = mapY + mapH + 30; LH = dockY + 26 * fs + 34;
+      D.cc = cols; D.rr = rows;
+      cv.width = Math.round(LW * dpr); cv.height = Math.round(LH * dpr);
+    }
+    function F(sz, w, fam) { return (w || 400) + ' ' + Math.round(sz * fs * 10) / 10 + 'px ' + (fam || SANS); }
+    function ease(x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); }
+    function clamp(x) { return Math.max(0, Math.min(1, x)); }
+    function cellXY(i) { return [mapX + (i % D.cc) * S, mapY + Math.floor(i / D.cc) * S]; }
+    function ctr(off, len) { var i = Math.floor((off + len / 2) / D.cell), p = cellXY(i); return [p[0] + S / 2, p[1] + S / 2]; }
+    function shape(role, r) {
+      var p = new Path2D();
+      if (role === 'triage') p.arc(0, 0, r, 0, 6.2832);
+      else if (role === 'static') p.rect(-r * .85, -r * .85, r * 1.7, r * 1.7);
+      else if (role === 'ioc') { p.moveTo(0, -r); p.lineTo(r, 0); p.lineTo(0, r); p.lineTo(-r, 0); p.closePath(); }
+      else { var n = role === 'crypto' ? 6 : role === 'behaviour' ? 5 : 8; for (var i = 0; i < n; i++) { var a = -1.5708 + i * 6.2832 / n, x = Math.cos(a) * r, y = Math.sin(a) * r; if (i) p.lineTo(x, y); else p.moveTo(x, y); } p.closePath(); }
+      return p;
+    }
+    function glyph(x, role, px, py, r, alpha) {
+      x.save(); x.translate(px, py); x.globalAlpha = alpha; x.fillStyle = RC[role]; x.fill(shape(role, r));
+      x.fillStyle = INK; x.font = F(r * .95, 700, MONO); x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(LET[role], 0, .5); x.restore(); x.textBaseline = 'alphabetic'; x.textAlign = 'left';
+    }
+    function dock(role) { var i = ORDER.indexOf(role); return [mapX + (i + .5) * (LW - 48) / 6, dockY]; }
+    function mmss(s) { s = Math.floor(s); return Math.floor(s / 3600) + ':' + ('0' + (Math.floor(s / 60) % 60)).slice(-2) + ':' + ('0' + (s % 60)).slice(-2); }
+    function clock(c) {
+      var B = D.beats, i = -1; for (var k = 0; k < B.length; k++) if (B[k].c <= c) i = k;
+      if (i < 0) return 0; if (i === B.length - 1) return B[i].t;
+      return B[i].t + (c - B[i].c) / (B[i + 1].c - B[i].c) * (B[i + 1].t - B[i].t);
+    }
+    function lane(role, c) { var s = null; D.lanes.forEach(function (l) { if (l[1] === role && l[0] <= c) s = l[2]; }); return s; }
+    function roleState(role, c) {
+      var active = false, seen = false;
+      D.beats.forEach(function (b) { if (b.c <= c && b.role === role) { if (b.k === 'start') { active = true; seen = true; } else if (b.k === 'end') active = false; } });
+      if (active) return [WORD[lane(role, c)] || 'starting', true]; return [seen ? 'done' : 'waiting', false];
+    }
+    function pill(x, px, py, a, b, col, alpha) {
+      x.globalAlpha = alpha; x.font = F(12, 600, MONO); var w1 = x.measureText(a).width; x.font = F(12, 400); var w2 = b ? x.measureText(b).width : 0, w = w1 + (b ? w2 + 22 : 0) + 22, h = 22 * fs;
+      x.fillStyle = 'rgba(13,19,21,.92)'; x.fillRect(px, py, w, h); x.fillStyle = col; x.fillRect(px, py, 3, h);
+      x.textBaseline = 'middle'; x.fillStyle = TX; x.font = F(12, 600, MONO); x.fillText(a, px + 12, py + h / 2 + .5);
+      if (b) { x.fillStyle = col; x.font = F(12, 400); x.fillText(b, px + 12 + w1 + 10, py + h / 2 + .5); }
+      x.globalAlpha = 1; x.textBaseline = 'alphabetic';
+    }
+    function find(id) { var r = null; D.beats.forEach(function (b) { if (b.k === 'find' && b.id === id) r = b; }); return r; }
+    function fillRange(x, f, col, alpha) {
+      for (var i = Math.floor(f.off / D.cell); i <= Math.floor((f.off + f.len - 1) / D.cell); i++) { var p = cellXY(i); x.fillStyle = col; x.globalAlpha = alpha; x.fillRect(p[0] + 1, p[1] + 1, S - 2, S - 2); }
+      x.globalAlpha = 1;
+    }
+    function ringRange(x, f, col, w) {
+      x.strokeStyle = col; x.lineWidth = w;
+      for (var i = Math.floor(f.off / D.cell); i <= Math.floor((f.off + f.len - 1) / D.cell); i++) { var p = cellXY(i); x.strokeRect(p[0] + 1.5, p[1] + 1.5, S - 3, S - 3); }
+    }
+    function draw(c) {
+      var x = ctx; x.setTransform(dpr * cv.width / (LW * dpr), 0, 0, dpr * cv.width / (LW * dpr), 0, 0);
+      x.fillStyle = INK; x.fillRect(0, 0, LW, LH); x.textBaseline = 'alphabetic'; x.textAlign = 'left';
+      var B = D.beats, nF = 0, nT = 0, done = false, phase = 'prepare';
+      B.forEach(function (b) { if (b.c <= c) { if (b.k === 'find') nF++; if (b.k === 'phase') phase = b.p; if (b.k === 'done') done = true; } });
+      D.tools.forEach(function (tc) { if (tc <= c) nT++; });
+      var PH = { prepare: 'Preparing the file', round1: 'Round 1: the agents work', round2: 'Round 2: settling the dispute', merge: 'Writing the report' };
+      // header
+      x.fillStyle = GOLD; x.font = F(12, 600); x.fillText('SwarmLabRE', 24, 26); x.fillStyle = TX; x.font = F(22, 600); x.fillText('Recorded run', 24, 26 + 26 * fs);
+      var sm = D.sample.name + '   ' + D.sample.format; x.fillStyle = DIM; x.font = F(12, 400, MONO); x.fillText(sm, 24, 26 + 46 * fs); var sw = x.measureText(sm).width;
+      x.fillStyle = done ? OK : GOLD; x.font = F(12, 600); if (P) x.fillText(done ? 'Done: the run is sealed' : PH[phase] || '', 24, 26 + 64 * fs); else x.fillText(done ? 'Done: the run is sealed' : PH[phase] || '', 24 + sw + 22, 26 + 46 * fs);
+      x.textAlign = 'right'; x.font = F(15, 500, MONO); x.fillStyle = TX; var c1 = nF + (nF === 1 ? ' finding' : ' findings'), c2 = nT + (nT === 1 ? ' tool call' : ' tool calls'), c3 = 'run time ' + mmss(Math.min(clock(c), 99999)); if (P) { x.font = F(13, 500, MONO); x.fillText(c1 + ', ' + c2, LW - 24, 26); x.fillStyle = DIM; x.fillText(c3, LW - 24, 26 + 26 * fs); } else { x.fillText(c1, LW - 24, 28); x.fillText(c2, LW - 24, 28 + 22 * fs); x.fillStyle = DIM; x.fillText(c3, LW - 24, 28 + 44 * fs); } x.textAlign = 'left';
+      var ay = P ? 132 : 118, per = P ? 3 : 6, cw = (LW - 48) / per;
+      ORDER.forEach(function (r, i) {
+        var st = roleState(r, c), cx = 24 + (i % per) * cw, cy = ay + Math.floor(i / per) * 34 * fs, live = st[1] || (done && false);
+        glyph(x, r, cx + 10, cy - 4, 8 * fs, live ? 1 : .5);
+        x.fillStyle = live ? TX : DIM; x.font = F(12, 600); x.fillText(LAB[r], cx + 24, cy - 6); x.fillStyle = live ? RC[r] : '#7a8a88'; x.font = F(11, 400); x.fillText(st[0], cx + 24, cy + 7);
+      });
+      // entropy strip
+      var ey = mapY - 28 * fs, ew = LW - 48; x.fillStyle = '#131b1e'; x.fillRect(24, ey, ew, 20 * fs);
+      D.entropy.forEach(function (e, i) { var x0 = 24 + ew * i * D.ebytes / D.size, w = ew * Math.min(D.ebytes, D.size - i * D.ebytes) / D.size; x.fillStyle = GOLD; x.globalAlpha = .25 + .5 * e / 255; x.fillRect(x0, ey + 20 * fs * (1 - e / 255), w - 1, 20 * fs * e / 255); });
+      x.globalAlpha = 1;
+      // map
+      var n = D.size / D.cell, tags = [];
+      for (var i = 0; i < n; i++) {
+        var p = cellXY(i), off = i * D.cell, ri = -1; D.regions.forEach(function (r, k) { if (off >= r.off && off < r.off + r.len) ri = k; });
+        var e = D.entropy[Math.floor(off / D.ebytes)] || 0; x.fillStyle = ri >= 0 ? RCOL[ri % 5] : '#2a3236'; x.globalAlpha = .55 + .4 * e / 255; x.fillRect(p[0] + 1, p[1] + 1, S - 2, S - 2);
+      }
+      x.globalAlpha = 1;
+      D.regions.forEach(function (r) { var p = cellXY(Math.floor(r.off / D.cell)); tags.push([p[0], p[1], r.name.replace('ELF header and program headers', 'ELF header').replace('section header table', 'section table')]); });
+      // call edge between functions
+      D.edges.forEach(function (ed) { var a = D.funcs[ed[0]], b2 = D.funcs[ed[1]]; if (!a || !b2) return; var pa = ctr(a.off, 1), pb = ctr(b2.off, 1); x.strokeStyle = 'rgba(231,238,235,.55)'; x.lineWidth = 1.2; x.setLineDash([4, 3]); x.beginPath(); x.moveTo(pa[0], pa[1] + S * .28); x.lineTo(pb[0], pb[1] + S * .28); x.stroke(); x.setLineDash([]); });
+      D.funcs.forEach(function (f) { var pp = ctr(f.off, 1); x.fillStyle = TX; x.beginPath(); x.moveTo(pp[0], pp[1] + S * .28 - 4); x.lineTo(pp[0] + 4, pp[1] + S * .28); x.lineTo(pp[0], pp[1] + S * .28 + 4); x.lineTo(pp[0] - 4, pp[1] + S * .28); x.closePath(); x.fill(); });
+      // findings: fill, track, pointer, ripple
+      var disTarget = null, resolved = false, disC = 0;
+      B.forEach(function (b) {
+        if (b.c > c) return; var a = c - b.c;
+        if (b.k === 'find' && b.ok) {
+          fillRange(x, b, RC[b.role], clamp((a - .55) / .4) * .95);
+          var d0 = dock(b.role), t0 = ctr(b.off, b.len), pr = ease(a / .8);
+          if (a < 3) { x.strokeStyle = RC[b.role]; x.lineWidth = 1.4; x.globalAlpha = clamp(1 - (a - .8) / 2.2) * .8; x.beginPath(); x.moveTo(d0[0], d0[1]); x.lineTo(d0[0] + (t0[0] - d0[0]) * pr, d0[1] + (t0[1] - d0[1]) * pr); x.stroke(); x.globalAlpha = 1; }
+          if (a >= .7 && a < 2.2) for (var k = 0; k < 3; k++) { var aa = a - .7 - k * .2; if (aa > 0 && aa < 1.2) { x.strokeStyle = RC[b.role]; x.globalAlpha = (1 - aa / 1.2) * .9; x.lineWidth = 2; x.beginPath(); x.arc(t0[0], t0[1], S * .5 + aa * 55, 0, 6.2832); x.stroke(); } }
+          x.globalAlpha = 1;
+          if (a < 1.3) { var gp = [d0[0] + (t0[0] - d0[0]) * pr, d0[1] + (t0[1] - d0[1]) * pr]; glyph(x, b.role, gp[0], gp[1], 10 * fs, 1 - clamp((a - .9) / .4)); }
+          var tp = cellXY(Math.floor(b.off / D.cell)); x.font = F(10, 700, MONO); var tw = x.measureText(b.id).width + 8; x.fillStyle = RC[b.role]; x.fillRect(tp[0], tp[1] - 14 * fs, tw, 13 * fs); x.fillStyle = INK; x.fillText(b.id, tp[0] + 4, tp[1] - 4 * fs);
+        }
+        if (b.k === 'dispute') { disTarget = find(b.id); disC = b.c; }
+        if (b.k === 'resolve') resolved = true;
+      });
+      if (disTarget) {
+        ringRange(x, disTarget, resolved ? OK : BAD, 2.2);
+        B.forEach(function (b) { if (b.k === 'dispute' && b.c <= c && c - b.c < 1.6) { var d0 = dock(b.role), t0 = ctr(disTarget.off, disTarget.len), pr = ease((c - b.c) / .8); x.strokeStyle = BAD; x.lineWidth = 1.4; x.globalAlpha = .8; x.beginPath(); x.moveTo(d0[0], d0[1]); x.lineTo(d0[0] + (t0[0] - d0[0]) * pr, d0[1] + (t0[1] - d0[1]) * pr); x.stroke(); x.globalAlpha = 1; glyph(x, b.role, d0[0] + (t0[0] - d0[0]) * pr, d0[1] + (t0[1] - d0[1]) * pr, 10 * fs, 1 - clamp((c - b.c - 1.1) / .5)); } });
+      }
+      B.forEach(function (b) {
+        if (b.k === 'reject' && b.c <= c && c - b.c < 2.6) {
+          var a = c - b.c, tg = find(b.target), d0 = dock(b.role), t0 = ctr(tg.off, tg.len), pr = ease(a / .8);
+          x.strokeStyle = BAD; x.lineWidth = 1.4; x.globalAlpha = .7 * clamp(1 - (a - .8) / 1.6); x.beginPath(); x.moveTo(d0[0], d0[1]); x.lineTo(d0[0] + (t0[0] - d0[0]) * pr, d0[1] + (t0[1] - d0[1]) * pr); x.stroke();
+          if (a > .8) { x.lineWidth = 3; x.globalAlpha = clamp(1 - (a - 1.2) / 1.2); var r2 = 12 * fs; x.beginPath(); x.moveTo(t0[0] - r2, t0[1] - r2); x.lineTo(t0[0] + r2, t0[1] + r2); x.moveTo(t0[0] + r2, t0[1] - r2); x.lineTo(t0[0] - r2, t0[1] + r2); x.stroke(); }
+          x.globalAlpha = 1; if (a < 1.5) glyph(x, b.role, d0[0] + (t0[0] - d0[0]) * pr, d0[1] + (t0[1] - d0[1]) * pr, 10 * fs, 1 - clamp((a - 1) / .5));
+        }
+      });
+      tags.forEach(function (tg) { x.font = F(10, 500, MONO); var w = x.measureText(tg[2]).width + 8; x.fillStyle = 'rgba(13,19,21,.85)'; x.fillRect(tg[0] + 2, tg[1] + 2, w, 13 * fs); x.fillStyle = '#c9d4d1'; x.fillText(tg[2], tg[0] + 6, tg[1] + 2 + 10 * fs); });
+      // ticker pills, newest four, each for 3.6 s
+      var items = [];
+      B.forEach(function (b) {
+        if (b.c > c || c - b.c >= 3.6) return; var a = c - b.c, fade = a > 3 ? 1 - (a - 3) / .6 : 1, o = null;
+        if (b.k === 'step') o = ['' + b.label, b.msg, '#7a8a88']; else if (b.k === 'find') o = ['+ ' + b.title + ' ' + b.id, b.ok ? 'byte-checked' : 'unconfirmed', b.ok ? OK : '#7a8a88'];
+        else if (b.k === 'dispute') o = [b.id + ' disputed', '', BAD]; else if (b.k === 'resolve') o = [b.id + ': dispute ' + b.verdict, '', OK]; else if (b.k === 'reject') o = [b.id + ' rejected', b.code, BAD];
+        if (o) items.push([o, fade, a]);
+      });
+      items.slice(-4).forEach(function (it, j, arr) { var pos = arr.length - 1 - j, slide = Math.max(0, 1 - it[2] / .25) * 10; pill(x, mapX + 10, mapY + mapH - 14 - (pos + 1) * 26 * fs + slide, it[0][0], it[0][1], it[0][2], Math.max(0, it[1])); });
+      // hex zoom for each byte-checked finding, one at a time
+      B.forEach(function (b) {
+        if (b.k !== 'find' || !b.ok || b.c > c) return; var a = c - b.c; if (a < .5 || a > 1.75) return;
+        var fade = a > 1.4 ? 1 - (a - 1.4) / .35 : clamp((a - .5) / .15), per2 = P ? 8 : 16, cwid = P ? LW - 24 : 590, chh = 112 * fs, t0 = ctr(b.off, b.len);
+        var cx = Math.max(12, Math.min(LW - cwid - 12, t0[0] - cwid / 2)), cy = t0[1] > mapY + mapH / 2 ? mapY + 10 : mapY + mapH - chh - 10;
+        x.globalAlpha = fade; x.fillStyle = 'rgba(13,19,21,.96)'; x.fillRect(cx, cy, cwid, chh); x.strokeStyle = OK; x.lineWidth = 1; x.strokeRect(cx + .5, cy + .5, cwid - 1, chh - 1);
+        x.font = F(12, 600, MONO); x.fillStyle = TX; x.fillText(b.title + ' ' + b.id + '  at 0x' + b.off.toString(16), cx + 10, cy + 18 * fs); x.fillStyle = OK; x.textAlign = 'right'; x.font = F(12, 400); x.fillText('byte-checked', cx + cwid - 10, cy + 18 * fs); x.textAlign = 'left';
+        x.font = F(12, 400, MONO); var cwc = x.measureText('0').width, base = Math.max(0, b.off - (b.off % per2) - per2);
+        for (var j = 0; j < 4; j++) {
+          var yy = cy + (40 + j * 16) * fs, ro = base + j * per2; x.fillStyle = DIM; x.fillText(('00000000' + ro.toString(16)).slice(-8), cx + 10, yy);
+          var asc = '';
+          for (var m = 0; m < per2; m++) { var o = ro + m; if (o >= BY.length) break; var inn = o >= b.off && o < b.off + b.len, bx = cx + 10 + cwc * 10 + m * cwc * 3; if (inn) { x.fillStyle = 'rgba(205,171,107,.3)'; x.fillRect(bx - 2, yy - 11 * fs, cwc * 2 + 4, 15 * fs); } x.fillStyle = inn ? '#f1e4c4' : '#9fb0ae'; x.fillText(('0' + BY[o].toString(16)).slice(-2), bx, yy); asc += (BY[o] >= 32 && BY[o] < 127) ? String.fromCharCode(BY[o]) : '.'; }
+          x.fillStyle = '#7a8a88'; x.fillText(asc, cx + 10 + cwc * (10 + per2 * 3 + 2), yy);
+        }
+        x.globalAlpha = 1;
+      });
+      // docks
+      ORDER.forEach(function (r) { var d = dock(r), st = roleState(r, c); glyph(x, r, d[0], d[1], 10 * fs, st[1] ? 1 : .45); if (st[1]) { x.strokeStyle = RC[r]; x.globalAlpha = .5; x.lineWidth = 1.5; x.beginPath(); x.arc(d[0], d[1], 15 * fs + 2 * Math.sin(c * 6), 0, 6.2832); x.stroke(); x.globalAlpha = 1; } });
+      if (c >= D.note.c0 + .3 && c < D.note.c1) { x.fillStyle = DIM; x.font = F(12, 400); x.textAlign = 'center'; x.fillText(D.note.text, LW / 2, dockY - 18 * fs - 2); x.textAlign = 'left'; }
+      if (done) { var a2 = clamp((c - B[B.length - 1].c) / .6), tx = D.nok + ' byte-checked, ' + D.nun + ' unconfirmed, ' + D.nrej + ' rejected'; x.globalAlpha = a2; x.font = F(14, 600); var w3 = x.measureText(tx).width + 28; x.fillStyle = 'rgba(13,19,21,.94)'; x.fillRect(LW / 2 - w3 / 2, mapY + mapH / 2 - 18 * fs, w3, 36 * fs); x.strokeStyle = GOLD; x.lineWidth = 1; x.strokeRect(LW / 2 - w3 / 2 + .5, mapY + mapH / 2 - 18 * fs + .5, w3 - 1, 36 * fs - 1); x.fillStyle = TX; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(tx, LW / 2, mapY + mapH / 2 + .5); x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.globalAlpha = 1; }
+      x.fillStyle = RULE; x.fillRect(24, LH - 22, LW - 48, 3); x.fillStyle = GOLD; x.fillRect(24, LH - 22, (LW - 48) * Math.min(1, c / D.end), 3);
+    }
+    D.nok = D.beats.filter(function (b) { return b.k === 'find' && b.ok; }).length; D.nun = D.beats.filter(function (b) { return b.k === 'find' && !b.ok; }).length; D.nrej = D.beats.filter(function (b) { return b.k === 'reject'; }).length;
+    var seek = document.getElementById('pl-seek'), play = document.getElementById('pl-play'), c = D.end, speed = 1, playing = false, last = 0, raf = 0;
+    function render() { draw(c); seek.value = Math.round(Math.min(c, D.end) * 100); seek.setAttribute('aria-valuetext', Math.round(c) + ' of ' + Math.round(D.end) + ' seconds'); }
+    function frame(now) { if (!playing) return; c += (now - last) / 1000 * speed; last = now; if (c >= D.end) { c = D.end; stop(); } render(); if (playing) raf = requestAnimationFrame(frame); }
+    function start() { if (c >= D.end) c = 0; playing = true; play.textContent = 'Pause'; last = performance.now(); raf = requestAnimationFrame(frame); }
+    function stop() { playing = false; cancelAnimationFrame(raf); play.textContent = c >= D.end ? 'Play again' : 'Play'; }
+    play.addEventListener('click', function () { if (playing) stop(); else start(); });
+    seek.addEventListener('input', function () { stop(); c = seek.value / 100; render(); play.textContent = c >= D.end ? 'Play again' : 'Play'; });
+    document.querySelectorAll('[data-sp]').forEach(function (b) { b.addEventListener('click', function () { speed = Number(b.getAttribute('data-sp')); document.querySelectorAll('[data-sp]').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); }); }); });
+    seek.max = Math.round(D.end * 100); play.textContent = 'Play again';
+    var rz = 0; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { layout(); render(); }, 120); });
+    layout(); render();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!still && 'IntersectionObserver' in window) { var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); c = 0; start(); } }, { threshold: 0.5 }); io.observe(cv); }
+  }
+
+  /* ---- the page around the animation: the flock behind it, the stepper, the scanner over the board's table, the recorded replay ---- */
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function onView(el, fn, th) { if (!('IntersectionObserver' in window)) { fn(); return; } var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: th || 0.4 }); io.observe(el); }
+
+  /* the flock: birds taking off at the top of the page, drawn with the demo file's hex digits and its own printable characters. The silhouettes are vectors rasterised to
+     one pixel per character cell; no glyph is drawn under a line of text; the loop runs at 20 frames a second only while the hero is on screen and the tab is visible. */
+  var hz = document.getElementById('hz'), bg = document.getElementById('bg'), sd = document.getElementById('stage-data');
+  if (hz && bg && sd && bg.getContext) {
+    var BD = JSON.parse(sd.textContent), bx = bg.getContext('2d'), off = document.createElement('canvas'), ox = off.getContext('2d', { willReadFrequently: true });
+    var pool = '0123456789abcdef', poolE = pool, seen = {};
+    for (var qi = 0; qi < BD.bytes.length; qi += 2) { var cc = parseInt(BD.bytes.substr(qi, 2), 16); if (cc > 32 && cc < 127 && !seen[cc]) { seen[cc] = 1; var chs = String.fromCharCode(cc); if (/[A-Za-z0-9]/.test(chs)) { if (pool.indexOf(chs) < 0) pool += chs; } else if (!/[.,'`:;"]/.test(chs)) poolE += chs; } }
+    var CW = 8, CH = 12, cols = 0, rows = 0, VW = 0, VH = 0, ratio = 1, mask = new Uint8Array(0), narrow = false, ptr = { x: -999, y: -999, sx: -999, sy: -999 }, FX = '207,216,214', GOLDC = '205,171,107', t0 = performance.now(), lastF = 0, visible = true, running = false;
+    var WIDE = [{ x: .83, y: .52, s: .30, r: -.45, ph: 0, fq: .17 }, { x: .94, y: .16, s: .12, r: -.4, ph: 2.1, fq: .19 }, { x: .70, y: .12, s: .08, r: -.5, ph: 2.9, fq: .22 }, { x: .66, y: .88, s: .10, r: -.5, ph: 1.3, fq: .21 }, { x: .05, y: .74, s: .08, r: -.55, ph: 3.7, fq: .2 }];
+    var NARROW = [{ x: .70, y: 64, s: .32, r: -.4, ph: 0, fq: .17 }, { x: .22, y: 74, s: .15, r: -.5, ph: 1.3, fq: .21 }, { x: .42, y: 28, s: .09, r: -.45, ph: 2.9, fq: .22 }];
+    function hash(i) { var h = Math.imul(i ^ 0x9e3779b9, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
+    function sizeBg() {
+      ratio = Math.min(2, window.devicePixelRatio || 1); VW = hz.clientWidth; VH = hz.offsetHeight; narrow = VW < 720; CW = narrow ? 6 : 8; CH = Math.round(CW * 1.5);
+      cols = Math.ceil(VW / CW); rows = Math.ceil(VH / CH); bg.width = Math.round(VW * ratio); bg.height = Math.round(VH * ratio); off.width = cols; off.height = rows;
+      FX = getComputedStyle(document.documentElement).getPropertyValue('--fx').trim() || FX;
+      mask = new Uint8Array(cols * rows); var hr = hz.getBoundingClientRect();
+      function knock(r, px, py) { var x0 = Math.max(0, Math.floor((r.left - hr.left - px) / CW)), x1 = Math.min(cols - 1, Math.floor((r.right - hr.left + px) / CW)), y0 = Math.max(0, Math.floor((r.top - hr.top - py) / CH)), y1 = Math.min(rows - 1, Math.floor((r.bottom - hr.top + py) / CH)); for (var j = y0; j <= y1; j++) for (var i = x0; i <= x1; i++) mask[j * cols + i] = 1; }
+      hz.querySelectorAll('h1, .lead, .cta a').forEach(function (el) { if (el.tagName === 'A') { knock(el.getBoundingClientRect(), 6, 4); return; } var rg = document.createRange(); rg.selectNodeContents(el); Array.prototype.forEach.call(rg.getClientRects(), function (r) { knock(r, 8, 3); }); });
+    }
+    var NEAR = new Path2D('M96 66 C90 40 66 16 20 4 C36 22 36 32 50 40 C48 48 58 52 66 56 C68 62 78 66 92 70 Z'), FAR = new Path2D('M104 64 C112 36 138 10 182 2 C170 20 170 30 156 38 C158 46 148 52 140 56 C138 62 126 66 112 70 Z'),
+        BODY = new Path2D('M40 80 C60 66 110 62 150 68 C160 62 172 60 176 66 L196 70 L178 74 C172 78 160 80 150 80 C120 90 80 92 50 90 L6 98 L14 80 Z');
+    function bird(b, t) {   // a hand-drawn silhouette, 200 units wide, wings flapping slowly about their roots
+      var u = Math.min(VW, VH * 1.3), sc = b.s * u * 1.7 / 200, cx = (b.x + .012 * Math.sin(t * .09 + b.ph)) * VW, cy = (b.y < 1 ? b.y * VH : b.y) + 6 * Math.cos(t * .07 + b.ph), fl = .28 * Math.sin(6.2832 * b.fq * t + b.ph);
+      ox.save(); ox.translate(cx, cy); ox.rotate(b.r + .03 * Math.sin(t * .11 + b.ph)); ox.scale(sc, sc); ox.translate(-100, -70); ox.fillStyle = '#fff'; ox.globalAlpha = 1; ox.fill(BODY);
+      ox.save(); ox.translate(96, 66); ox.rotate(-fl); ox.translate(-96, -66); ox.fill(NEAR); ox.restore();
+      ox.save(); ox.globalAlpha = .7; ox.translate(104, 64); ox.rotate(fl * .8); ox.translate(-104, -64); ox.fill(FAR); ox.restore(); ox.restore();
+    }
+    function paint(now) {
+      var t = reduce ? 0 : (now - t0) / 1000; ox.setTransform(1, 0, 0, 1, 0, 0); ox.clearRect(0, 0, cols, rows); ox.setTransform(1 / CW, 0, 0, 1 / CH, 0, 0);
+      (narrow ? NARROW : WIDE).forEach(function (b) { bird(b, t); });
+      var hr = hz.getBoundingClientRect(), px = ptr.sx - hr.left, py = ptr.sy - hr.top, img = ox.getImageData(0, 0, cols, rows).data;
+      bx.setTransform(ratio, 0, 0, ratio, 0, 0); bx.clearRect(0, 0, VW, VH); bx.font = '600 ' + (CW * 1.45) + 'px "Geist Mono", ui-monospace, monospace'; bx.textBaseline = 'middle'; bx.textAlign = 'center';
+      for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) {
+        var id = j * cols + i; if (mask[id]) continue; var a = img[id * 4 + 3] / 255; if (a < .1) continue;
+        var h1 = hash(id), h2 = hash(id + 7919), x = i * CW + CW / 2, y = j * CH + CH / 2, al = (a > .55 ? .66 : a * .7) * (.8 + .2 * h1) * (reduce ? 1 : .88 + .12 * Math.sin(t * .9 + h1 * 6.28));
+        var pl = a > .55 ? pool : poolE, ch = pl.charAt((Math.floor(h1 * 997) + (!reduce && h2 > .72 ? Math.floor(t * .5 + h2 * 9) : 0)) % pl.length);
+        if (!reduce) { var dx = x - px, dy = y - py, d = Math.sqrt(dx * dx + dy * dy); if (d < 140) { var k = Math.pow(1 - d / 140, 2); al = Math.min(.95, al + k * .5); if (d > 1) { x += dx / d * k * 10; y += dy / d * k * 10; } } }
+        bx.fillStyle = 'rgba(' + (h2 > .985 ? GOLDC : FX) + ',' + al.toFixed(2) + ')'; bx.fillText(ch, x, y);
+      }
+    }
+    function loop(now) { running = false; if (!visible || document.hidden) return; if (now - lastF >= 50) { lastF = now; ptr.sx += (ptr.x - ptr.sx) * .2; ptr.sy += (ptr.y - ptr.sy) * .2; paint(now); } running = true; requestAnimationFrame(loop); }
+    function kick() { if (!running && !reduce && visible && !document.hidden) { running = true; requestAnimationFrame(loop); } }
+    function resize() { sizeBg(); paint(performance.now()); }
+    resize();
+    if (!reduce) {
+      window.addEventListener('pointermove', function (e) { if (ptr.x < -900) { ptr.sx = e.clientX; ptr.sy = e.clientY; } ptr.x = e.clientX; ptr.y = e.clientY; }, { passive: true });
+      document.addEventListener('pointerleave', function () { ptr.x = ptr.y = -999; });
+      document.addEventListener('visibilitychange', kick);
+      if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; kick(); }).observe(hz);
+      kick();
+    }
+    var rzb = 0; window.addEventListener('resize', function () { clearTimeout(rzb); rzb = setTimeout(resize, 150); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
+  }
+
+  /* the five steps, one scene each */
+  var stp = document.getElementById('stepper');
+  if (stp) {
+    var items = stp.querySelectorAll('.steps li'), scenes = stp.querySelectorAll('.scene'), cur = 0, timer = 0, touched = false;
+    function go(n) { cur = (n + items.length) % items.length; items.forEach(function (li, i) { li.classList.toggle('on', i === cur); li.setAttribute('aria-current', i === cur ? 'step' : 'false'); }); scenes.forEach(function (s, i) { s.classList.toggle('on', i === cur); }); }
+    function hold() { touched = true; clearInterval(timer); }
+    items.forEach(function (li, i) { li.addEventListener('click', function () { hold(); go(i); }); });
+    document.getElementById('st-prev').addEventListener('click', function () { hold(); go(cur - 1); });
+    document.getElementById('st-next').addEventListener('click', function () { hold(); go(cur + 1); });
+    document.getElementById('st-first').addEventListener('click', function () { hold(); go(0); });
+    go(0);
+    if (!reduce) onView(stp, function () { timer = setInterval(function () { if (!touched) { if (cur === items.length - 1) { clearInterval(timer); return; } go(cur + 1); } }, 4200); }, .5);
+  }
+
+  /* the recorded replay: real output of the command, typed out; the second run is the same command on a copy with one letter changed */
+  var tj = document.getElementById('term-data');
+  if (tj) {
+    var TD = JSON.parse(tj.textContent), tOk = document.getElementById('t-ok'), tBad = document.getElementById('t-bad'), tBtn = document.getElementById('t-change'), tBadBox = document.getElementById('t-bad-box'), tTimer = 0;
+    function colour(line) {
+      var s = document.createElement('span'), m = line.match(/^(.*?)("identical"|"differs"|true|false)(.*)$/);
+      if (!m) { s.textContent = line; return s; }
+      var good = m[2] === '"identical"' || m[2] === 'true', k = document.createElement('b'); k.textContent = m[2]; k.className = good ? 'tg' : 'tb';
+      s.appendChild(document.createTextNode(m[1])); s.appendChild(k); s.appendChild(document.createTextNode(m[3])); return s;
+    }
+    function typeOut(pre, cmd, lines, exit, done) {
+      while (pre.firstChild) pre.removeChild(pre.firstChild); var all = ['$ ' + cmd].concat(lines).concat(['exit ' + exit]), i = 0;
+      (function step() { if (i >= all.length) { if (done) done(); return; } var l = document.createElement('span'); l.className = 'ln'; var isCmd = i === 0, isExit = i === all.length - 1;
+        if (isCmd) { l.textContent = all[i]; l.className += ' tc'; } else if (isExit) { l.textContent = all[i]; l.className += exit === 0 ? ' tg' : ' tb'; } else l.appendChild(colour(all[i]));
+        pre.appendChild(l); pre.appendChild(document.createTextNode('\n')); i++; tTimer = setTimeout(step, reduce ? 0 : (isCmd ? 500 : 38)); })();
+    }
+    tBtn.addEventListener('click', function () { tBadBox.hidden = false; tBtn.disabled = true; typeOut(tBad, TD.bad.cmd, TD.bad.lines, TD.bad.exit, function () { tBtn.disabled = false; tBtn.textContent = 'Show it again'; }); });
+    tBadBox.hidden = true; tBtn.disabled = true; while (tOk.firstChild) tOk.removeChild(tOk.firstChild);
+    function first() { typeOut(tOk, TD.ok.cmd, TD.ok.lines, TD.ok.exit, function () { tBtn.disabled = false; }); }
+    if (reduce) first(); else onView(document.getElementById('replay'), first, .35);
+  }
+})();</script>
 </body>
 </html>

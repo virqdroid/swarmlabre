@@ -25,7 +25,7 @@ class BrowserTest(unittest.TestCase):
 @unittest.skipUnless(BROWSER and (Path(__file__).resolve().parent.parent / "site" / "sample" / "report.html").is_file(),
                      "needs a browser and a site/ folder the Copy step of pages.yml has filled (it is built in CI and ignored locally)")
 class SiteBrowserTest(unittest.TestCase):
-    def test_one_pager_at_1280_and_500_px_with_the_network_blocked(self):
+    def test_one_pager_at_1280_500_and_390_px_and_without_javascript_with_the_network_blocked(self):
         import importlib.util                # tests/ui/site.py: the stdlib already has a module called `site`, so load ours by path
         spec = importlib.util.spec_from_file_location("site_check", Path(__file__).resolve().parent / "ui" / "site.py")
         mod = importlib.util.module_from_spec(spec)

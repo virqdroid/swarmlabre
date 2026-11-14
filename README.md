@@ -1,7 +1,7 @@
-# swarmlabre
+# SwarmLabRE
 
-Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and swarmlabre checks every finding against the
-file's own bytes and against the tool calls the run really made. The report is built from the checked facts; the agents' prose is labelled as model text.
+Up to six AI agents analyse one binary (ELF, PE or APK) at the same time. They share one findings board, and SwarmLabRE checks every finding against the
+file's own bytes and against the run's own tool log. The report is built from the checked facts; the agents' prose is labelled as model text.
 A finished run is sealed and **replays offline to byte-identical report files**.
 
 ![The web UI playing a recorded run of a harmless demo program: a result card, five byte-checked findings and one unconfirmed claim](docs/img/demo-1280.png)
@@ -17,7 +17,7 @@ checks, not the quality of any model. The same demo, a sample report and a short
 
 ![Architecture: the sample is parsed on the host; two containers without a network prepare it and run the agents; a board on the host checks every post; reports are written from the checked findings; the run is sealed and can be replayed offline](docs/architecture.svg)
 
-The agents run in containers with `--network none` and never hold the model's key; the model reaches them only through a socket swarmlabre owns.
+The agents run in containers with `--network none` and never hold the model's key; the model reaches them only through a socket SwarmLabRE owns.
 Everything they or the sample print is untrusted text. See [docs/architecture.md](docs/architecture.md) for the parts, the trust boundaries and the files of a run.
 
 ## Look first: Python 3.12 only, no Docker, no GPU, no key, no network
@@ -118,7 +118,7 @@ pinned (temperature and seed are forced on every request) and recorded, but not 
 | `export RUN DEST [--with-sample]` | pack a sealed run into a small folder that `replay` can rebuild anywhere |
 | `run SAMPLE --replay RUN` | run the containers against the recorded model replies of an earlier run |
 | `demo DIR` | write the harmless demo sample and its mock script |
-| `corpus DIR [NAME ...]` | write the benign generated samples: `elf-benign`, `elf-wide`, `pe-benign`, `apk-benign`, `elf-hostile` (strings that try to steer a model, a page or a spreadsheet) and `script-sh` (not analysable: swarmlabre takes ELF, PE and APK only) |
+| `corpus DIR [NAME ...]` | write the benign generated samples: `elf-benign`, `elf-wide`, `pe-benign`, `apk-benign`, `elf-hostile` (strings that try to steer a model, a page or a spreadsheet) and `script-sh` (not analysable: SwarmLabRE takes ELF, PE and APK only) |
 | `serve [--host H] [--port N]` | the web UI on this machine (default `127.0.0.1:8810`): launch a run, watch it live, read the report. Prints one address with a `#token=` part; open that |
 | `serve --replay RUN [--speed N\|real] [--paused]` | the same UI playing a recorded run (a sealed folder or an exported bundle) with no model and no Docker |
 | `python3 tools/build-demo.py BUNDLE [--out site/demo]` | writes the static demo: one self-contained page that plays a recorded run in the browser with no server |
@@ -133,7 +133,7 @@ Unix socket the run owns; the key stays outside. Whatever an agent, the sample o
 ## Tests
 
 ```sh
-python3 -m unittest discover -s tests                       # 164 tests, no Docker, no model (the browser checks skip without Firefox; SWARMLABRE_SKIP_BROWSER=1 skips them)
+python3 -m unittest discover -s tests                       # 187 tests, no Docker, no model (the browser checks skip without Firefox; SWARMLABRE_SKIP_BROWSER=1 skips them)
 python3 tests/goldenrun.py --check --twice                  # the 11 golden cases (tests/golden): replay each twice, compare every output byte for byte
 python3 tests/goldenrun.py --update-golden                  # PROPOSES new golden files: shows the diff and a review token, writes nothing (see docs/determinism.md)
 python3 tests/ui/parity.py                                  # text parity of the page at 1280 and 500 px in live, replay and static (headless Firefox + geckodriver)
