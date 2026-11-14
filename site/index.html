@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-v97g1unoPnWN9u/dC0T/9UW2oCpbXDdCmUxN2psPTTc='; img-src 'self'; font-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-PZbydYuESBFgAT7TxoQt+JD5NYMKevGPKzkeYG+/CTE='; img-src 'self'; font-src 'self'">
 <title>SwarmLabRE: checked multi-agent binary analysis</title>
 <meta name="description" content="SwarmLabRE: up to six AI agents analyse one binary (ELF, PE or APK). Every finding is checked against the file's own bytes, and a finished run replays offline to byte-identical report files.">
 <meta name="color-scheme" content="dark light">
@@ -739,6 +739,7 @@ python3 tests/goldenrun.py --check --twice</pre>
     var pool = '0123456789abcdef', poolE = pool, seen = {};
     for (var qi = 0; qi < BD.bytes.length; qi += 2) { var cc = parseInt(BD.bytes.substr(qi, 2), 16); if (cc > 32 && cc < 127 && !seen[cc]) { seen[cc] = 1; var chs = String.fromCharCode(cc); if (/[A-Za-z0-9]/.test(chs)) { if (pool.indexOf(chs) < 0) pool += chs; } else if (!/[.,'`:;"]/.test(chs)) poolE += chs; } }
     var CW = 8, CH = 12, cols = 0, rows = 0, VW = 0, VH = 0, FT = 0, FH = 0, ratio = 1, mask = new Uint8Array(0), narrow = false, ptr = { x: -999, y: -999, sx: -999, sy: -999 }, FX = '207,216,214', GOLDC = '205,171,107', t0 = performance.now(), lastF = 0, visible = true, running = false;
+    var soc = hz.querySelector('.soc'), S = null, tmask = new Uint8Array(0), thoughts = [], nextT = 0, lastP = 0;
     // x: share of the width; y: share of the band's height; s: height relative to the band's
     var WIDE = [{ x: .22, y: .50, s: .76, r: -.32, ph: 0, fq: .17 }, { x: .42, y: .30, s: .30, r: -.38, ph: 2.1, fq: .19 }, { x: .54, y: .72, s: .22, r: -.42, ph: 2.9, fq: .22 }, { x: .69, y: .46, s: .48, r: -.34, ph: 1.3, fq: .21 }, { x: .86, y: .28, s: .24, r: -.45, ph: 3.7, fq: .2 }];
     var NARROW = [{ x: .30, y: .56, s: .74, r: -.32, ph: 0, fq: .17 }, { x: .68, y: .36, s: .38, r: -.4, ph: 1.3, fq: .21 }, { x: .88, y: .70, s: .22, r: -.45, ph: 2.9, fq: .22 }];
@@ -747,14 +748,26 @@ python3 tests/goldenrun.py --check --twice</pre>
       ratio = Math.min(2, window.devicePixelRatio || 1); VW = hz.clientWidth; VH = hz.offsetHeight; narrow = VW < 720; CW = narrow ? 6 : 8; CH = Math.round(CW * 1.5);
       cols = Math.ceil(VW / CW); rows = Math.ceil(VH / CH); bg.width = Math.round(VW * ratio); bg.height = Math.round(VH * ratio); off.width = cols; off.height = rows;
       FX = getComputedStyle(document.documentElement).getPropertyValue('--fx').trim() || FX;
-      mask = new Uint8Array(cols * rows); var hr = hz.getBoundingClientRect(), br = band ? band.getBoundingClientRect() : hr; FT = br.top - hr.top; FH = br.height || 120;
-      function knock(r, px, py) { var x0 = Math.max(0, Math.floor((r.left - hr.left - px) / CW)), x1 = Math.min(cols - 1, Math.floor((r.right - hr.left + px) / CW)), y0 = Math.max(0, Math.floor((r.top - hr.top - py) / CH)), y1 = Math.min(rows - 1, Math.floor((r.bottom - hr.top + py) / CH)); for (var j = y0; j <= y1; j++) for (var i = x0; i <= x1; i++) mask[j * cols + i] = 1; }
-      hz.querySelectorAll('h1, .lead, .cta a, .soc, .tested h2').forEach(function (el) { if (el.tagName === 'A' || el.tagName === 'PRE') { knock(el.getBoundingClientRect(), 6, 4); return; } var rg = document.createRange(); rg.selectNodeContents(el); Array.prototype.forEach.call(rg.getClientRects(), function (r) { knock(r, 8, 3); }); });
+      mask = new Uint8Array(cols * rows); tmask = new Uint8Array(cols * rows); var hr = hz.getBoundingClientRect(), br = band ? band.getBoundingClientRect() : hr; FT = br.top - hr.top; FH = br.height || 120;
+      function knock(r, px, py, fig) { var x0 = Math.max(0, Math.floor((r.left - hr.left - px) / CW)), x1 = Math.min(cols - 1, Math.floor((r.right - hr.left + px) / CW)), y0 = Math.max(0, Math.floor((r.top - hr.top - py) / CH)), y1 = Math.min(rows - 1, Math.floor((r.bottom - hr.top + py) / CH)); for (var j = y0; j <= y1; j++) for (var i = x0; i <= x1; i++) { mask[j * cols + i] = 1; if (!fig) tmask[j * cols + i] = 1; } }
+      hz.querySelectorAll('h1, .lead, .cta a, .soc, .tested h2').forEach(function (el) { if (el.tagName === 'A' || el.tagName === 'PRE') { knock(el.getBoundingClientRect(), 6, 4, el.tagName === 'PRE'); return; } var rg = document.createRange(); rg.selectNodeContents(el); Array.prototype.forEach.call(rg.getClientRects(), function (r) { knock(r, 8, 3); }); });
+      sizeSoc(hr);
     }
+    // Socrates' glyph grid: where his head is, and which cells hold a glyph (a thought passes behind those)
+    function sizeSoc(hr) {
+      S = null; if (!soc) return;
+      var r = soc.getBoundingClientRect(), L = soc.textContent.split('\n'), w = 0, head = [];
+      L.forEach(function (l) { w = Math.max(w, l.length); });
+      if (!w || !r.width || !r.height) return;
+      S = { x: r.left - hr.left, y: r.top - hr.top, w: r.width, h: r.height, cw: r.width / w, lh: r.height / L.length, L: L, head: head };
+      for (var j = 0; j < Math.min(3, L.length); j++) for (var i = 0; i < L[j].length; i++) if (L[j].charAt(i) !== ' ') head.push([S.x + (i + .5) * S.cw, S.y + (j + .5) * S.lh]);
+    }
+    function onSoc(x, y) { var j = Math.floor((y - S.y) / S.lh), i = Math.floor((x - S.x) / S.cw), c = j >= 0 && j < S.L.length && i >= 0 ? S.L[j].charAt(i) : ''; return c !== '' && c !== ' '; }
     var NEAR = new Path2D('M96 66 C90 40 66 16 20 4 C36 22 36 32 50 40 C48 48 58 52 66 56 C68 62 78 66 92 70 Z'), FAR = new Path2D('M104 64 C112 36 138 10 182 2 C170 20 170 30 156 38 C158 46 148 52 140 56 C138 62 126 66 112 70 Z'),
         BODY = new Path2D('M40 80 C60 66 110 62 150 68 C160 62 172 60 176 66 L196 70 L178 74 C172 78 160 80 150 80 C120 90 80 92 50 90 L6 98 L14 80 Z');
     function bird(b, t) {   // a hand-drawn silhouette, 200 units wide, wings flapping slowly about their roots
       var sc = b.s * FH / 100, cx = (b.x + .012 * Math.sin(t * .09 + b.ph)) * VW, cy = FT + b.y * FH + 6 * Math.cos(t * .07 + b.ph), fl = .28 * Math.sin(6.2832 * b.fq * t + b.ph);
+      b.cx = cx; b.cy = cy;
       ox.save(); ox.translate(cx, cy); ox.rotate(b.r + .03 * Math.sin(t * .11 + b.ph)); ox.scale(sc, sc); ox.translate(-100, -70); ox.fillStyle = '#fff'; ox.globalAlpha = 1; ox.fill(BODY);
       ox.save(); ox.translate(96, 66); ox.rotate(-fl); ox.translate(-96, -66); ox.fill(NEAR); ox.restore();
       ox.save(); ox.globalAlpha = .7; ox.translate(104, 64); ox.rotate(fl * .8); ox.translate(-104, -64); ox.fill(FAR); ox.restore(); ox.restore();
@@ -771,7 +784,44 @@ python3 tests/goldenrun.py --check --twice</pre>
         if (!reduce) { var dx = x - px, dy = y - py, d = Math.sqrt(dx * dx + dy * dy); if (d < 140) { var k = Math.pow(1 - d / 140, 2); al = Math.min(.95, al + k * .5); if (d > 1) { x += dx / d * k * 10; y += dy / d * k * 10; } } }
         bx.fillStyle = 'rgba(' + (h2 > .985 ? GOLDC : FX) + ',' + al.toFixed(2) + ')'; bx.fillText(ch, x, y);
       }
+      if (!reduce && S) think(now);
     }
+    /* Socrates thinks: every few seconds one to three question marks rise from his head, glide down the gap beside him and, close to a bird in the band, turn into one
+       of the demo file's characters and join it. On a phone the headline is between him and the band, so they drift off to his left and fade. A thought is never drawn
+       under text, and where it crosses one of his glyphs it passes behind him. */
+    function think(now) {
+      var dt = Math.min(.1, (now - lastP) / 1000), fl = narrow ? NARROW : WIDE, big = '600 ' + Math.round(CW * 2.1) + 'px "Geist Mono", ui-monospace, monospace', small = bx.font; lastP = now;
+      if (now > nextT && thoughts.length < 12 && S.head.length) {
+        for (var n = 1 + Math.floor(Math.random() * 3); n > 0; n--) { var p = S.head[Math.floor(Math.random() * S.head.length)]; thoughts.push({ x: p[0], y: p[1], vx: (Math.random() - .5) * 16, vy: -20, age: 0, leg: 0, tb: 0, a: 0, ph: Math.random() * 6.28, tr: [], ch: pool.charAt(Math.floor(Math.random() * pool.length)), gold: Math.random() > .88 }); }
+        nextT = now + 1600 + Math.random() * 2000;
+      }
+      var gx = S.x - Math.max(16, CW * 2), way = [[gx, S.y + S.h * .16], [gx, FT - CH]];
+      thoughts = thoughts.filter(function (q) {
+        q.age += dt; var gone = q.leg === 3 || (narrow && q.age > 2.2);
+        q.a = gone ? q.a - dt * 1.6 : Math.min(.92, q.a + dt * 2);
+        if (q.age < .9 || narrow) { q.vy += ((narrow ? -10 : -34) + (narrow ? 14 * Math.sin(q.age * 5 + q.ph) : 0) - q.vy) * dt * 2; q.vx += ((narrow ? -36 : 0) + (narrow ? 0 : 26 * Math.sin(q.age * 6 + q.ph)) - q.vx) * dt * 2; }
+        else if (q.leg < 3) {
+          var tx = q.leg < 2 ? way[q.leg][0] : fl[q.tb].cx, ty = q.leg < 2 ? way[q.leg][1] : fl[q.tb].cy, dx = tx - q.x, dy = ty - q.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+          if (q.leg === 0 && (d < 24 || q.x < tx + 10)) q.leg = 1;
+          else if (q.leg === 1 && (d < 24 || q.y > ty - 10)) { q.leg = 2; q.tb = nearest(fl, q.x, q.y + FH * .5); }
+          else if (q.leg === 2 && d < 20) q.leg = 3;
+          if (q.leg >= 2 && d < 70) q.byte = true;   // the question becomes a byte of the file
+          q.vx += (dx / d * 120 - q.vx) * dt * 2.4; q.vy += (dy / d * 120 - q.vy) * dt * 2.4;
+        }
+        q.tr.unshift([q.x, q.y]); if (q.tr.length > 4) q.tr.pop();
+        q.x += q.vx * dt; q.y += q.vy * dt;
+        if ((q.a <= 0 && q.age > .3) || q.age > 14) return false;
+        for (var k = q.tr.length; k >= 0; k--) {   // the glyph and a short fading trail
+          var pt = k ? q.tr[k - 1] : [q.x, q.y], ci = Math.floor(pt[1] / CH) * cols + Math.floor(pt[0] / CW);
+          if (pt[0] < 0 || pt[1] < 0 || pt[0] >= VW || pt[1] >= VH || tmask[ci] || onSoc(pt[0], pt[1])) continue;
+          bx.font = k || q.byte ? small : big; bx.fillStyle = 'rgba(' + (q.gold ? GOLDC : FX) + ',' + Math.max(0, q.a * (k ? .5 / k : 1)).toFixed(2) + ')';
+          bx.fillText(k ? (q.byte ? pool.charAt((q.ch.charCodeAt(0) + k * 7) % pool.length) : '.') : q.byte ? q.ch : '?', pt[0], pt[1]);
+        }
+        return true;
+      });
+      bx.font = small;
+    }
+    function nearest(fl, x, y) { var bi = 0, bd = 1e9; fl.forEach(function (b, i) { var d = (b.cx - x) * (b.cx - x) + (b.cy - y) * (b.cy - y); if (d < bd) { bd = d; bi = i; } }); return bi; }
     function loop(now) { running = false; if (!visible || document.hidden) return; if (now - lastF >= 50) { lastF = now; ptr.sx += (ptr.x - ptr.sx) * .2; ptr.sy += (ptr.y - ptr.sy) * .2; paint(now); } running = true; requestAnimationFrame(loop); }
     function kick() { if (!running && !reduce && visible && !document.hidden) { running = true; requestAnimationFrame(loop); } }
     function resize() { sizeBg(); paint(performance.now()); }
