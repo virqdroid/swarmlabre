@@ -1,0 +1,164 @@
+{
+ "type": "bundle",
+ "id": "bundle--d05140cb-7695-5bed-9b61-bd940ecb65d4",
+ "objects": [
+  {
+   "type": "identity",
+   "spec_version": "2.1",
+   "id": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "created": "2026-11-13T13:28:06.000Z",
+   "modified": "2026-11-13T13:28:06.000Z",
+   "name": "swarmlabre",
+   "identity_class": "organization"
+  },
+  {
+   "id": "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d",
+   "type": "extension-definition",
+   "spec_version": "2.1",
+   "name": "TLP 2.0",
+   "description": "This defines TLP 2.0 as a STIX extension",
+   "created": "2022-10-01T00:00:00.000Z",
+   "modified": "2022-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--b3bca3c2-1f3d-4b54-b44f-dac42c3a8f01",
+   "schema": "https://github.com/oasis-open/cti-stix-common-objects/tree/master/extension-definition-specifications/tlp-2.0",
+   "version": "1.0.0",
+   "extension_types": [
+    "property-extension"
+   ]
+  },
+  {
+   "type": "marking-definition",
+   "spec_version": "2.1",
+   "id": "marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421",
+   "created": "2022-10-01T00:00:00.000Z",
+   "name": "TLP:AMBER",
+   "extensions": {
+    "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
+     "extension_type": "property-extension",
+     "tlp_2_0": "amber"
+    }
+   }
+  },
+  {
+   "type": "file",
+   "spec_version": "2.1",
+   "id": "file--637e0a37-4730-58a9-abc2-9e97aa8d04a3",
+   "hashes": {
+    "MD5": "d0e6226b2c5e01d1f8bc9c46c32591be",
+    "SHA-1": "e7d9e12462cea4c74018b33cd19b685143b0595e",
+    "SHA-256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564"
+   },
+   "size": 552,
+   "name": "demo2.elf"
+  },
+  {
+   "type": "indicator",
+   "spec_version": "2.1",
+   "id": "indicator--c9a4d95a-c408-5ba7-b11e-13301cb60f82",
+   "created": "2026-11-13T13:28:06.000Z",
+   "modified": "2026-11-13T13:28:06.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "MD5: d0e6226b2c5e01d1f8bc9c46c32591be",
+   "description": "Found in the analysed sample (swarm run sfaef16e6). Computed by swarmlabre from the file. Swarmlabre does not judge whether this value is malicious.",
+   "indicator_types": [
+    "unknown"
+   ],
+   "pattern": "[file:hashes.'MD5' = 'd0e6226b2c5e01d1f8bc9c46c32591be']",
+   "pattern_type": "stix",
+   "valid_from": "2026-11-13T13:28:06.000Z",
+   "confidence": 100,
+   "x_swarmlabre_evidence": "computed",
+   "object_marking_refs": [
+    "marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421"
+   ]
+  },
+  {
+   "type": "indicator",
+   "spec_version": "2.1",
+   "id": "indicator--0a9845f2-b54e-5108-a0de-e647d6e388d3",
+   "created": "2026-11-13T13:28:06.000Z",
+   "modified": "2026-11-13T13:28:06.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "SHA-1: e7d9e12462cea4c74018b33cd19b685143b0595e",
+   "description": "Found in the analysed sample (swarm run sfaef16e6). Computed by swarmlabre from the file. Swarmlabre does not judge whether this value is malicious.",
+   "indicator_types": [
+    "unknown"
+   ],
+   "pattern": "[file:hashes.'SHA-1' = 'e7d9e12462cea4c74018b33cd19b685143b0595e']",
+   "pattern_type": "stix",
+   "valid_from": "2026-11-13T13:28:06.000Z",
+   "confidence": 100,
+   "x_swarmlabre_evidence": "computed",
+   "object_marking_refs": [
+    "marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421"
+   ]
+  },
+  {
+   "type": "indicator",
+   "spec_version": "2.1",
+   "id": "indicator--df7d3a8e-2026-53c2-99ef-47bdce390587",
+   "created": "2026-11-13T13:28:06.000Z",
+   "modified": "2026-11-13T13:28:06.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "SHA-256: 4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+   "description": "Found in the analysed sample (swarm run sfaef16e6). Computed by swarmlabre from the file. Swarmlabre does not judge whether this value is malicious.",
+   "indicator_types": [
+    "unknown"
+   ],
+   "pattern": "[file:hashes.'SHA-256' = '4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564']",
+   "pattern_type": "stix",
+   "valid_from": "2026-11-13T13:28:06.000Z",
+   "confidence": 100,
+   "x_swarmlabre_evidence": "computed",
+   "object_marking_refs": [
+    "marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421"
+   ]
+  },
+  {
+   "type": "indicator",
+   "spec_version": "2.1",
+   "id": "indicator--5fc4c333-c9dc-5db1-b848-aba688c9e638",
+   "created": "2026-11-13T13:28:06.000Z",
+   "modified": "2026-11-13T13:28:06.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "URL: hxxps://updates[.]example[.]test/check",
+   "description": "Found in the analysed sample (swarm run sfaef16e6). Swarmlabre found these exact bytes in the file at offset 0x95. Swarmlabre does not judge whether this value is malicious.",
+   "indicator_types": [
+    "unknown"
+   ],
+   "pattern": "[url:value = 'https://updates.example.test/check']",
+   "pattern_type": "stix",
+   "valid_from": "2026-11-13T13:28:06.000Z",
+   "confidence": 85,
+   "x_swarmlabre_evidence": "byte-checked",
+   "x_swarmlabre_offset": 149,
+   "object_marking_refs": [
+    "marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421"
+   ]
+  },
+  {
+   "type": "report",
+   "spec_version": "2.1",
+   "id": "report--b34474a7-a7b4-5e65-9e91-384a2723bdd1",
+   "created": "2026-11-13T13:28:06.000Z",
+   "modified": "2026-11-13T13:28:06.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "Malware analysis report: demo2.elf",
+   "description": "Indicators from an automated static analysis (run sfaef16e6, 2026-11-13). Evidence levels: byte-checked 85, call-cited 50, computed 100 (STIX confidence). Static analysis only: the sample was never run.",
+   "report_types": [
+    "malware"
+   ],
+   "published": "2026-11-13T13:28:06.000Z",
+   "object_refs": [
+    "file--637e0a37-4730-58a9-abc2-9e97aa8d04a3",
+    "indicator--c9a4d95a-c408-5ba7-b11e-13301cb60f82",
+    "indicator--0a9845f2-b54e-5108-a0de-e647d6e388d3",
+    "indicator--df7d3a8e-2026-53c2-99ef-47bdce390587",
+    "indicator--5fc4c333-c9dc-5db1-b848-aba688c9e638"
+   ],
+   "object_marking_refs": [
+    "marking-definition--55d920b0-5e8b-4f79-9ee9-91f868d9b421"
+   ]
+  }
+ ]
+}

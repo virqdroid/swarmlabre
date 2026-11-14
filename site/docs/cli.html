@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>Command line: SwarmLabRE docs</title>
+<meta name="description" content="Every command and flag of the SwarmLabRE command line, with its help text, its default and its exit codes.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html" aria-current="page">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Reference / Command line</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html" aria-current="page">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="cli.html">Reference</a> / Command line</p>
+  <h1>Command line</h1>
+  <p class="lead">SwarmLabRE has seven commands. Each one prints its result as JSON on standard output and its messages on standard error, and ends with an exit code.</p>
+
+  <h2 id="calling">How to call it<a class="anc" href="#calling" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>Run a command as <code>python3 -m swarmlabre COMMAND</code> from the folder of the repository. Options that belong to no command, <code>--config</code> and <code>--version</code>, go before the command name; a command does not take them.</p>
+</div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre --version
+swarmlabre 0.1.0</pre></div>
+  <div class="prose">
+<p>Where a command takes a run, it takes a folder or a run id. An argument that is not a folder is looked up as <code>runs/&lt;id&gt;</code> in the state folder, which is <code>[paths] state</code> in the configuration. A run id is <code>s</code> and eight hexadecimal digits.</p>
+</div>
+  <h2 id="options">Options before the command<a class="anc" href="#options" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Option</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>--config CONFIG</code></td><td>path of <code>swarmlabre.toml</code> (default: <code>$SWARMLABRE_CONFIG</code>, <code>./swarmlabre.toml</code>, <code>~/.config/swarmlabre/</code>)</td><td>none; <a href="config.html#file">the search order</a> applies</td></tr>
+      <tr><td><code>--version</code></td><td>show program&#x27;s version number and exit</td><td>none</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre [-h] [--config CONFIG] [--version]
+                  {report,demo,corpus,run,replay,export,serve} ...</pre></div>
+  <div class="prose">
+<p>Every command also takes <code>-h</code> and <code>--help</code>, which print its help and exit.</p>
+</div>
+  <h2 id="exit-codes">Exit codes<a class="anc" href="#exit-codes" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>0</code></td><td>done</td></tr>
+      <tr><td><code>1</code></td><td>the work failed</td></tr>
+      <tr><td><code>2</code></td><td>bad usage or input</td></tr>
+      <tr><td><code>3</code></td><td>needs a model and none is configured</td></tr>
+      <tr><td><code>130</code></td><td><code>run</code> was stopped with Ctrl-C; the run ends and keeps what the board holds</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<p>The first four are the codes of <code>swarmlabre/cli.py</code>. A usage or input error prints its message to standard error. A configuration file that is named with <code>--config</code> but does not exist, or that is not valid TOML, ends the command with 2 and the line <code>config: ...</code>.</p>
+</div>
+  <h2 id="commands">The commands<a class="anc" href="#commands" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Command</th><th>Help text</th></tr></thead>
+    <tbody>
+      <tr><td><code>report</code></td><td>build the report files of a stored run</td></tr>
+      <tr><td><code>demo</code></td><td>write a harmless demo sample and the script of a mock model that analyses it</td></tr>
+      <tr><td><code>corpus</code></td><td>write the benign generated samples (ELF, PE, APK, script, hostile strings) into a folder</td></tr>
+      <tr><td><code>run</code></td><td>analyse a sample with the agent swarm</td></tr>
+      <tr><td><code>replay</code></td><td>rebuild a recorded run offline and compare every output with its manifest</td></tr>
+      <tr><td><code>export</code></td><td>pack a sealed run into a folder that replay can rebuild elsewhere</td></tr>
+      <tr><td><code>serve</code></td><td>start the web UI (live, or --replay RUN for a recorded run)</td></tr>
+    </tbody>
+  </table></div>
+  <h3 id="report">report<a class="anc" href="#report" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Builds every report file of a stored run again, in place, into the <code>out/</code> folder of the run, and prints the run id, the folder and the files it wrote as JSON. It needs no model and no Docker. With <code>--out</code> the files are also copied to another folder.</p>
+</div>
+  <div class="prose">
+<p>It exits 0 when <code>report.json</code> was written, 1 when it was not, and 2 when the argument is not a run folder (it has no <code>swarm.json</code>) or the run record cannot be read.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre report [-h] [--out OUT] run</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>run</code></td><td>a run folder or a run id (sXXXXXXXX)</td><td>none</td></tr>
+      <tr><td><code>--out OUT</code></td><td>also copy the report files into this folder</td><td>none</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre report demo/sfaef16e6 --out reports/</pre></div>
+  <h3 id="demo">demo<a class="anc" href="#demo" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Writes a harmless demo sample and the script of a mock model that analyses it into <code>dir</code>: <code>demo.elf</code> and <code>mock-script.json</code>, or with <code>--variant two</code> <code>demo2.elf</code> and <code>mock-script2.json</code>. It prints their paths as JSON and, on standard error, a hint with the <code>run</code> command that analyses them.</p>
+</div>
+  <div class="prose">
+<p>It exits 0. <a href="mock-model.html">The mock model</a> describes the script format.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre demo [-h] [--variant {one,two}] dir</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>dir</code></td><td>folder to write the demo sample and mock-script into</td><td>none</td></tr>
+      <tr><td><code>--variant {one,two}</code></td><td>two = a second sample with a UTF-16 string, a dispute and a round-2 plan</td><td>one</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre demo out-demo/
+<span class="p">$</span> python3 -m swarmlabre demo out-demo2/ --variant two</pre></div>
+  <h3 id="corpus">corpus<a class="anc" href="#corpus" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Writes the benign generated samples into <code>dir</code> and prints a JSON object from each sample name to the file it wrote. Without names it writes all six:</p>
+</div>
+  <div class="tw"><table>
+    <thead><tr><th>Name</th><th>File</th><th>Kind</th></tr></thead>
+    <tbody>
+      <tr><td><code>elf-benign</code></td><td><code>demo.elf</code></td><td>elf</td></tr>
+      <tr><td><code>elf-wide</code></td><td><code>demo2.elf</code></td><td>elf</td></tr>
+      <tr><td><code>pe-benign</code></td><td><code>demo.exe</code></td><td>pe</td></tr>
+      <tr><td><code>apk-benign</code></td><td><code>demo.apk</code></td><td>apk</td></tr>
+      <tr><td><code>elf-hostile</code></td><td><code>hostile.elf</code></td><td>elf</td></tr>
+      <tr><td><code>script-sh</code></td><td><code>demo.sh</code></td><td>script</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<p>A name that is not in the table exits 2 with the line <code>no such sample 'NAME' (have: ...)</code>, and nothing is written.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre corpus [-h] dir [names ...]</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>dir</code></td><td>no help text</td><td>none</td></tr>
+      <tr><td><code>names</code></td><td>which samples (default: all)</td><td>all six</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre corpus corpus/ elf-benign pe-benign</pre></div>
+  <h3 id="run">run<a class="anc" href="#run" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Analyses one sample: it stages the file, starts the run, waits for it and prints where the report is. It needs Docker and the two images, also with <code>--mock</code>. While it waits it prints one progress line to standard error whenever the phase or the number of finished tasks changes, unless <code>--quiet</code> is given. When the run ends it prints one JSON object with the run id, the status, the reason, the run folder, the files written and the counts, and with <code>--replay</code> also <code>replay_diverged</code>, the number of requests that had no recorded reply.</p>
+</div>
+  <div class="prose">
+<p>It exits 0 when the run status is <code>done</code> and 1 for any other status. It exits 2 when the sample is refused or the model settings are wrong, and 3 when no model is configured. Ctrl-C stops the run and exits 130. <a href="analyse.html">Analyse a file</a> follows a run from start to finish, and <a href="models.html">Use a real model</a> sets up the endpoint.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre run [-h] [--brief BRIEF] [--replay RUN] [--mock SCRIPT]
+                      [--roles ROLES] [--tlp TLP] [--out OUT] [--quiet]
+                      sample</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>sample</code></td><td>an ELF, PE or APK file</td><td>none</td></tr>
+      <tr><td><code>--brief BRIEF</code></td><td>the question the agents answer (default: what does it do, name its main functions)</td><td>What does this sample do? Name its most important functions and say what each one is for.</td></tr>
+      <tr><td><code>--replay RUN</code></td><td>answer from the recorded model replies of an earlier run (containers still run; the agents get the exact recorded answers)</td><td>none</td></tr>
+      <tr><td><code>--mock SCRIPT</code></td><td>answer from a scripted mock model (a JSON file) instead of [model] base_url</td><td>none</td></tr>
+      <tr><td><code>--roles ROLES</code></td><td>comma-separated roles (triage and reporter always run); default all six</td><td>all six</td></tr>
+      <tr><td><code>--tlp TLP</code></td><td>report marking: CLEAR, GREEN, AMBER, AMBER+STRICT, RED</td><td>the <code>tlp</code> key of <code>[swarm]</code></td></tr>
+      <tr><td><code>--out OUT</code></td><td>also copy the report files into this folder</td><td>none</td></tr>
+      <tr><td><code>--quiet</code></td><td>no progress lines</td><td>off</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre run out-demo/demo.elf --mock out-demo/mock-script.json --out out/</pre></div>
+  <h3 id="replay">replay<a class="anc" href="#replay" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Rebuilds a recorded run offline and compares every output with its manifest. It prints the checks as JSON.</p>
+</div>
+  <div class="prose">
+<p>It exits 0 when everything is identical, 1 when something differs and 2 when the folder cannot be replayed. <a href="replay.html">Replay and export a run</a> describes the levels and the checks.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre replay [-h] [--out OUT] [--no-sample] run</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>run</code></td><td>a run folder or a run id</td><td>none</td></tr>
+      <tr><td><code>--out OUT</code></td><td>also write the rebuilt files into this folder</td><td>none</td></tr>
+      <tr><td><code>--no-sample</code></td><td>do not use the kept sample: re-run only the report building (the downstream level)</td><td>off</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre replay demo/sfaef16e6
+<span class="p">$</span> python3 -m swarmlabre replay demo/sfaef16e6 --no-sample</pre></div>
+  <h3 id="export">export<a class="anc" href="#export" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Packs a sealed run into <code>dest/&lt;run id&gt;/</code>, which replay can rebuild anywhere, and prints the folder and whether the sample is in it as JSON.</p>
+</div>
+  <div class="prose">
+<p>It exits 0, or 2 when the run is not sealed or <code>dest/&lt;run id&gt;</code> already exists.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre export [-h] [--with-sample] run dest</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>run</code></td><td>a run folder or a run id</td><td>none</td></tr>
+      <tr><td><code>dest</code></td><td>folder to create &lt;run id&gt;/ in</td><td>none</td></tr>
+      <tr><td><code>--with-sample</code></td><td>include the sample (the bundle then replays at the full level)</td><td>off</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre export demo/sfaef16e6 bundles/</pre></div>
+  <h3 id="serve">serve<a class="anc" href="#serve" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Starts the web UI and prints its address, with the bearer token in the fragment, at every start. Live, it runs the real pipeline and needs Docker and a model. With <code>--replay</code> it plays a recorded run through the same page, with no model and no Docker.</p>
+</div>
+  <div class="prose">
+<p>It runs until Ctrl-C or SIGTERM and then exits 0. It exits 1 when it cannot listen on the address and 2 when <code>--replay</code> or <code>--speed</code> is wrong. A host that is not loopback prints a warning. <a href="web-ui.html">The web UI</a> covers the three modes and the token.</p>
+</div>
+  <div class="code"><div class="cap">usage</div>
+<pre>usage: swarmlabre serve [-h] [--host HOST] [--port PORT] [--replay RUN]
+                        [--speed SPEED] [--paused]</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Argument</th><th>Help text</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td><code>--host HOST</code></td><td>address to listen on (default 127.0.0.1, this machine only)</td><td>the <code>host</code> key of <code>[serve]</code></td></tr>
+      <tr><td><code>--port PORT</code></td><td>port (default 8810; 0 = any free port)</td><td>the <code>port</code> key of <code>[serve]</code></td></tr>
+      <tr><td><code>--replay RUN</code></td><td>play a sealed run folder or an exported bundle through the UI: no model, no Docker</td><td>none</td></tr>
+      <tr><td><code>--speed SPEED</code></td><td>replay speed: &#x27;real&#x27; (default) or a number, 8 = eight times faster</td><td>real</td></tr>
+      <tr><td><code>--paused</code></td><td>replay: start paused</td><td>off</td></tr>
+    </tbody>
+  </table></div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre serve --replay demo/sfaef16e6 --speed 8</pre></div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="sandbox.html"><small>Previous</small>The sandbox</a>
+    <a class="nx" href="config.html"><small>Next</small>Configuration</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/cli.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#calling">How to call it</a></li>
+    <li><a href="#options">Options before the command</a></li>
+    <li><a href="#exit-codes">Exit codes</a></li>
+    <li><a href="#commands">The commands</a></li>
+    <li class="sub"><a href="#report">report</a></li>
+    <li class="sub"><a href="#demo">demo</a></li>
+    <li class="sub"><a href="#corpus">corpus</a></li>
+    <li class="sub"><a href="#run">run</a></li>
+    <li class="sub"><a href="#replay">replay</a></li>
+    <li class="sub"><a href="#export">export</a></li>
+    <li class="sub"><a href="#serve">serve</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

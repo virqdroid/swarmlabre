@@ -1,0 +1,8 @@
+{
+ "kind": "recorded",
+ "name": "apk-basic",
+ "proves": "an APK (binary manifest, DEX, assets) through host parse, jadx prep, the Mobile ATT&CK matrix and the report",
+ "run": "s7461d751",
+ "sample": "apk-benign",
+ "sample_sha256": "3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607"
+}

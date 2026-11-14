@@ -1,0 +1,6 @@
+95	a	http://c2.example.test/beacon
+b3	a	Mutex\Global\DemoSwarmMutex
+cf	a	cmd.exe /c echo demo
+e4	a	example.invalid
+fb	a	.rodata
+103	a	.shstrtab

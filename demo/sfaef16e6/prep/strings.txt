@@ -1,0 +1,7 @@
+95	a	https://updates.example.test/check
+b8	a	Global\Demo2Lock
+c9	a	/tmp/.demo-cache
+da	a	203.0.113.9
+e4	w	9C:\Demo\agent.dll
+111	a	.rodata
+119	a	.shstrtab

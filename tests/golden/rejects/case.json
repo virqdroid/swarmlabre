@@ -1,0 +1,8 @@
+{
+ "kind": "scripted",
+ "name": "rejects",
+ "proves": "every reject code except cap_exceeded, one post each, next to accepted findings (byte-checked, call-cited, function, merged, technique)",
+ "run": "s22f56333",
+ "sample": "elf-benign",
+ "sample_sha256": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e"
+}

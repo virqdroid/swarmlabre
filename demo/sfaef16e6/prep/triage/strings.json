@@ -1,0 +1,8 @@
+{"sample_sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564", "shown": 6, "tool": "list_strings", "total": 6, "truncated": false,"items":[
+{"address": "0x400095", "string": {"byte_length": 35, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "https://updates.example.test/check"},
+{"address": "0x4000b8", "string": {"byte_length": 17, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "Global\\Demo2Lock"},
+{"address": "0x4000c9", "string": {"byte_length": 17, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "/tmp/.demo-cache"},
+{"address": ".shstrtab:0x1", "string": {"byte_length": 6, "encoding": "UTF-8", "termination": "present_or_not_required"}, "value": ".text"},
+{"address": ".shstrtab:0x7", "string": {"byte_length": 8, "encoding": "UTF-8", "termination": "present_or_not_required"}, "value": ".rodata"},
+{"address": ".shstrtab:0xf", "string": {"byte_length": 10, "encoding": "UTF-8", "termination": "present_or_not_required"}, "value": ".shstrtab"}
+]}

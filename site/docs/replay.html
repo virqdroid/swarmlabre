@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>Replay and export a run: SwarmLabRE docs</title>
+<meta name="description" content="How to replay a recorded SwarmLabRE run offline, what the full and downstream replay levels check, and how to export a run into a bundle that replays on another machine.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html" aria-current="page">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Guides / Replay and export a run</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html" aria-current="page">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="analyse.html">Guides</a> / Replay and export a run</p>
+  <h1>Replay and export a run</h1>
+  <p class="lead">A recorded run replays offline: <code>swarmlabre replay</code> rebuilds every report file and compares each with its hash. <code>swarmlabre export</code> packs a run into a folder that replays on another machine.</p>
+
+  <h2 id="replay">Replay a run<a class="anc" href="#replay" aria-label="Link to this section">#</a></h2>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre replay demo/sfaef16e6</pre></div>
+  <div class="prose">
+<code>replay</code> takes a run folder, an exported bundle or a run id, which it looks up under <code>runs/</code> in the state folder. It rebuilds the board and every report file offline, with no model and no Docker, compares each file with the SHA-256 in the manifest and prints the checks as JSON. It exits 0 only when everything is identical, 1 when something differs and 2 when the folder cannot be replayed at all. <a href="reproducibility.html#replay">Reproducibility</a> describes each check.
+<code>--out DIR</code> also writes the rebuilt files into a folder:
+</div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre replay demo/sfaef16e6 --out rebuilt/</pre></div>
+  <div class="prose">
+<p>The folder then holds the eight output files, which are the ones the manifest names.</p>
+</div>
+  <h2 id="levels">The replay levels<a class="anc" href="#levels" aria-label="Link to this section">#</a></h2>
+  <figure class="fig anim">
+    <svg class="fc-wide" viewBox="0 0 780 300" role="img" aria-label="Flowchart of the replay levels. A recorded run is checked for its sample. With the sample the replay runs at the full level and runs the board&#x27;s checks again; without it the replay runs at the downstream level and takes the board from the record. Both rebuild the Reporter&#x27;s summary and every output file and compare them with the manifest."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="40.5" width="149" height="99" rx="8"/><text class="fc-t" x="75.0" y="62" text-anchor="middle">A recorded run</text><text class="fc-s" x="75.0" y="82" text-anchor="middle">a sealed run folder</text><text class="fc-s" x="75.0" y="98" text-anchor="middle">or an exported</text><text class="fc-s" x="75.0" y="114" text-anchor="middle">bundle</text></g><g class="st" style="--i:1"><path class="fc-a" d="M150 90.0H189" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box" x="190.5" y="40.5" width="169" height="99" rx="8"/><text class="fc-t" x="275.0" y="62" text-anchor="middle">Is the sample there?</text><text class="fc-s" x="275.0" y="82" text-anchor="middle">the file input/sample</text><text class="fc-s" x="275.0" y="98" text-anchor="middle">is in the folder and</text><text class="fc-s" x="275.0" y="114" text-anchor="middle">--no-sample was not</text><text class="fc-s" x="275.0" y="130" text-anchor="middle">given</text></g><g class="st" style="--i:3"><path class="fc-a" d="M360 90.0H380.0V75.0H399" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="400.5" y="0.5" width="189" height="149" rx="8"/><text class="fc-t fc-mono" x="495.0" y="22" text-anchor="middle">full</text><text class="fc-s" x="495.0" y="42" text-anchor="middle">Sample present: the</text><text class="fc-s" x="495.0" y="58" text-anchor="middle">board's checks run again</text><text class="fc-s" x="495.0" y="74" text-anchor="middle">from the recorded inputs,</text><text class="fc-s" x="495.0" y="90" text-anchor="middle">and the sample must be the</text><text class="fc-s" x="495.0" y="106" text-anchor="middle">one the manifest names.</text></g><g class="st" style="--i:5"><path class="fc-a" d="M360 90.0H380.0V230.0H399" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="400.5" y="170.5" width="189" height="119" rx="8"/><text class="fc-t fc-mono" x="495.0" y="192" text-anchor="middle">downstream</text><text class="fc-s" x="495.0" y="212" text-anchor="middle">No sample: the board is</text><text class="fc-s" x="495.0" y="228" text-anchor="middle">taken from the record, and</text><text class="fc-s" x="495.0" y="244" text-anchor="middle">nothing is checked against</text><text class="fc-s" x="495.0" y="260" text-anchor="middle">a sample.</text></g><g class="st" style="--i:7"><path class="fc-a" d="M590 75.0H610.0V155.0H629" marker-end="url(#ar)"/></g><g class="st" style="--i:8"><path class="fc-a" d="M590 230.0H610.0V155.0H629" marker-end="url(#ar)"/></g><g class="st" style="--i:9"><rect class="fc-box" x="630.5" y="60.5" width="149" height="189" rx="8"/><text class="fc-t" x="705.0" y="82" text-anchor="middle">Rebuild and compare</text><text class="fc-s" x="705.0" y="102" text-anchor="middle">The Reporter's</text><text class="fc-s" x="705.0" y="118" text-anchor="middle">summary and every</text><text class="fc-s" x="705.0" y="134" text-anchor="middle">output file are</text><text class="fc-s" x="705.0" y="150" text-anchor="middle">rebuilt and compared</text><text class="fc-s" x="705.0" y="166" text-anchor="middle">with the manifest.</text><text class="fc-s" x="705.0" y="182" text-anchor="middle">The result names the</text><text class="fc-s" x="705.0" y="198" text-anchor="middle">level.</text></g></svg>
+    <svg class="fc-tall" viewBox="0 0 340 510" role="img" aria-label="The same flowchart, drawn top to bottom."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="339" height="55" rx="8"/><text class="fc-t" x="170.0" y="22" text-anchor="middle">A recorded run</text><text class="fc-s" x="170.0" y="42" text-anchor="middle">a sealed run folder or an exported bundle</text></g><g class="st" style="--i:1"><path class="fc-a" d="M170.0 56V83" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box" x="0.5" y="84.5" width="339" height="67" rx="8"/><text class="fc-t" x="170.0" y="106" text-anchor="middle">Is the sample there?</text><text class="fc-s" x="170.0" y="126" text-anchor="middle">the file input/sample is in the folder and</text><text class="fc-s" x="170.0" y="142" text-anchor="middle">--no-sample was not given</text></g><g class="st" style="--i:3"><path class="fc-a" d="M170.0 152V168.0H82.0V183" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="0.5" y="184.5" width="163" height="189" rx="8"/><text class="fc-t fc-mono" x="82.0" y="206" text-anchor="middle">full</text><text class="fc-s" x="82.0" y="226" text-anchor="middle">Sample present: the</text><text class="fc-s" x="82.0" y="242" text-anchor="middle">board's checks run</text><text class="fc-s" x="82.0" y="258" text-anchor="middle">again from the</text><text class="fc-s" x="82.0" y="274" text-anchor="middle">recorded inputs, and</text><text class="fc-s" x="82.0" y="290" text-anchor="middle">the sample must be the</text><text class="fc-s" x="82.0" y="306" text-anchor="middle">one the manifest</text><text class="fc-s" x="82.0" y="322" text-anchor="middle">names.</text></g><g class="st" style="--i:5"><path class="fc-a" d="M170.0 152V168.0H258.0V183" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="176.5" y="184.5" width="163" height="189" rx="8"/><text class="fc-t fc-mono" x="258.0" y="206" text-anchor="middle">downstream</text><text class="fc-s" x="258.0" y="226" text-anchor="middle">No sample: the board</text><text class="fc-s" x="258.0" y="242" text-anchor="middle">is taken from the</text><text class="fc-s" x="258.0" y="258" text-anchor="middle">record, and nothing is</text><text class="fc-s" x="258.0" y="274" text-anchor="middle">checked against a</text><text class="fc-s" x="258.0" y="290" text-anchor="middle">sample.</text></g><g class="st" style="--i:7"><path class="fc-a" d="M82.0 374V390.0H170.0V405" marker-end="url(#ar)"/></g><g class="st" style="--i:8"><path class="fc-a" d="M258.0 374V390.0H170.0V405" marker-end="url(#ar)"/></g><g class="st" style="--i:9"><rect class="fc-box" x="0.5" y="406.5" width="339" height="99" rx="8"/><text class="fc-t" x="170.0" y="428" text-anchor="middle">Rebuild and compare</text><text class="fc-s" x="170.0" y="448" text-anchor="middle">The Reporter's summary and every output file are</text><text class="fc-s" x="170.0" y="464" text-anchor="middle">rebuilt and compared with the manifest. The result</text><text class="fc-s" x="170.0" y="480" text-anchor="middle">names the level.</text></g></svg>
+    <figcaption>The two replay levels. The result of the command names the level that ran, and it never claims more than it checked.</figcaption>
+  </figure>
+  <div class="tw"><table>
+    <thead><tr><th></th><th>full</th><th>downstream</th></tr></thead>
+    <tbody>
+      <tr><td>When</td><td>the run folder holds <code>input/sample</code> and <code>--no-sample</code> is not given</td><td>the sample is not in the folder, or <code>--no-sample</code> is given</td></tr>
+      <tr><td>The board</td><td>rebuilt from <code>inputs.jsonl</code>: the bytes at each offset, the cited calls, duplicates and caps are checked again</td><td>taken from <code>board.jsonl</code></td></tr>
+      <tr><td>YARA rules</td><td>matched against the sample again</td><td>taken from the record</td></tr>
+      <tr><td><code>checks.sample</code></td><td><code>identical</code>, or <code>differs from the manifest</code> when the file is another one</td><td><code>not kept</code></td></tr>
+      <tr><td><code>checks.board</code></td><td><code>identical</code> or <code>differs</code></td><td>a note that the board was taken from the record</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<p>Both levels rebuild the Reporter's summary, its lint result and its assessment, rebuild every output file and compare each with the manifest. <code>--no-sample</code> runs a bundle that has the sample at the downstream level:</p>
+</div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre replay demo/sfaef16e6 --no-sample</pre></div>
+  <div class="prose">
+<p>A run exported without its sample also replays at the downstream level. Downstream is the weaker claim and the result says so. With <code>keep_sample = false</code> in the configuration SwarmLabRE deletes the run's copy of the sample once the report is written, and the run can then replay at the downstream level only.</p>
+</div>
+  <h2 id="export">Export a run<a class="anc" href="#export" aria-label="Link to this section">#</a></h2>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre export demo/sfaef16e6 bundles/
+<span class="p">$</span> python3 -m swarmlabre export demo/sfaef16e6 bundles-full/ --with-sample</pre></div>
+  <div class="prose">
+<code>export RUN DEST</code> copies what a replay needs into <code>DEST/&lt;run id&gt;/</code> and prints one JSON line with the folder and whether the sample is in it. The run needs a <code>manifest.json</code>, so a run from before recording cannot be exported. The command stops with exit code 2 when the folder in <code>DEST</code> already exists. The bundle holds:
+</div>
+  <div class="prose">
+<ul>
+  <li>the run record, <code>swarm.json</code>, and <code>manifest.json</code>;</li>
+  <li>the board's inputs and decisions, <code>inputs.jsonl</code> and <code>board.jsonl</code>;</li>
+  <li><code>layout.json</code>, <code>events.jsonl</code>, <code>detection.json</code> and <code>windows.json</code>;</li>
+  <li>the model trace, <code>model-trace.jsonl.gz</code>, and the run's task key, <code>nonce.key</code>;</li>
+  <li>the prepared files in <code>prep/</code> and the outputs in <code>out/</code>, so that the bundle can be compared as well as rebuilt;</li>
+  <li><code>input/sample</code>, only with <code>--with-sample</code>.</li>
+</ul>
+</div>
+  <div class="prose">
+<p>The agents' transcripts and thoughts, the container folders and the clip are never copied. A link, a device or a pipe in the folder is skipped, and a folder over 4 GiB or nested deeper than 8 levels is refused. Replay a bundle on any machine with Python 3.12:</p>
+</div>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre replay bundles/sfaef16e6
+<span class="p">$</span> python3 -m swarmlabre replay bundles-full/sfaef16e6</pre></div>
+  <div class="prose">
+<p>The first replays at the downstream level and the second at the full level. A bundle with the sample holds a copy of the file you analysed, so share it only with people who may have that file.</p>
+<p>The recorded demo run is itself a bundle, and the Pages workflow builds the static demo from it. <a href="web-ui.html#static">The web UI</a> shows what the static build does with it.</p>
+</div>
+  <h2 id="serve">Watch a replay<a class="anc" href="#serve" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<code>python3 -m swarmlabre serve --replay RUN</code> plays a sealed run folder or a bundle through the web UI, with no model and no Docker. It refuses a recording that does not replay byte for byte. <a href="web-ui.html#replay">The web UI</a> describes the clock and its options.
+</div>
+  <h2 id="containers">Replay through the containers<a class="anc" href="#containers" aria-label="Link to this section">#</a></h2>
+  <div class="code"><pre><span class="p">$</span> python3 -m swarmlabre run SAMPLE --replay RUN</pre></div>
+  <div class="prose">
+<p>This starts the containers as usual and answers every model request from the recorded trace of RUN, using the recorded task key and, unless <code>--brief</code> is given, the recorded brief. It needs Docker and the two images. It makes a new run, so its files differ from the recording in the run id and the times, and the result adds <code>replay_diverged</code>, the number of requests that had no recorded reply. <a href="reproducibility.html#containers">Reproducibility</a> reports what that count was in a measurement.</p>
+</div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="exports.html"><small>Previous</small>Reports and exports</a>
+    <a class="nx" href="models.html"><small>Next</small>Use a real model</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/replay.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#replay">Replay a run</a></li>
+    <li><a href="#levels">The replay levels</a></li>
+    <li><a href="#export">Export a run</a></li>
+    <li><a href="#serve">Watch a replay</a></li>
+    <li><a href="#containers">Replay through the containers</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+ "application": {},
+ "components": [
+  {
+   "actions": [],
+   "exported": "true",
+   "exported_effective": "true",
+   "name": "com.example.demo.MainActivity",
+   "permission": null,
+   "type": "activity"
+  }
+ ],
+ "package": "com.example.demo",
+ "sample_sha256": "3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607",
+ "uses_permissions": [
+  "android.permission.INTERNET"
+ ]
+}

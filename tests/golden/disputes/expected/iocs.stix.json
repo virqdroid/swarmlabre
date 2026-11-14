@@ -1,0 +1,85 @@
+{
+ "type": "bundle",
+ "id": "bundle--2828855f-9997-5643-b5cc-25fd43846fd7",
+ "objects": [
+  {
+   "type": "identity",
+   "spec_version": "2.1",
+   "id": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "created": "2026-09-21T14:14:20.000Z",
+   "modified": "2026-09-21T14:14:20.000Z",
+   "name": "swarmlabre",
+   "identity_class": "organization"
+  },
+  {
+   "id": "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d",
+   "type": "extension-definition",
+   "spec_version": "2.1",
+   "name": "TLP 2.0",
+   "description": "This defines TLP 2.0 as a STIX extension",
+   "created": "2022-10-01T00:00:00.000Z",
+   "modified": "2022-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--b3bca3c2-1f3d-4b54-b44f-dac42c3a8f01",
+   "schema": "https://github.com/oasis-open/cti-stix-common-objects/tree/master/extension-definition-specifications/tlp-2.0",
+   "version": "1.0.0",
+   "extension_types": [
+    "property-extension"
+   ]
+  },
+  {
+   "type": "marking-definition",
+   "spec_version": "2.1",
+   "id": "marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487",
+   "created": "2022-10-01T00:00:00.000Z",
+   "name": "TLP:CLEAR",
+   "extensions": {
+    "extension-definition--60a3c5c5-0d10-413e-aab3-9e08dde9e88d": {
+     "extension_type": "property-extension",
+     "tlp_2_0": "clear"
+    }
+   }
+  },
+  {
+   "type": "indicator",
+   "spec_version": "2.1",
+   "id": "indicator--53bab00a-bac2-5017-bc9a-c52cb1885fcf",
+   "created": "2026-09-21T14:14:20.000Z",
+   "modified": "2026-09-21T14:14:20.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "URL: hxxp://c2[.]example[.]test/beacon",
+   "description": "Found in the analysed sample (swarm run s11d2b274). Swarmlabre found these exact bytes in the file at offset 0x95. Swarmlabre does not judge whether this value is malicious.",
+   "indicator_types": [
+    "unknown"
+   ],
+   "pattern": "[url:value = 'http://c2.example.test/beacon']",
+   "pattern_type": "stix",
+   "valid_from": "2026-09-21T14:14:20.000Z",
+   "confidence": 85,
+   "x_swarmlabre_evidence": "byte-checked",
+   "x_swarmlabre_offset": 149,
+   "object_marking_refs": [
+    "marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487"
+   ]
+  },
+  {
+   "type": "report",
+   "spec_version": "2.1",
+   "id": "report--17e14cff-8450-5583-ad23-f7e05b6ea55d",
+   "created": "2026-09-21T14:14:20.000Z",
+   "modified": "2026-09-21T14:14:20.000Z",
+   "created_by_ref": "identity--9f66f4f0-f944-5b44-8494-a98ded091a82",
+   "name": "Malware analysis report: demo.elf",
+   "description": "Indicators from an automated static analysis (run s11d2b274, 2026-09-21). Evidence levels: byte-checked 85, call-cited 50, computed 100 (STIX confidence). Static analysis only: the sample was never run.",
+   "report_types": [
+    "malware"
+   ],
+   "published": "2026-09-21T14:14:20.000Z",
+   "object_refs": [
+    "indicator--53bab00a-bac2-5017-bc9a-c52cb1885fcf"
+   ],
+   "object_marking_refs": [
+    "marking-definition--94868c89-83c2-464b-929b-a1a8aa3c8487"
+   ]
+  }
+ ]
+}

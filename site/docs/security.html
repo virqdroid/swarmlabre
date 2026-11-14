@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>Security: SwarmLabRE docs</title>
+<meta name="description" content="What SwarmLabRE assumes is hostile, what it does about each threat, and what it does not claim.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html" aria-current="page">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Reference / Security</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html" aria-current="page">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="cli.html">Reference</a> / Security</p>
+  <h1>Security</h1>
+  <p class="lead">SwarmLabRE reads files that may be hostile and lets language models act on them. This page says what it defends against, how it does that and what it does not claim. It describes version 0.1.0.</p>
+
+  <h2 id="boundary">The trust boundary<a class="anc" href="#boundary" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>The host process is the only trusted part. It holds the model's key, the board and the reports. The sample, the agents, what the tools print and the model's answers are untrusted, and neither container has a network.</p>
+</div>
+  <figure class="fig anim">
+    <svg class="fc-wide" viewBox="0 0 780 270" role="img" aria-label="Trust boundary diagram: the host process is trusted and starts and feeds three things below it. The tools container and the agents container both have no network and read the sample and the prepared files read-only. The model endpoint is outside the host and only the gate reaches it, adding the key."><g class="st" style="--i:0"><rect class="fc-box" x="100.5" y="0.5" width="579" height="95" rx="8"/><text class="fc-t" x="390.0" y="22" text-anchor="middle">Host: trusted</text><text class="fc-s" x="390.0" y="42" text-anchor="middle">The SwarmLabRE process. It parses the sample, runs the board, holds the gate and the</text><text class="fc-s" x="390.0" y="58" text-anchor="middle">key, and writes the reports.</text></g><g class="st" style="--i:1"><path class="fc-a" d="M390.0 96V123.0H120.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box fc-bad fc-model" x="0.5" y="150.5" width="239" height="119" rx="8"/><text class="fc-t" x="120.0" y="172" text-anchor="middle">Tools container</text><text class="fc-s" x="120.0" y="192" text-anchor="middle">--network none. Reads the sample</text><text class="fc-s" x="120.0" y="208" text-anchor="middle">at /in, read-only. Runs Ghidra,</text><text class="fc-s" x="120.0" y="224" text-anchor="middle">jadx, Apktool and rea. Has no</text><text class="fc-s" x="120.0" y="240" text-anchor="middle">model socket.</text></g><g class="st" style="--i:3"><path class="fc-a" d="M390.0 96V149" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box fc-bad fc-model" x="270.5" y="150.5" width="239" height="119" rx="8"/><text class="fc-t" x="390.0" y="172" text-anchor="middle">Agents container</text><text class="fc-s" x="390.0" y="192" text-anchor="middle">--network none. Six roles, one uid</text><text class="fc-s" x="390.0" y="208" text-anchor="middle">each. Reads /in and /prep,</text><text class="fc-s" x="390.0" y="224" text-anchor="middle">read-only. Reaches the tool socket</text><text class="fc-s" x="390.0" y="240" text-anchor="middle">and the model socket.</text></g><g class="st" style="--i:5"><path class="fc-a" d="M390.0 96V123.0H660.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box fc-model" x="540.5" y="150.5" width="239" height="119" rx="8"/><text class="fc-t" x="660.0" y="172" text-anchor="middle">Model endpoint</text><text class="fc-s" x="660.0" y="192" text-anchor="middle">Outside the host. The gate sends</text><text class="fc-s" x="660.0" y="208" text-anchor="middle">it requests and adds the key. No</text><text class="fc-s" x="660.0" y="224" text-anchor="middle">container reaches it.</text></g></svg>
+    <svg class="fc-tall" viewBox="0 0 340 410" role="img" aria-label="The same diagram, with the three boxes under the host narrower."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="339" height="99" rx="8"/><text class="fc-t" x="170.0" y="22" text-anchor="middle">Host: trusted</text><text class="fc-s" x="170.0" y="42" text-anchor="middle">The SwarmLabRE process. It parses the sample, runs</text><text class="fc-s" x="170.0" y="58" text-anchor="middle">the board, holds the gate and the key, and writes</text><text class="fc-s" x="170.0" y="74" text-anchor="middle">the reports.</text></g><g class="st" style="--i:1"><path class="fc-a" d="M170.0 100V125.0H54.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box fc-bad fc-model" x="0.5" y="150.5" width="107" height="249" rx="8"/><text class="fc-t" x="54.0" y="172" text-anchor="middle">Tools</text><text class="fc-t" x="54.0" y="188" text-anchor="middle">container</text><text class="fc-s" x="54.0" y="208" text-anchor="middle">--network</text><text class="fc-s" x="54.0" y="224" text-anchor="middle">none. Reads</text><text class="fc-s" x="54.0" y="240" text-anchor="middle">the sample at</text><text class="fc-s" x="54.0" y="256" text-anchor="middle">/in,</text><text class="fc-s" x="54.0" y="272" text-anchor="middle">read-only.</text><text class="fc-s" x="54.0" y="288" text-anchor="middle">Runs Ghidra,</text><text class="fc-s" x="54.0" y="304" text-anchor="middle">jadx, Apktool</text><text class="fc-s" x="54.0" y="320" text-anchor="middle">and rea. Has</text><text class="fc-s" x="54.0" y="336" text-anchor="middle">no model</text><text class="fc-s" x="54.0" y="352" text-anchor="middle">socket.</text></g><g class="st" style="--i:3"><path class="fc-a" d="M170.0 100V149" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box fc-bad fc-model" x="116.5" y="150.5" width="107" height="249" rx="8"/><text class="fc-t" x="170.0" y="172" text-anchor="middle">Agents</text><text class="fc-t" x="170.0" y="188" text-anchor="middle">container</text><text class="fc-s" x="170.0" y="208" text-anchor="middle">--network</text><text class="fc-s" x="170.0" y="224" text-anchor="middle">none. Six</text><text class="fc-s" x="170.0" y="240" text-anchor="middle">roles, one</text><text class="fc-s" x="170.0" y="256" text-anchor="middle">uid each.</text><text class="fc-s" x="170.0" y="272" text-anchor="middle">Reads /in and</text><text class="fc-s" x="170.0" y="288" text-anchor="middle">/prep,</text><text class="fc-s" x="170.0" y="304" text-anchor="middle">read-only.</text><text class="fc-s" x="170.0" y="320" text-anchor="middle">Reaches the</text><text class="fc-s" x="170.0" y="336" text-anchor="middle">tool socket</text><text class="fc-s" x="170.0" y="352" text-anchor="middle">and the model</text><text class="fc-s" x="170.0" y="368" text-anchor="middle">socket.</text></g><g class="st" style="--i:5"><path class="fc-a" d="M170.0 100V125.0H286.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box fc-model" x="232.5" y="150.5" width="107" height="249" rx="8"/><text class="fc-t" x="286.0" y="172" text-anchor="middle">Model</text><text class="fc-t" x="286.0" y="188" text-anchor="middle">endpoint</text><text class="fc-s" x="286.0" y="208" text-anchor="middle">Outside the</text><text class="fc-s" x="286.0" y="224" text-anchor="middle">host. The</text><text class="fc-s" x="286.0" y="240" text-anchor="middle">gate sends it</text><text class="fc-s" x="286.0" y="256" text-anchor="middle">requests and</text><text class="fc-s" x="286.0" y="272" text-anchor="middle">adds the key.</text><text class="fc-s" x="286.0" y="288" text-anchor="middle">No container</text><text class="fc-s" x="286.0" y="304" text-anchor="middle">reaches it.</text></g></svg>
+    <figcaption>What the agents can reach. Dashed red boxes are containers with no network; the dashed grey box is outside the host. Arrows go from the host to what it starts or calls.</figcaption>
+  </figure>
+  <h2 id="hostile">What it assumes is hostile<a class="anc" href="#hostile" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<ul>
+  <li>The sample. Its bytes and strings are written by an attacker: markers that imitate SwarmLabRE's own protocol, text that tells a model what to do, HTML, ANSI and bidi controls, spreadsheet formulas, Markdown links, over-long values, malformed ELF, PE and APK headers, and archives with odd names or links.</li>
+  <li>The agents. A model steered by that text may post false findings, forge lines, write hostile prose, cite tool calls it never made, or try to read another role's files.</li>
+  <li>What the tools print and what the containers write. That is the output of Ghidra, jadx, Apktool and <code>rea</code>, and every file in a run folder that a container could have written.</li>
+  <li>Anything that can reach the web UI's port, including a web page in a browser on the same machine.</li>
+</ul>
+</div>
+  <h2 id="protects">What it protects<a class="anc" href="#protects" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Asset</th><th>What must not happen to it</th></tr></thead>
+    <tbody>
+      <tr><td>The host and its files</td><td>A sample, an agent or a tool reads or changes them.</td></tr>
+      <tr><td>The model's API key, if one is used</td><td>It leaks into a container, a log, a report or a recording.</td></tr>
+      <tr><td>The truth of a report</td><td>Text in a sample, or an agent, makes a finding look checked, or a link or tag reaches a viewer.</td></tr>
+      <tr><td>The recorded run</td><td>An accidental or careless edit goes unnoticed. A deliberate edit is not covered; see the last item of the limits.</td></tr>
+    </tbody>
+  </table></div>
+  <h2 id="defences">What it does about each threat<a class="anc" href="#defences" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>Each entry names a threat, says what SwarmLabRE does about it and names where the code and its tests are.</p>
+</div>
+  <h3 id="run-code">A sample or an agent runs code<a class="anc" href="#run-code" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>The sample is only read, never executed. The agents run in containers as the host user's uid and not as root, with <code>--read-only</code>, <code>--cap-drop ALL</code>, <code>no-new-privileges</code>, limits on memory, processors and processes, and <code>--network none</code>. Each agent role has its own uid and its own private tmpfs. <a href="sandbox.html">The sandbox</a> lists every setting.</p>
+<p>Where to look: <code>swarmlabre/sandbox.py</code>, <code>tests/test_sandbox.py</code>.</p>
+</div>
+  <h3 id="network">A container reaches the network<a class="anc" href="#network" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p><code>--network none</code> is the only network the code will build. Before a run, a throwaway container shows that it has no interface besides loopback and cannot connect to a public address. A run does not start when the probe finds an interface or a route out, or when it gives no clear answer. A running container is also inspected for a writable root, kept capabilities, privileged mode, a mounted Docker socket and a writable proxy folder.</p>
+<p>Where to look: <code>Health</code> and <code>posture</code> in <code>swarmlabre/sandbox.py</code>.</p>
+</div>
+  <h3 id="key">The model key reaches a container<a class="anc" href="#key" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>The key stays in the host process. A container reaches the model only through a Unix socket that the run owns and that is mounted read-only, and the gate adds the key on the host side. The agent's configuration holds no key, the scrubber hides the key in log strings, and a run does not start when the <code>docker inspect</code> output of a container contains it. The gate also sets <code>temperature</code>, <code>seed</code> and <code>model</code>, sets <code>n</code> to 1 and caps the output tokens, so an agent cannot spend the endpoint on another model or on many completions. <a href="models.html">Use a real model</a> describes the gate.</p>
+<p>Where to look: <code>swarmlabre/gate.py</code>, <code>swarmlabre/client.py</code>, <code>tests/test_gate.py</code>, <code>tests/test_sandbox.py</code>.</p>
+</div>
+  <h3 id="forged-line">A forged finding line sits in a sample's strings<a class="anc" href="#forged-line" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>A finding is read only from a line that carries the task's own nonce, in the agent's own tool-result stream. The nonce is an HMAC of a per-run key over the role and the task number, so a line copied from a sample does not carry it. <a href="board.html">The board</a> describes the post.</p>
+<p>Where to look: <code>HostileStrings</code> in <code>tests/test_golden.py</code>, <code>tests/test_board.py</code>.</p>
+</div>
+  <h3 id="false-finding">A false finding looks verified<a class="anc" href="#false-finding" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>The board checks every post again: the bytes at the offset, that each cited call exists in the run's tool log and appears in output of the agent's own session, the function list, the ATT&amp;CK id and name against MITRE's table, and the caps and duplicates. The evidence caps the verdict and the confidence. A model's judgement never changes a count, a level or a hash. The limit on call citations is listed under <a href="#limits">what it does not claim</a>.</p>
+<p>Where to look: <code>Board</code> in <code>swarmlabre/swarms.py</code>, <code>swarmlabre/report.py</code>.</p>
+</div>
+  <h3 id="hostile-text">Hostile text reaches a viewer<a class="anc" href="#hostile-text" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Everything that came from a sample, an agent or a tool is cleaned, capped and set as text. The report defangs network indicators, a CSV cell that could be read as a formula gets a leading quote, and <code>report.md</code> escapes <code>&lt;</code>, <code>&gt;</code> and link syntax.</p>
+<p>Where to look: the golden case <code>hostile</code>, <code>tests/test_report.py</code>.</p>
+</div>
+  <h3 id="write-back">A container writes a hostile file back<a class="anc" href="#write-back" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>Archives are parsed and never extracted. Paths are resolved inside the container, files are opened with <code>O_NOFOLLOW</code>, sizes and counts are capped, and the run folder is treated as untrusted data.</p>
+<p>Where to look: <code>read_tar</code> in <code>swarmlabre/swarms.py</code>.</p>
+</div>
+  <h3 id="ui">A web page or another user drives the UI<a class="anc" href="#ui" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p>The server listens on loopback by default. Every <code>api/*</code> call needs a bearer token. The token is made on first use, kept in a file with mode 0600 in the state folder and printed in the address fragment that <code>serve</code> prints at every start. A <code>Host</code> header that is not loopback is refused, which stops DNS rebinding. JSON bodies are capped at 1 MiB. The page is sent with <code>default-src 'none'</code>, <code>connect-src 'self'</code> and <code>frame-ancestors 'none'</code>. The files the page offers for download are <code>report.html</code>, <code>iocs.csv</code>, <code>iocs.stix.json</code>, <code>iocs.misp.json</code> and <code>detection.yar</code>; they are sent as attachments with a Content-Security-Policy of <code>sandbox</code>, so they are never rendered in the server's origin. <a href="web-ui.html">The web UI</a> has the details.</p>
+<p>Where to look: <code>swarmlabre/server.py</code>, <code>tests/test_server.py</code>.</p>
+</div>
+  <h3 id="edit">A recorded run is changed afterwards, by accident<a class="anc" href="#edit" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+<p><code>manifest.json</code> holds the SHA-256 of every input and output. <code>swarmlabre replay</code> exits 1 on a differing byte, an edited recorded file, a sample that is not the one the manifest names, or an output file in a bundle that is not the recorded one. <code>serve --replay</code> and the demo build refuse a run that does not replay. A bundle is copied without following links and with a size cap. <a href="reproducibility.html">Reproducibility</a> covers what replay checks.</p>
+<p>Where to look: <code>swarmlabre/replay.py</code>, <code>tests/test_replay.py</code>.</p>
+</div>
+  <h2 id="limits">What it does not claim<a class="anc" href="#limits" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<ul>
+  <li>Docker is not a perfect boundary. A flaw in the kernel or the container runtime could let a process leave a container. Run SwarmLabRE on a machine and an account where that would be survivable, and keep Docker and the kernel current. The host firewall rules of the project it came from are not included, and <code>--network none</code> is the only network control here.</li>
+  <li>No run on real malware is part of any check. The tests, the golden cases and the demo use generated benign files only, with reserved example domains, documentation addresses and code that only exits. How the parsers, Ghidra, jadx or the agents behave on hostile real-world files is not verified here.</li>
+  <li>The parsers have not been fuzzed. The ELF, PE and APK readers are hand-written Python with size limits and tests on hand-built files. A crafted file may crash a run, and a failed run keeps what the board built.</li>
+  <li>A verdict is a model's opinion. <span class="lvl ok">byte-checked</span> means that the bytes are at that offset and not that the agent understood them. A report can still be wrong, incomplete or misleading about what a file does.</li>
+  <li>A model can be steered. The defences stop a sample from forging the protocol and from becoming a verified fact without evidence. They do not stop a model from believing, repeating or acting on text in a sample inside its own sandbox, and they do not make the Reporter's prose accurate.</li>
+  <li>Live runs are not repeatable. Only replay of a recording is byte-identical; <a href="reproducibility.html">Reproducibility</a> says what a live run pins.</li>
+  <li>One environment was tested. Everything was run on Linux arm64 with Python 3.12.3, one Docker installation and one locally served model for the live checks. Other kernels, CPU architectures, Python minor versions, Docker versions and container runtimes are untested. The tools image builds for arm64 only.</li>
+  <li>The web UI is for one person on one machine. It has no user accounts, no HTTPS and no rate limiting. A non-loopback <code>--host</code> prints a warning, and the token is then the only protection and travels in clear text. Do not put it on the internet.</li>
+  <li>The static demo and replay mode show a recording. They add no evidence and check nothing again; the byte-for-byte check is <code>swarmlabre replay</code>.</li>
+  <li>A call citation is attributed by text and not by the tool server. A finding is <span class="lvl ci">call-cited</span> when each cited call id exists in the run's tool log and appears in the output of a command in that agent's own session. An agent that can run shell commands can print another role's call id, and SwarmLabRE cannot tell that from a real call of its own. So <span class="lvl ci">call-cited</span> means that the call exists in this run's tool log and that the agent's session printed its id, and not that this agent made it. The roles share one tool server, and attributing calls per role by peer uid is not built.</li>
+  <li>The agents' tool socket binds only some tools to the sample. On the locked socket the Android tools (<code>inspect_android_*</code> and the related search, decode and trace tools) accept only the pinned sample path. Other tools that take a file path, for example <code>inspect_artifact</code>, <code>inspect_signature</code> and <code>inspect_pe_resources</code>, are allowed but not bound, so a steered agent could point one at another file inside the tools container. That is the run's input folder, the tool output and the result cache, with no key or host file mounted there. Binding them needs the tool schemas of the real <code>rea</code> image and was not done.</li>
+  <li>Tamper evidence is not authentication. <code>manifest.json</code> holds hashes and nothing signs it. Someone who edits a recorded file can recompute its hash and the manifest's, and replay then agrees. The hashes detect an accidental change and a forgery that forgot the manifest, not a determined one. Keep the origin of a run by other means, such as a signature or a trusted copy of the manifest hash, if that matters.</li>
+  <li>No third party has reviewed this code. The two skills in <code>skills/</code> are prompts for a model and not security controls.</li>
+  <li>Third-party software is installed into the images at build time. Ghidra, jadx, Apktool, Binwalk, mitmproxy, the pi agent and <code>rea</code> are pinned to a version. The Debian packages are not, and the Node base image is pinned only to its tag, <code>node:22-slim</code>. A vulnerability in any of them is outside this repository's control. <a href="https://github.com/virqdroid/swarmlabre/blob/main/THIRD_PARTY.md">THIRD_PARTY.md</a> lists what is used.</li>
+</ul>
+</div>
+  <div class="prose">
+<p>The golden cases do not cover a failed, stopped or timed-out run, a packed, multi-DEX or 32-bit sample, or other machines, and those gaps apply here too. <a href="golden-cases.html#gaps">Golden cases</a> lists them, and <a href="ci.html">CI</a> says what runs on every push.</p>
+</div>
+  <h2 id="report">Reporting a problem<a class="anc" href="#report" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p><a href="https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md">SECURITY.md</a> says how to report a vulnerability and which versions get fixes.</p>
+</div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="config.html"><small>Previous</small>Configuration</a>
+    <a class="nx" href="architecture.html"><small>Next</small>Architecture</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/security.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#boundary">The trust boundary</a></li>
+    <li><a href="#hostile">What it assumes is hostile</a></li>
+    <li><a href="#protects">What it protects</a></li>
+    <li><a href="#defences">What it does about each threat</a></li>
+    <li class="sub"><a href="#run-code">A sample or an agent runs code</a></li>
+    <li class="sub"><a href="#network">A container reaches the network</a></li>
+    <li class="sub"><a href="#key">The model key reaches a container</a></li>
+    <li class="sub"><a href="#forged-line">A forged finding line sits in a sample's strings</a></li>
+    <li class="sub"><a href="#false-finding">A false finding looks verified</a></li>
+    <li class="sub"><a href="#hostile-text">Hostile text reaches a viewer</a></li>
+    <li class="sub"><a href="#write-back">A container writes a hostile file back</a></li>
+    <li class="sub"><a href="#ui">A web page or another user drives the UI</a></li>
+    <li class="sub"><a href="#edit">A recorded run is changed afterwards, by accident</a></li>
+    <li><a href="#limits">What it does not claim</a></li>
+    <li><a href="#report">Reporting a problem</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

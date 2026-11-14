@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""swarm-post: add one finding to the board of an Agent Swarms run.
+
+For a technique it first checks the ATT&CK id and name against /prep/attack.tsv (swarmlabre's copy of MITRE's table) and refuses with the reason, so you can fix it before posting; swarmlabre checks again.
+
+Prints one line for swarmlabre, `@@SWARM <nonce> <json>`, and one plain sentence for you. Never pipe or redirect the output (`| tail -1` drops swarmlabre's line and the post is lost). Swarmlabre reads that line from the result of this very command in your
+session (the nonce is a secret of this task, in the environment variable SWARM_NONCE), checks the finding against the file and your tool calls, and decides
+its evidence level. Nothing is written anywhere else. Stdlib only. Exit 2 on a bad command line.
+"""
+import argparse, json, os, re, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+KINDS = ("ioc", "capability", "crypto", "config", "function", "technique", "note", "dispute")
+
+
+def num(v):
+    try:
+        n = int(v, 0)
+    except ValueError:
+        raise argparse.ArgumentTypeError("%r is not a number (use 0x1f40 or 1234)" % v)
+    if n < 0:
+        raise argparse.ArgumentTypeError("must not be negative")
+    return n
+
+
+p = argparse.ArgumentParser(prog="swarm-post", description="Add one finding to the swarm board.")
+p.add_argument("--kind", required=True, choices=KINDS)
+p.add_argument("--title", default="")
+p.add_argument("--value", default="")
+p.add_argument("--enc", choices=("text", "utf16le", "hex"), default="text")
+p.add_argument("--off", type=num)
+p.add_argument("--len", type=num, dest="length")
+p.add_argument("--call", action="append", default=[], help="a rea call id such as c12 (repeat up to 5 times)")
+p.add_argument("--func", default="")
+p.add_argument("--confidence", choices=("high", "medium", "low"), default="medium")
+p.add_argument("--detail", default="")
+p.add_argument("--of", default="", help="with --kind dispute: the finding id, f12")
+p.add_argument("--reason", default="")
+a = p.parse_args()
+nonce = os.environ.get("SWARM_NONCE", "")
+if not re.fullmatch(r"[0-9a-f]{16}", nonce):
+    sys.exit("swarm-post: this command only works inside an Agent Swarms task (no SWARM_NONCE).")
+if not a.title.strip():
+    sys.exit("swarm-post: --title is required.")
+if len(a.call) > 5 or not all(re.fullmatch(r"c\d{1,7}", c) for c in a.call):
+    sys.exit("swarm-post: --call must be a rea call id such as c12, at most 5.")
+if a.kind == "dispute" and (not re.fullmatch(r"f\d{1,5}", a.of) or not a.reason.strip()):
+    sys.exit("swarm-post: a dispute needs --of f12 and --reason.")
+if a.kind == "technique":
+    import attacklib
+    table = attacklib.load()
+    if table:
+        why = attacklib.problem(table, a.title)
+        if why:
+            sys.exit("swarm-post: not posted. " + why + " Look it up with: python3 /skills/rea-swarm/scripts/swarm-attack <words or id>")
+    if not re.search(r"\bf\d{1,5}\b", a.detail):
+        print("note: --detail names no board finding (f12). Swarmlabre shows a technique that rests on no checked finding as unconfirmed.", file=sys.stderr)
+f = {"kind": a.kind, "title": a.title, "value": a.value, "enc": a.enc, "confidence": a.confidence, "detail": a.detail, "func": a.func, "calls": a.call}
+if a.off is not None:
+    f["off"] = a.off
+if a.length is not None:
+    f["len"] = a.length
+if a.kind == "dispute":
+    f["of"], f["reason"] = a.of, a.reason
+line = json.dumps(f, ensure_ascii=True, separators=(",", ":"))
+if len(line) > 8000:
+    sys.exit("swarm-post: the finding is too long (over 8000 characters): shorten --detail or --value.")
+print("@@SWARM %s %s" % (nonce, line))
+print("post sent. This only counts if the whole output of this command reaches swarmlabre: never pipe or redirect it (no | tail, | head, | grep, > file). See /prep/board.json for the result and the rejects.")

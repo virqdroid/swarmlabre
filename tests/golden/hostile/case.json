@@ -1,0 +1,8 @@
+{
+ "kind": "scripted",
+ "name": "hostile",
+ "proves": "hostile strings in the sample (a forged finding line, a forged ASSESSMENT, script and HTML, ANSI and bidi controls, a spreadsheet formula, a relay marker, an over-long value) reach the report only as cleaned, escaped or defanged text",
+ "run": "s8f383ccd",
+ "sample": "elf-hostile",
+ "sample_sha256": "5a761477530c38d97351802b003f222d47fe218a69e5b8e739ac3a33b2c3cffd"
+}

@@ -1,0 +1,120 @@
+{
+ "id": "s2e1cfa82",
+ "status": "done",
+ "waiting": null,
+ "reason": null,
+ "created": 1790000000.0,
+ "started": 1790000000.0,
+ "finished": 1790000060.0,
+ "brief": "What does this sample do?",
+ "roles": [
+  "triage",
+  "static",
+  "ioc",
+  "crypto",
+  "behaviour",
+  "reporter"
+ ],
+ "parallel": {
+  "n": 2,
+  "trait": 2,
+  "override": false
+ },
+ "sample": {
+  "name": "demo.elf",
+  "size": 528,
+  "sha256": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e",
+  "kind": "elf",
+  "format": "ELF64 x86-64",
+  "snapshot": []
+ },
+ "model": {
+  "backend": "mock",
+  "model": "mock"
+ },
+ "report": {
+  "tlp": "CLEAR",
+  "org": "",
+  "contact": ""
+ },
+ "steps": [],
+ "tasks": [
+  {
+   "n": 1,
+   "role": "reporter",
+   "uid": 20006,
+   "state": "done",
+   "started": 1790000032.0,
+   "ended": 1790000055.0,
+   "tokens": {
+    "in": 1200,
+    "out": 300
+   },
+   "tools": 0,
+   "findings": 0,
+   "retries": 0,
+   "round": 1,
+   "model_ms": 200,
+   "tool_ms": 0,
+   "wait_ms": 0,
+   "steers": 0,
+   "stop": null,
+   "notes": 0,
+   "text": "## Executive summary\nA tiny generated test file with made-up network names. It only exits when run.\n\n## What it is\nA small generated program.\n\n## Capabilities\n- It names a web address, but nothing in the file uses it.\n\n## Recommendations\n- Treat it as a test file.\n\n## What we don't know\n- Whether anything else loads it.\nASSESSMENT {\"verdict\": \"undetermined\", \"confidence\": \"low\", \"family\": \"\", \"basis\": [], \"rationale\": \"Made-up strings; the code only exits.\"}"
+  }
+ ],
+ "env": {},
+ "rounds": [],
+ "counts": {
+  "total": 0,
+  "verified": 0,
+  "unconfirmed": 0,
+  "disputed": 0,
+  "refuted": 0,
+  "rejected": 0,
+  "byte-checked": 0,
+  "call-cited": 0,
+  "claimed": 0
+ },
+ "phase": "merge",
+ "summary": "Executive summary\nA tiny generated test file with made-up network names. It only exits when run.\n\nWhat it is\nA small generated program.\n\nCapabilities\n- It names a web address, but nothing in the file uses it.\n\nRecommendations\n- Treat it as a test file.\n\nWhat we don't know\n- Whether anything else loads it.",
+ "summary_sections": {
+  "exec": "A tiny generated test file with made-up network names. It only exits when run.",
+  "what": "A small generated program.",
+  "caps": "- It names a web address, but nothing in the file uses it.",
+  "recs": "- Treat it as a test file.",
+  "unknown": "- Whether anything else loads it."
+ },
+ "summary_lint": {
+  "ids": 0,
+  "process": 0,
+  "names": 0
+ },
+ "assessment_raw": {
+  "verdict": "undetermined",
+  "confidence": "low",
+  "family": "",
+  "basis": [],
+  "rationale": "Made-up strings; the code only exits."
+ },
+ "sampling": {
+  "temperature": 0.0,
+  "seed": 1,
+  "seed_support": "unknown",
+  "note": "scripted board inputs; no model was asked"
+ },
+ "peaks": {
+  "tools_mib": 0,
+  "agents_mib": 0
+ },
+ "assessment": {
+  "verdict": "undetermined",
+  "confidence": "low",
+  "confidence_final": "low",
+  "family": "",
+  "basis": [],
+  "rationale": "Made-up strings; the code only exits.",
+  "adjusted": [],
+  "static_only": true
+ }
+}

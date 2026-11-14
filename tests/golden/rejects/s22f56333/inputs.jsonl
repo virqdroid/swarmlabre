@@ -1,0 +1,17 @@
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":149,"title":"C2 URL","value":"http://c2.example.test/beacon"},"role":"ioc","seen":[],"seq":1,"t":1790000002.5,"task":1}
+{"op":"intake","others":["c3"],"prep":[],"raw":{"calls":["c3"],"kind":"capability","title":"Reads a file"},"role":"static","seen":["c3"],"seq":2,"t":1790000003.0,"task":2}
+{"op":"intake","others":[],"prep":[],"raw":{"detail":"It only exits.","func":"entry","kind":"function","title":"The entry point"},"role":"static","seen":[],"seq":3,"t":1790000003.5,"task":2}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":149,"title":"C2 URL","value":"http://c2.example.test/beacon"},"role":"crypto","seen":[],"seq":4,"t":1790000004.0,"task":3}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"low","detail":"Rests on f1.","kind":"technique","title":"T1071 Application Layer Protocol"},"role":"behaviour","seen":[],"seq":5,"t":1790000004.5,"task":4}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"bogus","title":"Not a kind"},"role":"ioc","seen":[],"seq":6,"t":1790000005.0,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":149,"title":"Wrong bytes","value":"http://c2.example.test/beacoN"},"role":"ioc","seen":[],"seq":7,"t":1790000005.5,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":100000,"title":"Past the end","value":"http://c2.example.test/beacon"},"role":"ioc","seen":[],"seq":8,"t":1790000006.0,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"calls":["c900"],"kind":"capability","title":"Cites a call nobody made"},"role":"static","seen":[],"seq":9,"t":1790000006.5,"task":2}
+{"op":"intake","others":["c7"],"prep":[],"raw":{"calls":["c7"],"kind":"capability","title":"Cites another agent's call"},"role":"static","seen":[],"seq":10,"t":1790000007.0,"task":2}
+{"op":"intake","others":[],"prep":[],"raw":{"func":"no_such_function","kind":"function","title":"A function that is not there"},"role":"static","seen":[],"seq":11,"t":1790000007.5,"task":2}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":149,"title":"C2 URL again","value":"http://c2.example.test/beacon"},"role":"ioc","seen":[],"seq":12,"t":1790000008.0,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"dispute","of":"f1","reason":"The Reporter does not dispute.","title":"Reporter disputes"},"role":"reporter","seen":[],"seq":13,"t":1790000008.5,"task":6}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"technique","title":"Make the computer sad"},"role":"behaviour","seen":[],"seq":14,"t":1790000009.0,"task":4}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"technique","title":"T1086 Run some commands"},"role":"behaviour","seen":[],"seq":15,"t":1790000009.5,"task":4}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"technique","title":"T1437 Application Layer Protocol"},"role":"behaviour","seen":[],"seq":16,"t":1790000010.0,"task":4}
+{"op":"intake","others":[],"prep":[],"raw":{"kind":"technique","title":"T1071 Not the name of that technique"},"role":"behaviour","seen":[],"seq":17,"t":1790000010.5,"task":4}

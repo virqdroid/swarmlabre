@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>The board: SwarmLabRE docs</title>
+<meta name="description" content="How SwarmLabRE&#x27;s board checks every finding an agent posts: evidence levels, statuses, disputes and the reasons a post is refused.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html" aria-current="page">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Concepts / The board</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html" aria-current="page">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="pipeline.html">Concepts</a> / The board</p>
+  <h1>The board</h1>
+  <p class="lead">Agents do not write the report. Each finding goes to the board through <code>swarm-post</code>, the board checks it against the sample's bytes and the run's tool log, and the report is built from what passes.</p>
+
+  <div class="prose">
+  <p>Text that appears only in an agent's final answer is not a finding. Each post either gets an evidence level or is refused with a reason code. The board records its decisions in order, and replaying the run rebuilds the same board byte for byte.</p>
+  </div>
+
+  <h2 id="one-post">How a post becomes a finding<a class="anc" href="#one-post" aria-label="Link to this section">#</a></h2>
+  <figure class="fig anim">
+    <svg class="fc-wide" viewBox="0 0 780 330" role="img" aria-label="Flowchart: an agent runs swarm-post; the line is signed with the task's nonce; the host reads it from the agent's tool output; the board checks it. A post that fails a check is refused and kept with a code. A post that passes gets an evidence level; disputes and the round-2 verdict then set its status, and the report is built from the status."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t fc-mono" x="86" y="32" text-anchor="middle">swarm-post</text><text class="fc-s" x="86" y="52" text-anchor="middle">the agent posts a kind,</text><text class="fc-s" x="86" y="68" text-anchor="middle">a title and evidence</text></g><g class="st" style="--i:1"><path class="fc-a" d="M172 46H191" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box" x="196.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="282" y="32" text-anchor="middle">Signed line</text><text class="fc-s" x="282" y="52" text-anchor="middle">@@SWARM with the</text><text class="fc-s" x="282" y="68" text-anchor="middle">task's nonce</text></g><g class="st" style="--i:3"><path class="fc-a" d="M368 46H387" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="392.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="478" y="32" text-anchor="middle">Host</text><text class="fc-s" x="478" y="52" text-anchor="middle">reads the line from the</text><text class="fc-s" x="478" y="68" text-anchor="middle">agent's tool output</text></g><g class="st" style="--i:5"><path class="fc-a" d="M564 46H583" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="588.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="674" y="32" text-anchor="middle">Board checks</text><text class="fc-s" x="674" y="52" text-anchor="middle">bytes, tool log,</text><text class="fc-s" x="674" y="68" text-anchor="middle">functions, ATT&amp;CK</text></g><g class="st" style="--i:7"><path class="fc-a" d="M684 84V145" marker-end="url(#ar)"/><text class="fc-l" x="692" y="122" text-anchor="start">fails a check</text></g><g class="st" style="--i:7"><path class="fc-a" d="M620 84V117H478V145" marker-end="url(#ar)"/><text class="fc-l" x="548" y="110" text-anchor="middle">passes</text></g><g class="st" style="--i:8"><rect class="fc-box fc-bad" x="588.5" y="150.5" width="171" height="75" rx="8"/><text class="fc-t" x="674" y="174" text-anchor="middle">Refused</text><text class="fc-s" x="674" y="194" text-anchor="middle">kept on the board with</text><text class="fc-s" x="674" y="210" text-anchor="middle">an x id and a code</text></g><g class="st" style="--i:8"><rect class="fc-box" x="392.5" y="150.5" width="171" height="75" rx="8"/><text class="fc-t" x="478" y="174" text-anchor="middle">Evidence level</text><text class="fc-s" x="478" y="194" text-anchor="middle">byte-checked, call-cited</text><text class="fc-s" x="478" y="210" text-anchor="middle">or claimed</text></g><g class="st" style="--i:9"><path class="fc-a" d="M392 188H373" marker-end="url(#ar)"/></g><g class="st" style="--i:9"><rect class="fc-box fc-model" x="196.5" y="262.5" width="171" height="61" rx="8"/><text class="fc-t" x="282" y="286" text-anchor="middle">Disputes</text><text class="fc-s" x="282" y="306" text-anchor="middle">and the round-2 verdict</text></g><g class="st" style="--i:9"><path class="fc-a" d="M282 262V231" marker-end="url(#ar)"/></g><g class="st" style="--i:10"><rect class="fc-box" x="196.5" y="150.5" width="171" height="75" rx="8"/><text class="fc-t" x="282" y="174" text-anchor="middle">Status</text><text class="fc-s" x="282" y="194" text-anchor="middle">verified, unconfirmed,</text><text class="fc-s" x="282" y="210" text-anchor="middle">disputed or refuted</text></g><g class="st" style="--i:11"><path class="fc-a" d="M196 188H177" marker-end="url(#ar)"/></g><g class="st" style="--i:12"><rect class="fc-box" x="0.5" y="150.5" width="171" height="75" rx="8"/><text class="fc-t" x="86" y="174" text-anchor="middle">Report</text><text class="fc-s" x="86" y="194" text-anchor="middle">built from the status</text><text class="fc-s" x="86" y="210" text-anchor="middle">of each finding</text></g></svg>
+    <svg class="fc-tall" viewBox="0 0 340 560" role="img" aria-label="The same flowchart, drawn top to bottom."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="339" height="51" rx="8"/><text class="fc-t fc-mono" x="170" y="21" text-anchor="middle">swarm-post</text><text class="fc-s" x="170" y="41" text-anchor="middle">the agent posts a kind, a title and evidence</text></g><g class="st" style="--i:1"><path class="fc-a" d="M170 52V73" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box" x="0.5" y="78.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="99" text-anchor="middle">Signed line</text><text class="fc-s" x="170" y="119" text-anchor="middle">@@SWARM with the task's nonce</text></g><g class="st" style="--i:3"><path class="fc-a" d="M170 130V151" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="0.5" y="156.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="177" text-anchor="middle">Host</text><text class="fc-s" x="170" y="197" text-anchor="middle">reads the line from the agent's tool output</text></g><g class="st" style="--i:5"><path class="fc-a" d="M170 208V229" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="0.5" y="234.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="255" text-anchor="middle">Board checks</text><text class="fc-s" x="170" y="275" text-anchor="middle">bytes, tool log, functions, ATT&amp;CK</text></g><g class="st" style="--i:7"><path class="fc-a" d="M81 286V307" marker-end="url(#ar)"/><text class="fc-l" x="73" y="302" text-anchor="end">passes</text></g><g class="st" style="--i:7"><path class="fc-a" d="M259 286V307" marker-end="url(#ar)"/><text class="fc-l" x="251" y="302" text-anchor="end">fails a check</text></g><g class="st" style="--i:8"><rect class="fc-box" x="0.5" y="312.5" width="161" height="69" rx="8"/><text class="fc-t" x="81" y="333" text-anchor="middle">Evidence level</text><text class="fc-s" x="81" y="353" text-anchor="middle">byte-checked, call-cited</text><text class="fc-s" x="81" y="369" text-anchor="middle">or claimed</text></g><g class="st" style="--i:8"><rect class="fc-box fc-bad" x="178.5" y="312.5" width="161" height="69" rx="8"/><text class="fc-t" x="259" y="333" text-anchor="middle">Refused</text><text class="fc-s" x="259" y="353" text-anchor="middle">kept on the board with</text><text class="fc-s" x="259" y="369" text-anchor="middle">an x id and a code</text></g><g class="st" style="--i:9"><path class="fc-a" d="M81 382V403" marker-end="url(#ar)"/></g><g class="st" style="--i:9"><rect class="fc-box fc-model" x="178.5" y="408.5" width="161" height="69" rx="8"/><text class="fc-t" x="259" y="438" text-anchor="middle">Disputes</text><text class="fc-s" x="259" y="458" text-anchor="middle">and the round-2 verdict</text></g><g class="st" style="--i:9"><path class="fc-a" d="M178 443H167" marker-end="url(#ar)"/></g><g class="st" style="--i:10"><rect class="fc-box" x="0.5" y="408.5" width="161" height="69" rx="8"/><text class="fc-t" x="81" y="429" text-anchor="middle">Status</text><text class="fc-s" x="81" y="449" text-anchor="middle">verified, unconfirmed,</text><text class="fc-s" x="81" y="465" text-anchor="middle">disputed or refuted</text></g><g class="st" style="--i:11"><path class="fc-a" d="M81 478V499" marker-end="url(#ar)"/></g><g class="st" style="--i:12"><rect class="fc-box" x="0.5" y="504.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="525" text-anchor="middle">Report</text><text class="fc-s" x="170" y="545" text-anchor="middle">built from the status of each finding</text></g></svg>
+    <figcaption>One post, from the agent's command to the report. The dashed box is model text: the verdict is the orchestrator model's opinion.</figcaption>
+  </figure>
+  <div class="code"><div class="cap">inside the agents container</div>
+<pre><span class="p">$</span> python3 /skills/rea-swarm/scripts/swarm-post <span class="k">--kind</span> ioc <span class="k">--title</span> <span class="s">"Update URL"</span> \
+    <span class="k">--value</span> <span class="s">"https://updates.example.test/check"</span> <span class="k">--off</span> <span class="n">0x95</span> <span class="k">--confidence</span> high</pre></div>
+  <div class="prose"><p>The nonce is an HMAC of a per-run key over the role and the task number, so a line copied from the sample's strings is ignored. Agents have to run the command without a pipe or a redirect: either one cuts the line, and the post is lost.</p></div>
+
+  <h2 id="levels">Evidence levels<a class="anc" href="#levels" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Level</th><th>What the board checked</th><th>In the report</th></tr></thead>
+    <tbody>
+      <tr><td><span class="lvl ok">byte-checked</span></td><td>The bytes at <code>--off</code> equal <code>--value</code> in SwarmLabRE's copy of the file. Only <code>ioc</code>, <code>crypto</code> and <code>config</code> posts can reach it, because only their value is bytes of the file.</td><td>Stated as fact.</td></tr>
+      <tr><td><span class="lvl ci">call-cited</span></td><td>Every <code>--call</code> id is in the run's tool log and its output appeared in that agent's session, and the <code>--func</code> is in the function list.</td><td>Stated as fact.</td></tr>
+      <tr><td><span class="lvl un">claimed</span></td><td>Neither check passed.</td><td>Left out of <code>report.html</code>; listed as a lead in <code>report.md</code> and <code>report.json</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+  <p>An agent's <code>--confidence</code> is stored with the post and has no effect on the level.</p>
+  <p>A call-cited finding does not prove that the agent made the call. The board matches the call's output by text in the agent's session; <a href="security.html">Security</a> explains what that leaves open.</p>
+  <p>Most of an APK is compressed, so a string read from decompiled code is posted without <code>--off</code>. The post cites the <code>--call</code> that printed the string and names the class or <code>CLASS.method</code> in <code>--func</code>.</p>
+  </div>
+
+  <h2 id="status">Status<a class="anc" href="#status" aria-label="Link to this section">#</a></h2>
+  <div class="prose"><p>The report uses the status, which combines the level with any dispute on the finding.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>Status</th><th>When</th><th>In the report</th></tr></thead>
+    <tbody>
+      <tr><td><span class="lvl ok">verified</span></td><td>byte-checked or call-cited, with no open dispute.</td><td>In the body.</td></tr>
+      <tr><td><span class="lvl un">unconfirmed</span></td><td>claimed, or a technique whose findings include no checked one.</td><td>Left out of <code>report.html</code>; listed as a lead in <code>report.md</code> and <code>report.json</code>.</td></tr>
+      <tr><td><span class="lvl un">disputed</span></td><td>Another agent disputed it and the verdict was <code>unresolved</code>, or there was no verdict.</td><td>In the body, marked as disputed.</td></tr>
+      <tr><td><span class="lvl bad">refuted</span></td><td>Disputed, and the verdict was <code>wrong</code>.</td><td>Left out; counted as refuted.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="disputes">Disputes<a class="anc" href="#disputes" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+  <p>Any role except the Reporter can dispute a finding with <code>--kind dispute --of f12 --reason "..."</code>. With <code>max_rounds = 2</code> the orchestrator model may plan a second round, mostly to settle disputes, and gives each disputed finding a verdict:</p>
+  <ul>
+    <li><code>stands</code>: the finding holds, and its status goes back to what its level says.</li>
+    <li><code>wrong</code>: the dispute is right, and the finding is refuted.</li>
+    <li><code>unresolved</code>: the finding stays disputed.</li>
+  </ul>
+  <p>The verdict is model text and is labelled that way. It can change a finding's status but not its evidence level.</p>
+  </div>
+
+  <h2 id="example">The demo run's board<a class="anc" href="#example" aria-label="Link to this section">#</a></h2>
+  <div class="prose"><p>The recorded run of <code>demo2.elf</code> ends with six findings, five byte-checked and one unconfirmed, plus one refused post.</p></div>
+  <figure class="fig fig-chart">
+    <svg viewBox="0 0 460 296" role="img" aria-label="Posts in the demo run by agent. Triage: none. Static: disputed f1, verdict stands. Strings/IOC: f2, f3, f4, f5, all byte-checked. Crypto/Config: f1 byte-checked, x1 refused as a duplicate. Behaviour: f6, claimed. Reporter: no findings."><g><rect class="u-ok" x="0" y="4" width="12" height="12" rx="3"/><text class="c-leg" x="18" y="14">byte-checked</text></g><g><rect class="u-un" x="130" y="4" width="12" height="12" rx="3"/><text class="c-leg" x="148" y="14">claimed</text></g><g><rect class="u-bad" x="225" y="4" width="12" height="12" rx="3"/><text class="c-leg" x="243" y="14">refused</text></g><text class="c-row" x="0" y="60">Triage</text><text class="c-note" x="128" y="60">no posts</text><text class="c-row" x="0" y="102">Static</text><text class="c-note" x="128" y="102">disputed f1; the verdict was stands</text><text class="c-row" x="0" y="144">Strings/IOC</text><g><title>f2 Update URL: byte-checked at offset 149</title><rect class="u-ok" x="128" y="124" width="32" height="30" rx="4"/><text class="u-id" x="144" y="143.5" text-anchor="middle">f2</text></g><g><title>f3 Documentation IP: byte-checked at offset 218</title><rect class="u-ok" x="166" y="124" width="32" height="30" rx="4"/><text class="u-id" x="182" y="143.5" text-anchor="middle">f3</text></g><g><title>f4 Temp path: byte-checked at offset 201</title><rect class="u-ok" x="204" y="124" width="32" height="30" rx="4"/><text class="u-id" x="220" y="143.5" text-anchor="middle">f4</text></g><g><title>f5 Wide library name: byte-checked at offset 230 (UTF-16)</title><rect class="u-ok" x="242" y="124" width="32" height="30" rx="4"/><text class="u-id" x="258" y="143.5" text-anchor="middle">f5</text></g><text class="c-row" x="0" y="186">Crypto/Config</text><g><title>f1 Lock name: byte-checked at offset 184; disputed by Static, the verdict was stands</title><rect class="u-ok" x="128" y="166" width="32" height="30" rx="4"/><text class="u-id" x="144" y="185.5" text-anchor="middle">f1</text></g><g><title>x1 Lock name: refused as a duplicate</title><rect class="u-bad" x="166" y="166" width="32" height="30" rx="4"/><text class="u-id2" x="182" y="185.5" text-anchor="middle">x1</text></g><text class="c-row" x="0" y="228">Behaviour</text><g><title>f6 No code reads the strings: claimed, no byte or call evidence</title><rect class="u-un" x="128" y="208" width="32" height="30" rx="4"/><text class="u-id" x="144" y="227.5" text-anchor="middle">f6</text></g><text class="c-row" x="0" y="270">Reporter</text><text class="c-note" x="128" y="270">writes the summary; posts no findings</text></svg>
+    <figcaption>Every post of the recorded demo run, by agent, from <code>out/board.json</code>. Hover a square for its title.</figcaption>
+    <details class="tv"><summary>Show as a table</summary><div class="tw"><table>
+      <thead><tr><th>Agent</th><th>Post</th><th>Title</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Crypto/Config</td><td><code>f1</code></td><td>Lock name</td><td><span class="lvl ok">byte-checked</span>; disputed by Static, the verdict was <code>stands</code></td></tr>
+        <tr><td>Strings/IOC</td><td><code>f2</code></td><td>Update URL</td><td><span class="lvl ok">byte-checked</span></td></tr>
+        <tr><td>Strings/IOC</td><td><code>f3</code></td><td>Documentation IP</td><td><span class="lvl ok">byte-checked</span></td></tr>
+        <tr><td>Strings/IOC</td><td><code>f4</code></td><td>Temp path</td><td><span class="lvl ok">byte-checked</span></td></tr>
+        <tr><td>Strings/IOC</td><td><code>f5</code></td><td>Wide library name</td><td><span class="lvl ok">byte-checked</span></td></tr>
+        <tr><td>Behaviour</td><td><code>f6</code></td><td>No code reads the strings</td><td><span class="lvl un">claimed</span></td></tr>
+        <tr><td>Crypto/Config</td><td><code>x1</code></td><td>Lock name</td><td><span class="lvl bad">refused</span>: <code>duplicate</code></td></tr>
+      </tbody></table></div></details>
+  </figure>
+  <div class="prose"><p>Finding <code>f2</code> in <code>out/board.json</code>:</p></div>
+  <div class="code"><div class="cap">demo/sfaef16e6/out/board.json</div>
+<pre>{
+  <span class="k">"id"</span>: <span class="s">"f2"</span>, <span class="k">"agent"</span>: <span class="s">"ioc"</span>, <span class="k">"kind"</span>: <span class="s">"ioc"</span>,
+  <span class="k">"title"</span>: <span class="s">"Update URL"</span>,
+  <span class="k">"value"</span>: <span class="s">"https://updates.example.test/check"</span>, <span class="k">"enc"</span>: <span class="s">"text"</span>,
+  <span class="k">"off"</span>: <span class="n">149</span>, <span class="k">"len"</span>: <span class="n">34</span>,
+  <span class="k">"evidence"</span>: [{ <span class="k">"off"</span>: <span class="n">149</span>, <span class="k">"len"</span>: <span class="n">34</span>, <span class="k">"section"</span>: <span class="s">".rodata"</span> }],
+  <span class="k">"confidence"</span>: <span class="s">"high"</span>,
+  <span class="k">"level"</span>: <span class="s">"byte-checked"</span>, <span class="k">"status"</span>: <span class="s">"verified"</span>, <span class="k">"disputes"</span>: []
+}</pre></div>
+  <div class="prose"><p>In round 2 the Crypto/Config agent posted the lock name <code>Global\Demo2Lock</code> again. The board refused it as a duplicate and kept the post:</p></div>
+  <div class="code"><div class="cap">demo/sfaef16e6/out/board.json, "rejected"</div>
+<pre>{ <span class="k">"id"</span>: <span class="s">"x1"</span>, <span class="k">"agent"</span>: <span class="s">"crypto"</span>, <span class="k">"kind"</span>: <span class="s">"config"</span>, <span class="k">"title"</span>: <span class="s">"Lock name"</span>,
+  <span class="k">"code"</span>: <span class="s">"duplicate"</span>, <span class="k">"why"</span>: <span class="s">"This agent had already posted the same finding."</span> }</pre></div>
+
+  <h2 id="refused">Refused posts<a class="anc" href="#refused" aria-label="Link to this section">#</a></h2>
+  <div class="prose"><p>A refused post stays on the board under an <code>x</code> id with one of these codes. Agents can read it in <code>/prep/board.json</code> and post again with better evidence.</p></div>
+  <div class="tw"><table>
+    <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>bad_format</code></td><td>The post was not a well-formed finding.</td></tr>
+      <tr><td><code>bytes_mismatch</code></td><td>The bytes at that offset are not the value given.</td></tr>
+      <tr><td><code>off_out_of_range</code></td><td>The offset or length lies outside the file.</td></tr>
+      <tr><td><code>call_unknown</code></td><td>A cited tool call was never made in this run.</td></tr>
+      <tr><td><code>call_not_yours</code></td><td>A cited tool call was not seen in this agent's own session.</td></tr>
+      <tr><td><code>func_unknown</code></td><td>The function is not in SwarmLabRE's function list.</td></tr>
+      <tr><td><code>cap_exceeded</code></td><td>This agent or the run reached its limit of findings.</td></tr>
+      <tr><td><code>duplicate</code></td><td>This agent had already posted the same finding.</td></tr>
+      <tr><td><code>role_not_allowed</code></td><td>The Reporter does not post disputes (it only writes the summary).</td></tr>
+      <tr><td><code>technique_unknown</code></td><td>The title does not start with an ATT&amp;CK technique id that exists (see <code>/prep/attack.tsv</code>).</td></tr>
+      <tr><td><code>technique_retired</code></td><td>That ATT&amp;CK id was retired; the hint names its replacement.</td></tr>
+      <tr><td><code>technique_mismatch</code></td><td>The name after the ATT&amp;CK id is not MITRE's name for that id: the id or the name is wrong.</td></tr>
+      <tr><td><code>technique_domain</code></td><td>That technique id belongs to the other ATT&amp;CK matrix (Mobile for an APK, Enterprise for ELF and PE).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="techniques">ATT&amp;CK techniques<a class="anc" href="#techniques" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+  <p>A <code>technique</code> post starts its title with an ATT&amp;CK id and MITRE's name for it, which the agent looks up with <code>swarm-attack</code>. The board checks both against the pinned table in <code>swarmlabre/data/attack.json</code> and against the matrix for the file type: Enterprise for ELF and PE, Mobile for APK.</p>
+  <p>The post also lists the findings it rests on. If none of them is verified or disputed, the technique is <span class="lvl un">unconfirmed</span>, whatever its own level.</p>
+  </div>
+
+  <h2 id="files">Files<a class="anc" href="#files" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>File</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td><code>board.jsonl</code></td><td>The board's decisions, in order.</td></tr>
+      <tr><td><code>inputs.jsonl</code></td><td>Every input the board received, with the clock value it saw. A replay feeds these back in.</td></tr>
+      <tr><td><code>out/board.json</code></td><td>The final board: findings, refused posts, counts and ATT&amp;CK techniques.</td></tr>
+      <tr><td><code>/prep/board.json</code></td><td>The board as agents see it during the run. Agents wrote it about a hostile sample, so it is data and never instructions.</td></tr>
+    </tbody>
+  </table></div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="roles.html"><small>Previous</small>The six roles</a>
+    <a class="nx" href="reports.html"><small>Next</small>Reports</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/board.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#one-post">How a post becomes a finding</a></li>
+    <li><a href="#levels">Evidence levels</a></li>
+    <li><a href="#status">Status</a></li>
+    <li><a href="#disputes">Disputes</a></li>
+    <li><a href="#example">The demo run's board</a></li>
+    <li><a href="#refused">Refused posts</a></li>
+    <li><a href="#techniques">ATT&amp;CK techniques</a></li>
+    <li><a href="#files">Files</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

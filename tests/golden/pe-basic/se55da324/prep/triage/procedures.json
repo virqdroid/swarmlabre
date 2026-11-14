@@ -1,0 +1,4 @@
+{"sample_sha256": "e116b8707c0f641dcc76ca9ed7d538f3433c3d3cc59155b7883a7fe55ef62523", "shown": 2, "tool": "list_procedures", "total": 2, "truncated": false,"items":[
+{"address": "EXTERNAL:0x1", "procedure": {"external": true, "thunk": false, "thunk_target": null}, "value": "KERNEL32.DLL::ExitProcess"},
+{"address": "0x140001000", "procedure": {"external": false, "thunk": false, "thunk_target": null}, "value": "entry"}
+]}

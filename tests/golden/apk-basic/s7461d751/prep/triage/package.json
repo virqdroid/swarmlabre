@@ -1,0 +1,30 @@
+{
+ "result": {
+  "class_count": 1,
+  "engine": {
+   "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+   "heap_limit_mib": 1024,
+   "name": "jadx-headless-mcp",
+   "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+   "version": "0.7.1",
+   "worker_count": 1
+  },
+  "manifest": {
+   "reported_total_bytes": null,
+   "status": "complete",
+   "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\" package=\"com.example.demo\">\n    <uses-permission android:name=\"android.permission.INTERNET\"/>\n    <application android:label=\"Demo\">\n        <activity\n            android:name=\"com.example.demo.MainActivity\"\n            android:exported=\"true\"/>\n    </application>\n</manifest>"
+  },
+  "min_sdk": null,
+  "package_name": "com.example.demo",
+  "permissions": [
+   "android.permission.INTERNET"
+  ],
+  "resource_count": 4,
+  "signature_verification": "not_performed",
+  "target_sdk": null,
+  "version_code": null,
+  "version_name": null
+ },
+ "sample_sha256": "3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607",
+ "tool": "inspect_android_package"
+}

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>The sandbox: SwarmLabRE docs</title>
+<meta name="description" content="How SwarmLabRE sandboxes a run: two containers with no network and a read-only root, what each can reach, the checks before and during a run, and what the sandbox does not claim.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html" aria-current="page">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Models and sandbox / The sandbox</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html" aria-current="page">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="models.html">Models and sandbox</a> / The sandbox</p>
+  <h1>The sandbox</h1>
+  <p class="lead">A run uses two containers. Both have no network, a read-only root and no capabilities, and the host is the only trusted part.</p>
+
+  <h2 id="boundary">The trust boundary<a class="anc" href="#boundary" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>A run reads a file that may be hostile and lets a language model act on it, so the sandbox assumes the sample, the agents and the tools' output are hostile. The host process is the only trusted part. It holds the model's key, the board and the reports.</p>
+</div>
+  <figure class="fig anim">
+    <svg class="fc-wide" viewBox="0 0 780 270" role="img" aria-label="Trust boundary diagram: the host process is trusted and starts and feeds three things below it. The tools container and the agents container both have no network and read the sample and the prepared files read-only. The model endpoint is outside the host and only the gate reaches it, adding the key."><g class="st" style="--i:0"><rect class="fc-box" x="100.5" y="0.5" width="579" height="95" rx="8"/><text class="fc-t" x="390.0" y="22" text-anchor="middle">Host: trusted</text><text class="fc-s" x="390.0" y="42" text-anchor="middle">The SwarmLabRE process. It parses the sample, runs the board, holds the gate and the</text><text class="fc-s" x="390.0" y="58" text-anchor="middle">key, and writes the reports.</text></g><g class="st" style="--i:1"><path class="fc-a" d="M390.0 96V123.0H120.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box fc-bad fc-model" x="0.5" y="150.5" width="239" height="119" rx="8"/><text class="fc-t" x="120.0" y="172" text-anchor="middle">Tools container</text><text class="fc-s" x="120.0" y="192" text-anchor="middle">--network none. Reads the sample</text><text class="fc-s" x="120.0" y="208" text-anchor="middle">at /in, read-only. Runs Ghidra,</text><text class="fc-s" x="120.0" y="224" text-anchor="middle">jadx, Apktool and rea. Has no</text><text class="fc-s" x="120.0" y="240" text-anchor="middle">model socket.</text></g><g class="st" style="--i:3"><path class="fc-a" d="M390.0 96V149" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box fc-bad fc-model" x="270.5" y="150.5" width="239" height="119" rx="8"/><text class="fc-t" x="390.0" y="172" text-anchor="middle">Agents container</text><text class="fc-s" x="390.0" y="192" text-anchor="middle">--network none. Six roles, one uid</text><text class="fc-s" x="390.0" y="208" text-anchor="middle">each. Reads /in and /prep,</text><text class="fc-s" x="390.0" y="224" text-anchor="middle">read-only. Reaches the tool socket</text><text class="fc-s" x="390.0" y="240" text-anchor="middle">and the model socket.</text></g><g class="st" style="--i:5"><path class="fc-a" d="M390.0 96V123.0H660.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box fc-model" x="540.5" y="150.5" width="239" height="119" rx="8"/><text class="fc-t" x="660.0" y="172" text-anchor="middle">Model endpoint</text><text class="fc-s" x="660.0" y="192" text-anchor="middle">Outside the host. The gate sends</text><text class="fc-s" x="660.0" y="208" text-anchor="middle">it requests and adds the key. No</text><text class="fc-s" x="660.0" y="224" text-anchor="middle">container reaches it.</text></g></svg>
+    <svg class="fc-tall" viewBox="0 0 340 410" role="img" aria-label="The same diagram, with the three boxes under the host narrower."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="339" height="99" rx="8"/><text class="fc-t" x="170.0" y="22" text-anchor="middle">Host: trusted</text><text class="fc-s" x="170.0" y="42" text-anchor="middle">The SwarmLabRE process. It parses the sample, runs</text><text class="fc-s" x="170.0" y="58" text-anchor="middle">the board, holds the gate and the key, and writes</text><text class="fc-s" x="170.0" y="74" text-anchor="middle">the reports.</text></g><g class="st" style="--i:1"><path class="fc-a" d="M170.0 100V125.0H54.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box fc-bad fc-model" x="0.5" y="150.5" width="107" height="249" rx="8"/><text class="fc-t" x="54.0" y="172" text-anchor="middle">Tools</text><text class="fc-t" x="54.0" y="188" text-anchor="middle">container</text><text class="fc-s" x="54.0" y="208" text-anchor="middle">--network</text><text class="fc-s" x="54.0" y="224" text-anchor="middle">none. Reads</text><text class="fc-s" x="54.0" y="240" text-anchor="middle">the sample at</text><text class="fc-s" x="54.0" y="256" text-anchor="middle">/in,</text><text class="fc-s" x="54.0" y="272" text-anchor="middle">read-only.</text><text class="fc-s" x="54.0" y="288" text-anchor="middle">Runs Ghidra,</text><text class="fc-s" x="54.0" y="304" text-anchor="middle">jadx, Apktool</text><text class="fc-s" x="54.0" y="320" text-anchor="middle">and rea. Has</text><text class="fc-s" x="54.0" y="336" text-anchor="middle">no model</text><text class="fc-s" x="54.0" y="352" text-anchor="middle">socket.</text></g><g class="st" style="--i:3"><path class="fc-a" d="M170.0 100V149" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box fc-bad fc-model" x="116.5" y="150.5" width="107" height="249" rx="8"/><text class="fc-t" x="170.0" y="172" text-anchor="middle">Agents</text><text class="fc-t" x="170.0" y="188" text-anchor="middle">container</text><text class="fc-s" x="170.0" y="208" text-anchor="middle">--network</text><text class="fc-s" x="170.0" y="224" text-anchor="middle">none. Six</text><text class="fc-s" x="170.0" y="240" text-anchor="middle">roles, one</text><text class="fc-s" x="170.0" y="256" text-anchor="middle">uid each.</text><text class="fc-s" x="170.0" y="272" text-anchor="middle">Reads /in and</text><text class="fc-s" x="170.0" y="288" text-anchor="middle">/prep,</text><text class="fc-s" x="170.0" y="304" text-anchor="middle">read-only.</text><text class="fc-s" x="170.0" y="320" text-anchor="middle">Reaches the</text><text class="fc-s" x="170.0" y="336" text-anchor="middle">tool socket</text><text class="fc-s" x="170.0" y="352" text-anchor="middle">and the model</text><text class="fc-s" x="170.0" y="368" text-anchor="middle">socket.</text></g><g class="st" style="--i:5"><path class="fc-a" d="M170.0 100V125.0H286.0V149" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box fc-model" x="232.5" y="150.5" width="107" height="249" rx="8"/><text class="fc-t" x="286.0" y="172" text-anchor="middle">Model</text><text class="fc-t" x="286.0" y="188" text-anchor="middle">endpoint</text><text class="fc-s" x="286.0" y="208" text-anchor="middle">Outside the</text><text class="fc-s" x="286.0" y="224" text-anchor="middle">host. The</text><text class="fc-s" x="286.0" y="240" text-anchor="middle">gate sends it</text><text class="fc-s" x="286.0" y="256" text-anchor="middle">requests and</text><text class="fc-s" x="286.0" y="272" text-anchor="middle">adds the key.</text><text class="fc-s" x="286.0" y="288" text-anchor="middle">No container</text><text class="fc-s" x="286.0" y="304" text-anchor="middle">reaches it.</text></g></svg>
+    <figcaption>What the agents can reach. Dashed red boxes are containers with no network; the dashed grey box is outside the host. Arrows go from the host to what it starts or calls.</figcaption>
+  </figure>
+  <h2 id="flags">What every container gets<a class="anc" href="#flags" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td><code>--network none</code></td><td>the only network the code will build; a profile that asks for another one is refused</td></tr>
+      <tr><td><code>--read-only</code></td><td>the root file system cannot be written; only the tmpfs folders below can</td></tr>
+      <tr><td><code>--cap-drop ALL</code></td><td>no Linux capabilities</td></tr>
+      <tr><td><code>--security-opt no-new-privileges</code></td><td>a process cannot gain privileges</td></tr>
+      <tr><td><code>--user</code></td><td>the uid and gid of the host user, not root; each agent role then runs as its own uid</td></tr>
+      <tr><td><code>--memory, --cpus, --pids-limit</code></td><td>limits on memory (swap included), processors and processes</td></tr>
+      <tr><td><code>--tmpfs</code></td><td><code>/tmp</code>, <code>/home/agent</code> and the working folder, with <code>nosuid</code> and <code>nodev</code>, and sizes set per run</td></tr>
+      <tr><td><code>--init --rm</code></td><td>the container removes itself when it ends</td></tr>
+    </tbody>
+  </table></div>
+  <h2 id="mounts">What each container can reach<a class="anc" href="#mounts" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>Container</th><th>Mounted</th><th>Mode</th></tr></thead>
+    <tbody>
+      <tr><td>tools</td><td><code>/in</code>: the run's input folder, with the sample</td><td>read-only</td></tr>
+      <tr><td>tools</td><td><code>/ag</code>: the folder where the tool server puts its socket</td><td>read-write</td></tr>
+      <tr><td>tools</td><td><code>/skills/rea-reverse-engineering</code></td><td>read-only</td></tr>
+      <tr><td>agents</td><td><code>/in</code>, <code>/prep</code> (the prepared files), <code>/cfg</code> (the agent's settings) and <code>/skills/*</code></td><td>read-only</td></tr>
+      <tr><td>agents</td><td><code>/tools-sock</code>: the tool server's socket folder</td><td>read-only</td></tr>
+      <tr><td>agents</td><td><code>/run/proxy</code>: the folder with the model socket</td><td>read-only</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<p>The tools container has no model socket. A socket in a read-only mount still connects, so the proxy mount is the folder and not the file. Each agent role also gets a private tmpfs for its working folder and its home, owned by its own uid and readable by no other, so one role cannot plant files in another's folders. The two containers never mount the Docker socket, and neither holds a key.</p>
+</div>
+  <h2 id="network">No network, and the checks before and during a run<a class="anc" href="#network" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>Before a run starts, a throwaway container with <code>--network none</code> must show no interface besides loopback and must fail to connect to a public address. The result is kept for 60 seconds, or 8 seconds after a failure. A check that gives no clear answer counts as a failure, so a run does not start until it can run.</p>
+<p>After each container starts, SwarmLabRE inspects it and stops the run when one of these holds:</p>
+</div>
+  <div class="prose">
+<ul>
+  <li>the root file system is writable;</li>
+  <li>capabilities are kept;</li>
+  <li>new privileges are allowed;</li>
+  <li>the container is privileged;</li>
+  <li>it has a network other than none;</li>
+  <li>the Docker socket is mounted;</li>
+  <li>the proxy socket folder is writable;</li>
+  <li>there is no memory limit;</li>
+  <li>there is no process limit;</li>
+  <li>it runs as root.</li>
+</ul>
+</div>
+  <div class="prose">
+<p>It also stops the run when the inspect output contains the model's key.</p>
+</div>
+  <h2 id="model">How the model reaches the agents<a class="anc" href="#model" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>pi talks to <code>127.0.0.1:8801</code> inside the agents container. A forwarder script, <code>sock-fwd.js</code>, listens on loopback only and connects to one fixed path, <code>/run/proxy/model.sock</code>. That is the gate's socket on the host, in a folder only the owner can enter, and the gate drops a connection from any other uid. The gate adds the key. <a href="models.html">Use a real model</a> lists what else the gate changes.</p>
+</div>
+  <h2 id="untrusted">What comes back<a class="anc" href="#untrusted" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>Files a container can write are untrusted. SwarmLabRE reads the tools container's output as a tar stream and never extracts it, with at most 64 MiB and 400 files. It resolves paths inside the container, opens files with <code>O_NOFOLLOW</code> and caps every size it reads. An agent's output is read as text. A finding is taken only from a line that carries that task's own nonce, which a string inside the sample cannot forge. What an agent writes is cleaned, capped and shown as text. <a href="board.html">The board</a> says how a post becomes a finding.</p>
+</div>
+  <h2 id="limits">What the sandbox does not do<a class="anc" href="#limits" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<ul>
+  <li>Docker is not a perfect boundary. A flaw in the kernel or the container runtime could let a process leave a container. Run SwarmLabRE on a machine and an account where that would be survivable.</li>
+  <li>No check in the repository involves real malware, so how Ghidra, jadx and the agents behave on hostile files from the wild is not verified.</li>
+  <li>The tool socket binds only some tools to the sample. The Android tools accept only the pinned sample path; others that take a path, such as <code>inspect_artifact</code>, are allowed but not bound, so a steered agent could point one at another file inside the tools container.</li>
+  <li>A call citation is attributed by text. An agent that can run shell commands can print another role's call id, and SwarmLabRE cannot tell that from a call of its own.</li>
+</ul>
+</div>
+  <div class="prose">
+<p>The <a href="security.html">Security</a> page holds the whole threat model. <a href="https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md">SECURITY.md</a> says how to report a problem.</p>
+</div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="mock-model.html"><small>Previous</small>The mock model</a>
+    <a class="nx" href="cli.html"><small>Next</small>Command line</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/sandbox.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#boundary">The trust boundary</a></li>
+    <li><a href="#flags">What every container gets</a></li>
+    <li><a href="#mounts">What each container can reach</a></li>
+    <li><a href="#network">No network, and the checks before and during a run</a></li>
+    <li><a href="#model">How the model reaches the agents</a></li>
+    <li><a href="#untrusted">What comes back</a></li>
+    <li><a href="#limits">What the sandbox does not do</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

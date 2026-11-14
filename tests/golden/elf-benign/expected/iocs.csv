@@ -1,0 +1,7 @@
+tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+AMBER,Hash values,MD5,cda5b751da9f89c6c757462ce25ced0a,cda5b751da9f89c6c757462ce25ced0a,computed,,,Sample file. Computed by swarmlabre from the file itself.,sf549b7df
+AMBER,Hash values,SHA-1,6ffc8f0743822f27e102ac07b83b1aadda0f5d7f,6ffc8f0743822f27e102ac07b83b1aadda0f5d7f,computed,,,Sample file. Computed by swarmlabre from the file itself.,sf549b7df
+AMBER,Hash values,SHA-256,c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e,c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e,computed,,,Sample file. Computed by swarmlabre from the file itself.,sf549b7df
+AMBER,URLs,URL,http://c2.example.test/beacon,hxxp://c2[.]example[.]test/beacon,byte-checked,0x95,f2,"C2 URL. byte-checked, offset 0x95, finding f2.",sf549b7df
+AMBER,Host artifacts,Windows path (fragment),Mutex\Global\DemoSwarmMutex,Mutex\Global\DemoSwarmMutex,byte-checked,0xb3,f4,"Mutex name. byte-checked, offset 0xb3, finding f4.",sf549b7df
+AMBER,Other strings,String,cmd.exe /c echo demo,cmd.exe /c echo demo,byte-checked,0xcf,f5,"Command line. byte-checked, offset 0xcf, finding f5.",sf549b7df

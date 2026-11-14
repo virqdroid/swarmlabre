@@ -1,0 +1,480 @@
+{
+ "id": "sfaef16e6",
+ "status": "done",
+ "waiting": null,
+ "reason": null,
+ "created": 1794576455.8672907,
+ "started": 1794576455.8677633,
+ "finished": 1794576486.3779652,
+ "brief": "What does this sample do? Name its most important functions and say what each one is for.",
+ "roles": [
+  "triage",
+  "static",
+  "ioc",
+  "crypto",
+  "behaviour",
+  "reporter"
+ ],
+ "parallel": {
+  "n": 4,
+  "trait": 4,
+  "override": true
+ },
+ "sample": {
+  "name": "demo2.elf",
+  "size": 552,
+  "sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+  "kind": "elf",
+  "format": "ELF64 x86-64",
+  "snapshot": [
+   {
+    "label": "File type",
+    "value": "ELF64 x86-64"
+   },
+   {
+    "label": "Size",
+    "value": "552 bytes"
+   },
+   {
+    "label": "MD5",
+    "value": "d0e6226b2c5e01d1f8bc9c46c32591be"
+   },
+   {
+    "label": "SHA-1",
+    "value": "e7d9e12462cea4c74018b33cd19b685143b0595e"
+   },
+   {
+    "label": "SHA-256",
+    "value": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564"
+   },
+   {
+    "label": "Entropy",
+    "value": "2.81 bits per byte over the whole file"
+   },
+   {
+    "label": "High-entropy data",
+    "value": "None: no part of the file is at 7.2 bits per byte or more"
+   },
+   {
+    "label": "Entry point",
+    "value": "0x400078"
+   },
+   {
+    "label": "Section headers",
+    "value": "4"
+   }
+  ]
+ },
+ "model": {
+  "backend": "mock",
+  "model": "mock-1"
+ },
+ "report": {
+  "tlp": "AMBER",
+  "org": "",
+  "contact": ""
+ },
+ "steps": [
+  {
+   "step": "sample",
+   "status": "ok",
+   "msg": "ELF64 x86-64, 4f514261553c",
+   "t": 1794576455.9
+  },
+  {
+   "step": "host_parse",
+   "status": "ok",
+   "msg": "5 regions, 3 cells of 256 bytes, 7 strings",
+   "t": 1794576455.9
+  },
+  {
+   "step": "tools",
+   "status": "ok",
+   "msg": "6 GiB, 4 cpus",
+   "t": 1794576456.2
+  },
+  {
+   "step": "prep_triage",
+   "status": "ok",
+   "msg": "",
+   "t": 1794576463.4
+  },
+  {
+   "step": "prep_functions",
+   "status": "ok",
+   "msg": "2 functions",
+   "t": 1794576463.4
+  },
+  {
+   "step": "prep_decompile",
+   "status": "ok",
+   "msg": "2 of 2 functions",
+   "t": 1794576463.5
+  },
+  {
+   "step": "prep_edges",
+   "status": "ok",
+   "msg": "1 edges",
+   "t": 1794576463.5
+  },
+  {
+   "step": "copy_out",
+   "status": "ok",
+   "msg": "15 files, 10 KiB",
+   "t": 1794576463.6
+  },
+  {
+   "step": "layout",
+   "status": "ok",
+   "msg": "2 of 2 functions, 2 placed on the map, 1 edges",
+   "t": 1794576463.6
+  },
+  {
+   "step": "agents",
+   "status": "ok",
+   "msg": "1433 MiB, model mock-1, 4 requests at a time",
+   "t": 1794576464.0
+  }
+ ],
+ "tasks": [
+  {
+   "n": 1,
+   "role": "triage",
+   "uid": 20001,
+   "state": "done",
+   "started": 1794576463.9614036,
+   "ended": 1794576464.4681044,
+   "tokens": {
+    "in": 7576,
+    "out": 23
+   },
+   "retries": 0,
+   "tools": 2,
+   "model_ms": 1,
+   "tool_ms": 17,
+   "wait_ms": 0,
+   "findings": 0,
+   "text": "Triage done: a tiny static ELF.",
+   "stop": null,
+   "notes": 0,
+   "round": 1,
+   "steers": 0
+  },
+  {
+   "n": 2,
+   "role": "static",
+   "uid": 20002,
+   "state": "done",
+   "started": 1794576463.9704046,
+   "ended": 1794576484.5257478,
+   "tokens": {
+    "in": 10434,
+    "out": 34
+   },
+   "retries": 0,
+   "tools": 3,
+   "model_ms": 1,
+   "tool_ms": 20038,
+   "wait_ms": 0,
+   "findings": 0,
+   "text": "Static done: disputed the first finding.",
+   "stop": null,
+   "notes": 0,
+   "round": 1,
+   "steers": 0
+  },
+  {
+   "n": 3,
+   "role": "ioc",
+   "uid": 20003,
+   "state": "done",
+   "started": 1794576463.970741,
+   "ended": 1794576464.582032,
+   "tokens": {
+    "in": 19854,
+    "out": 57
+   },
+   "retries": 0,
+   "tools": 6,
+   "model_ms": 3,
+   "tool_ms": 110,
+   "wait_ms": 0,
+   "findings": 4,
+   "text": "Strings done: four indicators posted.",
+   "stop": null,
+   "notes": 0,
+   "round": 1,
+   "steers": 0
+  },
+  {
+   "n": 4,
+   "role": "crypto",
+   "uid": 20004,
+   "state": "done",
+   "started": 1794576463.971046,
+   "ended": 1794576464.4747345,
+   "tokens": {
+    "in": 7524,
+    "out": 28
+   },
+   "retries": 0,
+   "tools": 2,
+   "model_ms": 1,
+   "tool_ms": 52,
+   "wait_ms": 0,
+   "findings": 1,
+   "text": "Crypto and config done: one configuration string.",
+   "stop": null,
+   "notes": 0,
+   "round": 1,
+   "steers": 0
+  },
+  {
+   "n": 5,
+   "role": "behaviour",
+   "uid": 20005,
+   "state": "done",
+   "started": 1794576464.3274522,
+   "ended": 1794576464.8531654,
+   "tokens": {
+    "in": 13732,
+    "out": 19
+   },
+   "retries": 0,
+   "tools": 2,
+   "model_ms": 0,
+   "tool_ms": 43,
+   "wait_ms": 0,
+   "findings": 1,
+   "text": "Behaviour done.",
+   "stop": null,
+   "notes": 0,
+   "round": 1,
+   "steers": 0
+  },
+  {
+   "n": 6,
+   "role": "crypto",
+   "uid": 20004,
+   "state": "done",
+   "started": 1794576484.537581,
+   "ended": 1794576485.0750213,
+   "tokens": {
+    "in": 7724,
+    "out": 28
+   },
+   "retries": 0,
+   "tools": 2,
+   "model_ms": 1,
+   "tool_ms": 32,
+   "wait_ms": 0,
+   "findings": 0,
+   "text": "Crypto and config done: one configuration string.",
+   "stop": null,
+   "notes": 0,
+   "round": 2,
+   "steers": 0,
+   "goal": "Look again for configuration values.",
+   "scope": "the read-only data section"
+  },
+  {
+   "n": 7,
+   "role": "reporter",
+   "uid": 20006,
+   "state": "done",
+   "started": 1794576485.0859792,
+   "ended": 1794576485.593456,
+   "tokens": {
+    "in": 2505,
+    "out": 132
+   },
+   "retries": 0,
+   "tools": 0,
+   "model_ms": 1,
+   "tool_ms": 0,
+   "wait_ms": 0,
+   "findings": 0,
+   "text": "## Executive summary\nA tiny demo program with made-up network names. It only exits when run.\n\n## What it is\nA small static 64-bit Linux program built for demonstration.\n\n## Capabilities\n- It names web and file locations, but nothing in the file uses them.\n\n## Recommendations\n- Treat it as a test file.\n\n## What we don't know\n- Whether anything else loads it.\n\nASSESSMENT {\"verdict\": \"suspicious\", \"confidence\": \"moderate\", \"family\": \"\", \"basis\": [\"f1\", \"f2\", \"f3\"], \"rationale\": \"Made-up network strings; the code only exits.\"}",
+   "stop": null,
+   "notes": 0,
+   "round": 1,
+   "steers": 0
+  }
+ ],
+ "peaks": {
+  "tools_mib": 933,
+  "agents_mib": 325
+ },
+ "limits": {
+  "tools_gib": 6.0,
+  "agents_gib": 1.4,
+  "tools_cpus": 4
+ },
+ "native": true,
+ "phase": "merge",
+ "env": {
+  "rea": "6.4.0",
+  "ghidra": "12.1.4",
+  "apktool": "3.0.3",
+  "jadx": "jadx-headless-mcp 0.7.1",
+  "tool": "0.1.0",
+  "attack": "20.0"
+ },
+ "sampling": {
+  "temperature": 0.0,
+  "seed": 1,
+  "seed_support": "honoured",
+  "note": "scripted replies do not depend on sampling"
+ },
+ "say": {
+  "static": [
+   {
+    "t": 1794576464.24,
+    "text": "Waiting for the first findings, then checking them"
+   }
+  ],
+  "crypto": [
+   {
+    "t": 1794576464.24,
+    "text": "Looking for configuration"
+   },
+   {
+    "t": 1794576484.83,
+    "text": "Looking for configuration"
+   }
+  ],
+  "ioc": [
+   {
+    "t": 1794576464.26,
+    "text": "Reading the strings file"
+   }
+  ],
+  "triage": [
+   {
+    "t": 1794576464.26,
+    "text": "Reading the overview"
+   }
+  ],
+  "behaviour": [
+   {
+    "t": 1794576464.62,
+    "text": "Nothing to map beyond the strings"
+   }
+  ]
+ },
+ "rounds": [
+  {
+   "n": 1,
+   "plan": "One task per role, started at once (built in).",
+   "roles": [
+    "triage",
+    "static",
+    "ioc",
+    "crypto",
+    "behaviour"
+   ],
+   "summary": "5 of 5 tasks finished; 6 findings, 4 verified, 1 disputed."
+  },
+  {
+   "n": 2,
+   "plan": "Settle the dispute and let Crypto look again.",
+   "roles": [
+    "crypto"
+   ],
+   "state": "done",
+   "tasks": [
+    {
+     "role": "crypto",
+     "goal": "Look again for configuration values.",
+     "scope": "the read-only data section",
+     "minutes": 2
+    }
+   ],
+   "summary": "1 of 1 tasks finished; the board now holds 6 findings, 5 verified, 0 disputed, 0 refuted."
+  }
+ ],
+ "summary": "Executive summary\nA tiny demo program with made-up network names. It only exits when run.\n\nWhat it is\nA small static 64-bit Linux program built for demonstration.\n\nCapabilities\n- It names web and file locations, but nothing in the file uses them.\n\nRecommendations\n- Treat it as a test file.\n\nWhat we don't know\n- Whether anything else loads it.",
+ "summary_sections": {
+  "exec": "A tiny demo program with made-up network names. It only exits when run.",
+  "what": "A small static 64-bit Linux program built for demonstration.",
+  "caps": "- It names web and file locations, but nothing in the file uses them.",
+  "recs": "- Treat it as a test file.",
+  "unknown": "- Whether anything else loads it."
+ },
+ "summary_lint": {
+  "ids": 0,
+  "process": 0,
+  "names": 0
+ },
+ "assessment_raw": {
+  "verdict": "suspicious",
+  "confidence": "moderate",
+  "family": "",
+  "basis": [
+   "f1",
+   "f2",
+   "f3"
+  ],
+  "rationale": "Made-up network strings; the code only exits."
+ },
+ "assessment": {
+  "verdict": "suspicious",
+  "confidence": "moderate",
+  "confidence_final": "moderate",
+  "family": "",
+  "basis": [
+   "f1",
+   "f2",
+   "f3"
+  ],
+  "rationale": "Made-up network strings; the code only exits.",
+  "adjusted": [],
+  "static_only": true
+ },
+ "counts": {
+  "total": 6,
+  "verified": 5,
+  "unconfirmed": 1,
+  "disputed": 0,
+  "refuted": 0,
+  "rejected": 1,
+  "byte-checked": 5,
+  "call-cited": 0,
+  "claimed": 1
+ },
+ "model_stats": {
+  "requests": 25,
+  "errors": 0,
+  "parallel": 4,
+  "span_s": 21.2,
+  "busy_s": 0.0,
+  "peak": 1,
+  "occupancy_pct": 25.0,
+  "full_pct": 0.0,
+  "queued_pct": 0.0,
+  "max_waiting": 2,
+  "wait_ms": {
+   "p50": 0,
+   "p95": 0,
+   "max": 0
+  },
+  "ttft_ms": {
+   "p50": 1.0,
+   "p95": 1.0,
+   "n": 24
+  },
+  "decode_tps": {
+   "p50": null,
+   "p10": null,
+   "n": 0
+  },
+  "agg_tps": 18882.4,
+  "tokens": {
+   "in": 69349,
+   "out": 321,
+   "cached_pct": null,
+   "exact_pct": 96.0
+  },
+  "sys": null
+ }
+}

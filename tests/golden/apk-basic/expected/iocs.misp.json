@@ -1,0 +1,80 @@
+{
+ "Event": {
+  "uuid": "39c3700c-c9eb-515a-9fa5-96c07f28bba8",
+  "info": "Malware analysis report: demo.apk (static analysis, run s7461d751)",
+  "date": "2026-11-13",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1794590486",
+  "Tag": [
+   {
+    "name": "tlp:amber",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": [
+   {
+    "uuid": "7caa0a3d-f586-52dd-ab0a-065d54fbab9e",
+    "type": "md5",
+    "category": "Payload delivery",
+    "value": "900fb31c45abe9ac511828f99e147320",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590486"
+   },
+   {
+    "uuid": "b6a66474-661d-5d2a-83f2-f6169ffc60d0",
+    "type": "sha1",
+    "category": "Payload delivery",
+    "value": "0eb89c862e3cd427e800f6e70681bb108e9c2d08",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590486"
+   },
+   {
+    "uuid": "7bb29444-0815-532e-b8b6-8b7cd55cf9a1",
+    "type": "sha256",
+    "category": "Payload delivery",
+    "value": "3edee4888c1dbec717159d23de270813be6de57b00df9c8b36f7a94a19ba2607",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590486"
+   },
+   {
+    "uuid": "ea6110cb-b2fb-5d2e-ae0f-5f2595fe8254",
+    "type": "ip-dst",
+    "category": "Network activity",
+    "value": "203.0.113.50",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f2, f5, offset 0x4bf.",
+    "distribution": "5",
+    "timestamp": "1794590486"
+   },
+   {
+    "uuid": "b1682d56-7335-5aa9-b200-3874bc4fbe00",
+    "type": "url",
+    "category": "Network activity",
+    "value": "http://c2.example.test/apk-beacon",
+    "to_ids": true,
+    "comment": "byte-checked. Finding f4, offset 0x51e.",
+    "distribution": "5",
+    "timestamp": "1794590486"
+   },
+   {
+    "uuid": "d9a9762b-fd2f-5bc8-94f6-901b8f4ca60e",
+    "type": "other",
+    "category": "Other",
+    "value": "com.example.demo.secret",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f6, offset 0x505.",
+    "distribution": "5",
+    "timestamp": "1794590486"
+   }
+  ]
+ }
+}

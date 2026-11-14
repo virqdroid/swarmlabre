@@ -1,0 +1,8 @@
+tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+AMBER,Hash values,MD5,d0e6226b2c5e01d1f8bc9c46c32591be,d0e6226b2c5e01d1f8bc9c46c32591be,computed,,,Sample file. Computed by swarmlabre from the file itself.,sfaef16e6
+AMBER,Hash values,SHA-1,e7d9e12462cea4c74018b33cd19b685143b0595e,e7d9e12462cea4c74018b33cd19b685143b0595e,computed,,,Sample file. Computed by swarmlabre from the file itself.,sfaef16e6
+AMBER,Hash values,SHA-256,4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564,4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564,computed,,,Sample file. Computed by swarmlabre from the file itself.,sfaef16e6
+AMBER,IP addresses,IPv4 address,203.0.113.9,203[.]0[.]113[.]9,byte-checked,0xda,f3,"Documentation IP. byte-checked, offset 0xda, finding f3, private or reserved address.",sfaef16e6
+AMBER,URLs,URL,https://updates.example.test/check,hxxps://updates[.]example[.]test/check,byte-checked,0x95,f2,"Update URL. byte-checked, offset 0x95, finding f2.",sfaef16e6
+AMBER,Host artifacts,File path,/tmp/.demo-cache,/tmp/.demo-cache,byte-checked,0xc9,f4,"Temp path. byte-checked, offset 0xc9, finding f4.",sfaef16e6
+AMBER,Host artifacts,Windows file path,C:\Demo\agent.dll,C:\Demo\agent.dll,byte-checked,0xe6,f5,"Wide library name. byte-checked, offset 0xe6, finding f5.",sfaef16e6

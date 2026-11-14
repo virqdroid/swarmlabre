@@ -1,0 +1,8 @@
+{
+ "kind": "scripted",
+ "name": "benign-capped",
+ "proves": "a benign verdict never goes above moderate confidence, even with two verified findings and a byte-checked one",
+ "run": "s8a28311e",
+ "sample": "elf-benign",
+ "sample_sha256": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e"
+}

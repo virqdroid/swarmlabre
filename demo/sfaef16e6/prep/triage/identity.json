@@ -1,0 +1,12 @@
+{
+ "extension": "",
+ "extension_claims": null,
+ "extension_mismatch": false,
+ "file": "ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, stripped",
+ "head_hex": "7f454c46020101000000000000000000",
+ "magic": "elf",
+ "name": "sample",
+ "path": "/in/sample",
+ "sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+ "size": 552
+}

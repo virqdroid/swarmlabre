@@ -1,0 +1,30 @@
+{
+ "Event": {
+  "uuid": "f249bfa9-737a-5223-b11b-03336deccc06",
+  "info": "Malware analysis report: demo.elf (static analysis, run s598de684)",
+  "date": "2026-09-21",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1790000060",
+  "Tag": [
+   {
+    "name": "tlp:clear",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": [
+   {
+    "uuid": "79a6f253-a800-5980-9335-94ac94bf82ff",
+    "type": "url",
+    "category": "Network activity",
+    "value": "http://c2.example.test/beacon",
+    "to_ids": true,
+    "comment": "byte-checked. Finding f2, offset 0x95.",
+    "distribution": "5",
+    "timestamp": "1790000060"
+   }
+  ]
+ }
+}

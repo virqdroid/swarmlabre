@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>Reports and exports: SwarmLabRE docs</title>
+<meta name="description" content="The indicator files and the YARA rules of a SwarmLabRE run: what feeds each, the columns of iocs.csv, the STIX and MISP mapping, and how a rule is written and matched.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html" aria-current="page">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Guides / Reports and exports</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html" aria-current="page">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="analyse.html">Guides</a> / Reports and exports</p>
+  <h1>Reports and exports</h1>
+  <p class="lead">The indicator files and the YARA rules are the machine-readable output of a run. They carry only what the board checked, and each row says how it was checked.</p>
+
+  <h2 id="feeds">What feeds each file<a class="anc" href="#feeds" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>Every export is built from the board and the sample, never from an agent's prose. A finding reaches a file only through the status it has on the board; <a href="reports.html#reach">Reports</a> has the table of statuses and files. Unconfirmed claims, refuted findings and refused posts never appear in an indicator file or a rule.</p>
+</div>
+  <figure class="fig anim">
+    <svg class="fc-wide" viewBox="0 0 780 330" role="img" aria-label="Flowchart. The sample&#x27;s hashes and the verified findings that nobody disputes become indicator rows, merged by value, which feed iocs.csv, iocs.stix.json and iocs.misp.json. Separately, byte-checked strings are read again from the kept sample, a rule is matched against the sample with SwarmLabRE&#x27;s own matcher, and detection.yar is written only if the rule matched."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="189" height="83" rx="8"/><text class="fc-t" x="95.0" y="22" text-anchor="middle">Sample hashes</text><text class="fc-s" x="95.0" y="42" text-anchor="middle">MD5, SHA-1 and SHA-256,</text><text class="fc-s" x="95.0" y="58" text-anchor="middle">computed by the host from</text><text class="fc-s" x="95.0" y="74" text-anchor="middle">the file</text></g><g class="st" style="--i:1"><rect class="fc-box" x="0.5" y="104.5" width="189" height="83" rx="8"/><text class="fc-t" x="95.0" y="126" text-anchor="middle">Verified findings</text><text class="fc-s" x="95.0" y="146" text-anchor="middle">ioc findings and network</text><text class="fc-s" x="95.0" y="162" text-anchor="middle">config findings that</text><text class="fc-s" x="95.0" y="178" text-anchor="middle">nobody disputes</text></g><g class="st" style="--i:2"><path class="fc-a" d="M190 42.0H215.0V94.0H239" marker-end="url(#ar)"/></g><g class="st" style="--i:3"><path class="fc-a" d="M190 146.0H215.0V94.0H239" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="240.5" y="52.5" width="199" height="83" rx="8"/><text class="fc-t" x="340.0" y="74" text-anchor="middle">Indicator rows</text><text class="fc-s" x="340.0" y="94" text-anchor="middle">merged by value; each row</text><text class="fc-s" x="340.0" y="110" text-anchor="middle">keeps its evidence level</text></g><g class="st" style="--i:5"><path class="fc-a" d="M440 94.0H470.0V31.0H499" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="500.5" y="0.5" width="279" height="61" rx="8"/><text class="fc-t fc-mono" x="640.0" y="22" text-anchor="middle">iocs.csv</text><text class="fc-s" x="640.0" y="42" text-anchor="middle">every row, real and defanged value</text></g><g class="st" style="--i:7"><path class="fc-a" d="M440 94.0H470.0V103.0H499" marker-end="url(#ar)"/></g><g class="st" style="--i:8"><rect class="fc-box" x="500.5" y="72.5" width="279" height="61" rx="8"/><text class="fc-t fc-mono" x="640.0" y="94" text-anchor="middle">iocs.stix.json</text><text class="fc-s" x="640.0" y="114" text-anchor="middle">rows STIX can express</text></g><g class="st" style="--i:9"><path class="fc-a" d="M440 94.0H470.0V175.0H499" marker-end="url(#ar)"/></g><g class="st" style="--i:10"><rect class="fc-box" x="500.5" y="144.5" width="279" height="61" rx="8"/><text class="fc-t fc-mono" x="640.0" y="166" text-anchor="middle">iocs.misp.json</text><text class="fc-s" x="640.0" y="186" text-anchor="middle">every row; to_ids for matchable ones</text></g><g class="st" style="--i:11"><rect class="fc-box" x="0.5" y="238.5" width="159" height="83" rx="8"/><text class="fc-t" x="80.0" y="260" text-anchor="middle">Byte-checked strings</text><text class="fc-s" x="80.0" y="280" text-anchor="middle">verified ioc, crypto</text><text class="fc-s" x="80.0" y="296" text-anchor="middle">and config findings</text></g><g class="st" style="--i:12"><path class="fc-a" d="M160 280.0H199" marker-end="url(#ar)"/></g><g class="st" style="--i:13"><rect class="fc-box" x="200.5" y="238.5" width="169" height="83" rx="8"/><text class="fc-t" x="285.0" y="260" text-anchor="middle">Read the bytes again</text><text class="fc-s" x="285.0" y="280" text-anchor="middle">at each offset, from</text><text class="fc-s" x="285.0" y="296" text-anchor="middle">the kept sample</text></g><g class="st" style="--i:14"><path class="fc-a" d="M370 280.0H409" marker-end="url(#ar)"/></g><g class="st" style="--i:15"><rect class="fc-box" x="410.5" y="238.5" width="189" height="83" rx="8"/><text class="fc-t" x="505.0" y="260" text-anchor="middle">Match the rule</text><text class="fc-s" x="505.0" y="280" text-anchor="middle">against the sample, with</text><text class="fc-s" x="505.0" y="296" text-anchor="middle">SwarmLabRE's own matcher</text></g><g class="st" style="--i:16"><path class="fc-a" d="M600 280.0H639" marker-end="url(#ar)"/></g><g class="st" style="--i:17"><rect class="fc-box" x="640.5" y="238.5" width="139" height="83" rx="8"/><text class="fc-t fc-mono" x="710.0" y="260" text-anchor="middle">detection.yar</text><text class="fc-s" x="710.0" y="280" text-anchor="middle">written only if the</text><text class="fc-s" x="710.0" y="296" text-anchor="middle">rule matched</text></g></svg>
+    <svg class="fc-tall" viewBox="0 0 340 696" role="img" aria-label="The same flowchart, drawn top to bottom."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="161" height="109" rx="8"/><text class="fc-t" x="81.0" y="22" text-anchor="middle">Sample hashes</text><text class="fc-s" x="81.0" y="42" text-anchor="middle">MD5, SHA-1 and</text><text class="fc-s" x="81.0" y="58" text-anchor="middle">SHA-256, computed by</text><text class="fc-s" x="81.0" y="74" text-anchor="middle">the host from the file</text></g><g class="st" style="--i:1"><rect class="fc-box" x="178.5" y="0.5" width="161" height="109" rx="8"/><text class="fc-t" x="259.0" y="22" text-anchor="middle">Verified findings</text><text class="fc-s" x="259.0" y="42" text-anchor="middle">ioc findings and</text><text class="fc-s" x="259.0" y="58" text-anchor="middle">network config</text><text class="fc-s" x="259.0" y="74" text-anchor="middle">findings that nobody</text><text class="fc-s" x="259.0" y="90" text-anchor="middle">disputes</text></g><g class="st" style="--i:2"><path class="fc-a" d="M81.0 110V126.0H170.0V141" marker-end="url(#ar)"/></g><g class="st" style="--i:3"><path class="fc-a" d="M259.0 110V126.0H170.0V141" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="0.5" y="142.5" width="339" height="69" rx="8"/><text class="fc-t" x="170.0" y="164" text-anchor="middle">Indicator rows</text><text class="fc-s" x="170.0" y="184" text-anchor="middle">merged by value; each row keeps its evidence level</text></g><g class="st" style="--i:5"><path class="fc-a" d="M170.0 212V228.0H54.0V243" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="0.5" y="244.5" width="107" height="99" rx="8"/><text class="fc-t fc-mono" x="54.0" y="266" text-anchor="middle" style="font-size:11px">iocs.csv</text><text class="fc-s" x="54.0" y="286" text-anchor="middle">every row,</text><text class="fc-s" x="54.0" y="302" text-anchor="middle">real and</text><text class="fc-s" x="54.0" y="318" text-anchor="middle">defanged</text><text class="fc-s" x="54.0" y="334" text-anchor="middle">value</text></g><g class="st" style="--i:7"><path class="fc-a" d="M170.0 212V243" marker-end="url(#ar)"/></g><g class="st" style="--i:8"><rect class="fc-box" x="116.5" y="244.5" width="107" height="99" rx="8"/><text class="fc-t fc-mono" x="170.0" y="266" text-anchor="middle" style="font-size:11px">iocs.stix.json</text><text class="fc-s" x="170.0" y="286" text-anchor="middle">rows STIX can</text><text class="fc-s" x="170.0" y="302" text-anchor="middle">express</text></g><g class="st" style="--i:9"><path class="fc-a" d="M170.0 212V228.0H286.0V243" marker-end="url(#ar)"/></g><g class="st" style="--i:10"><rect class="fc-box" x="232.5" y="244.5" width="107" height="99" rx="8"/><text class="fc-t fc-mono" x="286.0" y="266" text-anchor="middle" style="font-size:11px">iocs.misp.json</text><text class="fc-s" x="286.0" y="286" text-anchor="middle">every row;</text><text class="fc-s" x="286.0" y="302" text-anchor="middle">to_ids for</text><text class="fc-s" x="286.0" y="318" text-anchor="middle">matchable</text><text class="fc-s" x="286.0" y="334" text-anchor="middle">ones</text></g><g class="st" style="--i:11"><rect class="fc-box" x="0.5" y="376.5" width="339" height="55" rx="8"/><text class="fc-t" x="170.0" y="398" text-anchor="middle">Byte-checked strings</text><text class="fc-s" x="170.0" y="418" text-anchor="middle">verified ioc, crypto and config findings</text></g><g class="st" style="--i:12"><path class="fc-a" d="M170.0 432V463" marker-end="url(#ar)"/></g><g class="st" style="--i:13"><rect class="fc-box" x="0.5" y="464.5" width="339" height="55" rx="8"/><text class="fc-t" x="170.0" y="486" text-anchor="middle">Read the bytes again</text><text class="fc-s" x="170.0" y="506" text-anchor="middle">at each offset, from the kept sample</text></g><g class="st" style="--i:14"><path class="fc-a" d="M170.0 520V551" marker-end="url(#ar)"/></g><g class="st" style="--i:15"><rect class="fc-box" x="0.5" y="552.5" width="339" height="55" rx="8"/><text class="fc-t" x="170.0" y="574" text-anchor="middle">Match the rule</text><text class="fc-s" x="170.0" y="594" text-anchor="middle">against the sample, with SwarmLabRE's own matcher</text></g><g class="st" style="--i:16"><path class="fc-a" d="M170.0 608V639" marker-end="url(#ar)"/></g><g class="st" style="--i:17"><rect class="fc-box" x="0.5" y="640.5" width="339" height="55" rx="8"/><text class="fc-t fc-mono" x="170.0" y="662" text-anchor="middle">detection.yar</text><text class="fc-s" x="170.0" y="682" text-anchor="middle">written only if the rule matched</text></g></svg>
+    <figcaption>What feeds each file. The three indicator files share one list of rows. A rule has its own path and is shown only after it has matched the sample.</figcaption>
+  </figure>
+  <h2 id="csv">iocs.csv<a class="anc" href="#csv" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>One row per indicator, with a header line and CRLF line ends. The sample's own hashes come first, then the checked findings. Three lines of the file of the demo run, the header, the MD5 row and the URL row:</p>
+</div>
+  <div class="code"><div class="cap">demo/sfaef16e6/out/iocs.csv</div>
+<pre>tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+AMBER,Hash values,MD5,d0e6226b2c5e01d1f8bc9c46c32591be,d0e6226b2c5e01d1f8bc9c46c32591be,computed,,,Sample file. Computed by swarmlabre from the file itself.,sfaef16e6
+AMBER,URLs,URL,https://updates.example.test/check,hxxps://updates[.]example[.]test/check,byte-checked,0x95,f2,"Update URL. byte-checked, offset 0x95, finding f2.",sfaef16e6</pre></div>
+  <div class="tw"><table>
+    <thead><tr><th>Column</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td><code>tlp</code></td><td>the marking of the run</td></tr>
+      <tr><td><code>group</code></td><td>the kind of indicator: Hash values, IP addresses, URLs, Host artifacts and so on</td></tr>
+      <tr><td><code>type</code></td><td>the type inside the group, such as SHA-256, URL or Windows file path</td></tr>
+      <tr><td><code>indicator</code></td><td>the real value, so that a blocklist can use it</td></tr>
+      <tr><td><code>defanged</code></td><td>the same value written so that it is not a live address: <code>hxxps://updates[.]example[.]test/check</code></td></tr>
+      <tr><td><code>evidence</code></td><td>byte-checked, call-cited or computed</td></tr>
+      <tr><td><code>offset</code></td><td>where the bytes are in the file, in hex; empty for computed rows</td></tr>
+      <tr><td><code>findings</code></td><td>the board's finding ids behind the row</td></tr>
+      <tr><td><code>context</code></td><td>the finding's title, how it was checked and a note when it is a private or reserved address</td></tr>
+      <tr><td><code>run</code></td><td>the run id</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<p>A cell that starts with <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>, a tab or a carriage return gets a leading single quote, so that a spreadsheet reads it as text and not as a formula.</p>
+</div>
+  <h2 id="stix">iocs.stix.json<a class="anc" href="#stix" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>A STIX 2.1 bundle. It holds an identity, the TLP 2.0 marking definition and its extension definition, a file object for the sample with its hashes and size, one indicator for each row STIX can express, and a report object that lists them.</p>
+</div>
+  <div class="tw"><table>
+    <thead><tr><th>Row</th><th>STIX pattern</th></tr></thead>
+    <tbody>
+      <tr><td>a hash of the sample</td><td><code>file:hashes</code></td></tr>
+      <tr><td>a public IPv4 or IPv6 address</td><td><code>ipv4-addr:value</code> or <code>ipv6-addr:value</code></td></tr>
+      <tr><td>a domain</td><td><code>domain-name:value</code></td></tr>
+      <tr><td>a URL</td><td><code>url:value</code></td></tr>
+      <tr><td>an email address</td><td><code>email-addr:value</code></td></tr>
+      <tr><td>a user agent</td><td>an <code>http-request-ext</code> request header on <code>network-traffic</code></td></tr>
+      <tr><td>a registry key</td><td><code>windows-registry-key:key</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<p>Paths, Android names, other strings, hex strings that came from findings and private addresses have no honest STIX pattern, so they get no indicator; they stay in the CSV and the MISP event. Every indicator has <code>indicator_types</code> of <code>unknown</code>, because SwarmLabRE does not judge whether a value is malicious. <code>confidence</code> is 85 for byte-checked, 50 for call-cited and 100 for computed, and the indicator carries <code>x_swarmlabre_evidence</code> and, when known, <code>x_swarmlabre_offset</code>. In the demo run the bundle has one URL indicator and the three hash indicators.</p>
+</div>
+  <h2 id="misp">iocs.misp.json<a class="anc" href="#misp" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>One MISP event with an attribute per row, the tag <code>tlp:amber</code> (or the run's marking), <code>published</code> false and <code>distribution</code> 0, so nothing is shared until you change that. The threat level is 4 (undefined) and the analysis state is 2 (complete).</p>
+</div>
+  <div class="tw"><table>
+    <thead><tr><th>Row</th><th>Attribute type</th><th>Category</th></tr></thead>
+    <tbody>
+      <tr><td>a hash of the sample</td><td><code>md5</code>, <code>sha1</code>, <code>sha256</code> or <code>imphash</code></td><td>Payload delivery</td></tr>
+      <tr><td>an IP address</td><td><code>ip-dst</code>, or <code>ip-dst|port</code> when the finding has a port</td><td>Network activity</td></tr>
+      <tr><td>a domain</td><td><code>domain</code></td><td>Network activity</td></tr>
+      <tr><td>a URL</td><td><code>url</code></td><td>Network activity</td></tr>
+      <tr><td>an email address or a user agent</td><td><code>email-src</code> or <code>user-agent</code></td><td>Network activity</td></tr>
+      <tr><td>a hash-length hex string found in the file</td><td><code>md5</code>, <code>sha1</code>, <code>sha256</code> or <code>sha512</code></td><td>Payload delivery</td></tr>
+      <tr><td>a registry key</td><td><code>regkey</code></td><td>Artifacts dropped</td></tr>
+      <tr><td>a file path or name</td><td><code>filename</code></td><td>Artifacts dropped</td></tr>
+      <tr><td>anything else</td><td><code>other</code></td><td>Other</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+<code>to_ids</code> is true only for byte-checked or computed values of a kind that detection can match: the hashes of the sample, public addresses, domains, URLs, email addresses, user agents and registry keys. It is false for file paths, private addresses and for hex strings found inside the file, which may be a key or an id. In the demo run the URL and the three hashes have <code>to_ids</code> true; the documentation address and the two paths have it false.
+</div>
+  <h2 id="yara">detection.yar<a class="anc" href="#yara" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<p>The file holds one to three rules written from the strings SwarmLabRE byte-checked in the sample. This is the file of the demo run:</p>
+</div>
+  <div class="code"><div class="cap">demo/sfaef16e6/out/detection.yar</div>
+<pre>// Agent Swarms run sfaef16e6. TLP:AMBER. Prepared by swarmlabre on 2026-11-13.
+// Every rule was matched against the source sample by swarmlabre's own matcher (not by YARA) before it was written here.
+
+rule Swarmlabre_ELF_4f514261553c {
+    meta:
+        description = "Byte-checked strings from the Linux ELF sample, SHA-256 4f514261553c3026... (4 strings, at least 3 must be present)"
+        author = "swarmlabre"
+        date = "2026-11-13"
+        reference = "Agent Swarms run sfaef16e6"
+        hash = "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564"
+        tlp = "AMBER"
+        sample_type = "Linux ELF"
+        source = "strings swarmlabre byte-checked in the sample"
+        false_positives = "see the note in the report; not tested on clean files"
+    strings:
+        $s1 = "https://updates.example.test/check" ascii
+        $s2 = "Global\\Demo2Lock" ascii
+        $s3 = "/tmp/.demo-cache" ascii
+        $w1 = "C:\\Demo\\agent.dll" wide
+    condition:
+        uint32(0) == 0x464c457f and filesize &lt; 1MB and 3 of them
+}</pre></div>
+  <div class="prose">
+<p>A string goes into a rule only when its finding is verified and byte-checked and has the kind <code>ioc</code>, <code>crypto</code> or <code>config</code>. SwarmLabRE reads the bytes at the finding's offset again and drops the string if they differ. Filters then drop strings that are shorter than 8 characters (hex strings: 12 bytes), ordinary words, ordinary prose, system or library paths, documentation and licence addresses, common library strings, strings with too little variety, format strings, version numbers, and strings that overlap or repeat one already chosen. A rule has at least 4 and at most 40 strings. When fewer than 4 pass, no rule is written and the report says why.</p>
+<p>The condition checks the file type (<code>uint32(0) == 0x464c457f</code> for ELF, <code>uint16(0) == 0x5a4d</code> for PE, <code>uint32(0) == 0x04034b50</code> for APK), a size bound of twice the sample's size rounded up to whole megabytes, and <code>N of them</code>, where N is a third of the strings, rounded up, and at least 3. When at least 4 of the strings are network or configuration strings, or cryptography strings, and they are not all of them, they also get a rule of their own with the suffix <code>_net</code> or <code>_crypto</code>.</p>
+<p>SwarmLabRE does not run YARA. It matches each rule against its own copy of the sample with a matcher that implements only the part of YARA these rules use, and a rule that does not match every one of its strings is left out. The copy of a rule shown in <code>report.html</code> writes the dots, colons and at signs of addresses as <code>\xNN</code> escapes, so that the report shows no live address; the file has the real strings. The rules were checked only against the sample they came from and not against clean files. Run them over your own clean set before you block on one.</p>
+</div>
+  <h2 id="use">Using the files<a class="anc" href="#use" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+<ul>
+  <li>Open <code>iocs.csv</code> in a spreadsheet. The <code>defanged</code> column is the one to paste into a ticket or a message.</li>
+  <li>Import <code>iocs.stix.json</code> into a threat intelligence platform that reads STIX 2.1. Each indicator keeps its evidence level in <code>x_swarmlabre_evidence</code>.</li>
+  <li>Import <code>iocs.misp.json</code> as an event. It arrives unpublished and for your organisation only.</li>
+  <li>Give <code>detection.yar</code> to a scanner that reads YARA after you have tested it on files you know are clean.</li>
+  <li>Rebuild all of them from a stored run with <code>python3 -m swarmlabre report RUN --out DIR</code>. The files carry the run's TLP marking: <code>--tlp</code> on <code>run</code> or <code>[swarm] tlp</code> sets it.</li>
+</ul>
+</div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="web-ui.html"><small>Previous</small>The web UI</a>
+    <a class="nx" href="replay.html"><small>Next</small>Replay and export a run</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/exports.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#feeds">What feeds each file</a></li>
+    <li><a href="#csv">iocs.csv</a></li>
+    <li><a href="#stix">iocs.stix.json</a></li>
+    <li><a href="#misp">iocs.misp.json</a></li>
+    <li><a href="#yara">detection.yar</a></li>
+    <li><a href="#use">Using the files</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

@@ -1,0 +1,80 @@
+{
+ "Event": {
+  "uuid": "53952a07-8835-5789-9da2-654cc950fc6c",
+  "info": "Malware analysis report: demo.elf (static analysis, run sf549b7df)",
+  "date": "2026-11-13",
+  "threat_level_id": "4",
+  "analysis": "2",
+  "distribution": "0",
+  "published": false,
+  "timestamp": "1794590465",
+  "Tag": [
+   {
+    "name": "tlp:amber",
+    "colour": "#000000"
+   }
+  ],
+  "Attribute": [
+   {
+    "uuid": "ea42c9f9-dc50-5dfa-a81a-bbd3e76bbbf9",
+    "type": "md5",
+    "category": "Payload delivery",
+    "value": "cda5b751da9f89c6c757462ce25ced0a",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590465"
+   },
+   {
+    "uuid": "68c9cc06-04f7-5009-a840-2547d339bb33",
+    "type": "sha1",
+    "category": "Payload delivery",
+    "value": "6ffc8f0743822f27e102ac07b83b1aadda0f5d7f",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590465"
+   },
+   {
+    "uuid": "32abc80a-a2e5-59da-9cbb-99977ee27886",
+    "type": "sha256",
+    "category": "Payload delivery",
+    "value": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e",
+    "to_ids": true,
+    "comment": "Sample computed. Computed by swarmlabre from the file.",
+    "distribution": "5",
+    "timestamp": "1794590465"
+   },
+   {
+    "uuid": "cf7b7f2e-de1b-5199-b257-13eb4bbc26cc",
+    "type": "url",
+    "category": "Network activity",
+    "value": "http://c2.example.test/beacon",
+    "to_ids": true,
+    "comment": "byte-checked. Finding f2, offset 0x95.",
+    "distribution": "5",
+    "timestamp": "1794590465"
+   },
+   {
+    "uuid": "32df3703-5b3a-54ce-aee2-32f4f271eb31",
+    "type": "filename",
+    "category": "Artifacts dropped",
+    "value": "Mutex\\Global\\DemoSwarmMutex",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f4, offset 0xb3.",
+    "distribution": "5",
+    "timestamp": "1794590465"
+   },
+   {
+    "uuid": "30ce3bee-98d2-5667-a930-b2a1f412b82c",
+    "type": "other",
+    "category": "Other",
+    "value": "cmd.exe /c echo demo",
+    "to_ids": false,
+    "comment": "byte-checked. Finding f5, offset 0xcf.",
+    "distribution": "5",
+    "timestamp": "1794590465"
+   }
+  ]
+ }
+}

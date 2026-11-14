@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'">
+<title>Reproducibility: SwarmLabRE docs</title>
+<meta name="description" content="What SwarmLabRE's reproducibility claims cover: byte-identical replay of a recorded run, a pinned live run, replay through the containers and the files of a run.">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"Geist";src:url(../fonts/geist.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(../fonts/geistmono.woff2) format("woff2");font-weight:400 700;font-display:swap}
+:root{
+  --bg:#0d1315;--card:#131b1e;--rule:#2e3f44;--line:#223034;--text:#e7eeeb;--dim:#8b9b99;--gold:#cdab6b;--code:#0a0f11;
+  --ok:#6fcf9f;--ok-bg:rgba(111,207,159,.13);--cite:#7fb6e6;--cite-bg:rgba(127,182,230,.13);--un:#cdab6b;--un-bg:rgba(205,171,107,.13);--bad:#e5705f;--bad-bg:rgba(229,112,95,.13);
+  --hl-k:#9fc4dd;--hl-s:#a9d8b8;--hl-n:#e2b97a;--hl-c:#5f7472;--nav:#0d1315;--side:#0f1719;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark light;
+}
+@media (prefers-color-scheme:light){
+  :root{--bg:#f3f5f4;--card:#fff;--rule:#d5dcdd;--line:#e1e7e8;--text:#14232b;--dim:#51626a;--gold:#7d5a10;--code:#e9eeee;
+    --ok:#0f6f48;--ok-bg:rgba(15,111,72,.1);--cite:#1f5f93;--cite-bg:rgba(31,95,147,.1);--un:#7d5a10;--un-bg:rgba(125,90,16,.1);--bad:#a8402f;--bad-bg:rgba(168,64,47,.1);
+    --hl-k:#1f5f93;--hl-s:#0f6f48;--hl-n:#8a5a00;--hl-c:#7a8a8e;--nav:#f3f5f4;--side:#eef1f0}
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--sans);-webkit-font-smoothing:antialiased;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+a{color:var(--text);text-underline-offset:3px;text-decoration-color:var(--rule)}
+a:hover{color:var(--gold);text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+p{margin:0 0 14px}
+code{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{white-space:nowrap;background:var(--code);padding:1px 5px;border-radius:5px}
+/* top bar */
+.nav{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom:1px solid var(--line)}
+.nav .in{max-width:1360px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:14px;min-height:60px}
+.mark{display:inline-flex;align-items:center;gap:10px;font:600 1.05rem var(--sans);letter-spacing:-.01em;text-decoration:none;min-height:44px}
+.sec{font:500 .95rem var(--sans);color:var(--dim);padding-left:14px;border-left:1px solid var(--rule)}
+.nav nav{margin-left:auto;display:flex;gap:4px}
+.nav nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;text-decoration:none;color:var(--dim);font-size:.94rem}
+.nav nav a:hover{color:var(--text);background:var(--card)}
+.nav nav a.gh{border:1px solid var(--rule);color:var(--text)}
+/* layout */
+.shell{max-width:1360px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:248px minmax(0,1fr) 210px;gap:48px}
+.side{position:sticky;top:61px;align-self:start;max-height:calc(100vh - 61px);overflow-y:auto;padding:28px 4px 40px 12px;margin-left:-12px;scrollbar-width:none}
+.side:hover{scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.side h4{margin:22px 0 6px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--gold)}
+.side h4:first-child{margin-top:0}
+.side ul{list-style:none;margin:0;padding:0}
+.side li a{display:block;padding:5px 12px;margin-left:-12px;border-radius:7px;text-decoration:none;color:var(--dim);font-size:.93rem;line-height:1.4}
+.side li a:hover{color:var(--text);background:var(--card)}
+.side li a[aria-current]{position:relative;color:var(--text);background:var(--card);font-weight:500}
+.side li a[aria-current]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:2px;border-radius:2px;background:var(--gold)}
+.menu{display:none}
+main{min-width:0;padding:30px 0 80px}
+.crumb{font:500 .82rem var(--mono);color:var(--dim);margin:0 0 14px;letter-spacing:.02em}
+.crumb a{color:var(--dim);text-decoration:none}.crumb a:hover{color:var(--gold)}
+h1{font-size:clamp(2rem,4vw,2.75rem);line-height:1.08;letter-spacing:-.03em;margin:0 0 14px;font-weight:600}
+.lead{font-size:1.14rem;color:var(--dim);max-width:62ch;margin-bottom:26px}
+h2{font-size:1.45rem;line-height:1.2;letter-spacing:-.02em;margin:46px 0 12px;font-weight:600;padding-top:22px;border-top:1px solid var(--line)}
+h3{font-size:1.06rem;line-height:1.3;margin:28px 0 8px;font-weight:600}
+h2 a.anc,h3 a.anc{margin-left:8px;color:var(--rule);text-decoration:none;font-weight:400;opacity:0}
+h2:hover a.anc,h3:hover a.anc,a.anc:focus-visible{opacity:1}
+.prose{max-width:72ch}
+.prose ul,.prose ol{padding-left:22px;margin:0 0 16px}.prose li{margin:4px 0}
+/* level names: coloured text, as on the one-pager's board table */
+.lvl{font:600 .86rem var(--mono);white-space:nowrap}.lvl.ok{color:var(--ok)}.lvl.ci{color:var(--cite)}.lvl.un{color:var(--un)}.lvl.bad{color:var(--bad)}
+/* figures: inline SVG drawn with the page's tokens */
+.fig{margin:22px 0 26px}
+.fig svg{display:block;width:100%;height:auto}
+.fig figcaption{font-size:.86rem;color:var(--dim);margin-top:10px;max-width:72ch}
+.fc-tall{display:none!important}
+@media (max-width:640px){.fc-wide{display:none!important}.fc-tall{display:block!important}}
+.fc-box{fill:var(--card);stroke:var(--rule)}.fc-bad{stroke:var(--bad)}.fc-model{stroke-dasharray:5 4}
+.fc-t{fill:var(--text);font:600 13px var(--sans)}.fc-mono{font-family:var(--mono)}
+.fc-s{fill:var(--dim);font:400 12px var(--sans)}
+.fc-a{fill:none;stroke:var(--dim);stroke-width:1.5}.mk{fill:var(--dim)}
+.fc-l{fill:var(--dim);font:500 11px var(--mono)}
+@media (prefers-reduced-motion:no-preference){
+  .anim .st{opacity:0;transform-box:fill-box;animation:fcIn .45s ease-out forwards;animation-delay:calc(var(--i) * .22s)}
+}
+@keyframes fcIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.fig-chart svg{max-width:560px}
+.u-ok{fill:var(--ok)}.u-un{fill:var(--un)}.u-bad{fill:url(#hatch);stroke:var(--bad);stroke-width:1.5}
+.hb{fill:var(--bad-bg)}.hl{stroke:var(--bad);stroke-width:1.6;opacity:.55}
+.u-id{font:600 12px var(--mono);fill:var(--bg)}.u-id2{font:600 12px var(--mono);fill:var(--text)}
+.c-row{fill:var(--text);font:500 13px var(--sans)}.c-note{fill:var(--dim);font:400 12.5px var(--sans)}.c-leg{fill:var(--dim);font:500 12px var(--mono)}
+details.tv{margin:10px 0 0;font-size:.9rem}details.tv summary{cursor:pointer;color:var(--dim);min-height:44px;display:flex;align-items:center}
+details.tv summary:hover{color:var(--text)}
+/* tables */
+.tw{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--rule) transparent;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+thead th{font-weight:500;color:var(--dim);font-size:.8rem}
+td:first-child{white-space:nowrap}
+/* code */
+.code{margin:16px 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--code);overflow:hidden}
+.code .cap{padding:7px 14px;border-bottom:1px solid var(--line);font:500 .78rem var(--mono);color:var(--dim)}
+.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:13px/1.7 var(--mono);scrollbar-width:thin;scrollbar-color:var(--rule) transparent}
+.k{color:var(--hl-k)}.s{color:var(--hl-s)}.n{color:var(--hl-n)}.p{color:var(--gold)}
+/* pager */
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:56px}
+.pager a{display:block;padding:14px 18px;border:1px solid var(--line);border-radius:10px;text-decoration:none;background:var(--card);min-height:44px}
+.pager a:hover{border-color:var(--gold);color:var(--text)}
+.pager small{display:block;font:500 .76rem var(--mono);color:var(--dim);margin-bottom:2px}
+.pager .nx{text-align:right}
+.foot{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:.85rem;color:var(--dim)}
+.foot a{color:var(--dim)}
+/* toc */
+.toc{position:sticky;top:61px;align-self:start;padding:34px 0 30px}
+.toc h4{margin:0 0 10px;font:600 .72rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--dim)}
+.toc ul{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:1px solid transparent;text-decoration:none;color:var(--dim);font-size:.86rem;line-height:1.4}
+.toc a:hover{color:var(--text);border-left-color:var(--gold)}
+.toc li.sub a{padding-left:26px;font-size:.82rem}
+@media (max-width:1180px){.shell{grid-template-columns:232px minmax(0,1fr);gap:40px}.toc{display:none}}
+@media (max-width:900px){
+  .shell{display:block;padding:0 16px}
+  .side{display:none}
+  .menu{display:block;margin:18px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .menu summary{list-style:none;display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 14px;cursor:pointer;font-weight:500}
+  .menu summary::-webkit-details-marker{display:none}
+  .menu summary span{font:500 .8rem var(--mono);color:var(--dim)}
+  .menu .side{display:block;position:static;max-height:none;padding:6px 14px 18px;border-top:1px solid var(--line)}
+  .menu .side li a{padding:12px 12px}
+  .nav .in{padding:0 16px}.sec{display:none}.nav nav a:not(.gh){display:none}
+  main{padding-top:22px}
+  .menu{margin:0 0 18px}
+  .pager{grid-template-columns:1fr}
+}
+.fc-cont{stroke-dasharray:2 3}
+.fc-yes{stroke:var(--ok)}
+.fc-gate{stroke:var(--gold)}
+.u-task{fill:var(--card);stroke:var(--dim);stroke-width:1.5}.u-tid{font:600 12px var(--mono);fill:var(--text)}
+.c-col{fill:var(--dim);font:500 12px var(--mono)}
+.m-yes{fill:var(--text);font:600 12px var(--mono)}.m-no{fill:var(--dim);font:500 12px var(--mono)}
+.m-line{stroke:var(--line);stroke-width:1}
+.m-ok{fill:var(--ok);font:600 12px var(--mono)}
+.fig img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:10px;background:var(--code)}
+.fc-life{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:3 4}
+.fc-zone{fill:none;stroke:var(--rule);stroke-width:1.2;stroke-dasharray:6 5}
+.fc-ret{stroke-dasharray:5 3}
+.fc-q{fill:var(--text);font:400 12px var(--sans);paint-order:stroke;stroke:var(--bg);stroke-width:5px;stroke-linejoin:round}
+.fc-n{fill:var(--gold);font:600 11px var(--mono)}
+code.wrap{white-space:normal;overflow-wrap:anywhere}
+td[colspan]{white-space:normal}
+</style>
+</head>
+<body>
+<header class="nav"><div class="in">
+  <a class="mark" href="../"><svg viewBox="0 0 48 32" width="30" height="20" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="#e68ab8"/><rect x="19.24" y="3.24" width="9.52" height="9.52" rx="1.5" fill="#3cc7d6"/><polygon points="40.0,2.4 45.6,8.0 40.0,13.6 34.4,8.0" fill="#b4d04a"/><polygon points="8.0,18.4 12.8,21.2 12.8,26.8 8.0,29.6 3.2,26.8 3.2,21.2" fill="#c58be0"/><polygon points="24.0,18.4 29.3,22.3 27.3,28.5 20.7,28.5 18.7,22.3" fill="#e8906f"/><polygon points="40.0,18.4 44.0,20.0 45.6,24.0 44.0,28.0 40.0,29.6 36.0,28.0 34.4,24.0 36.0,20.0" fill="#a9b7bb"/></svg>SwarmLabRE</a>
+  <span class="sec">Docs</span>
+  <nav aria-label="Site"><a href="../">Home</a><a href="../demo/">Demo</a><a href="../sample/report.html">Sample report</a><a class="gh" href="https://github.com/virqdroid/swarmlabre">GitHub</a></nav>
+</div></header>
+
+<div class="shell">
+<aside class="side" aria-label="Docs">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html" aria-current="page">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+</aside>
+
+<main id="top">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk" d="M0 0L10 5L0 10z"/></marker><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="hb" width="6" height="6"/><line class="hl" x1="0" y1="0" x2="0" y2="6"/></pattern></defs></svg>
+  <details class="menu"><summary>Docs menu <span>Concepts / Reproducibility</span></summary>
+  <div class="side">
+  <h4>Introduction</h4>
+  <ul><li><a href="index.html">Overview</a></li><li><a href="quick-start.html">Quick start</a></li></ul>
+  <h4>Concepts</h4>
+  <ul><li><a href="pipeline.html">One run, in order</a></li><li><a href="roles.html">The six roles</a></li><li><a href="board.html">The board</a></li><li><a href="reports.html">Reports</a></li><li><a href="reproducibility.html" aria-current="page">Reproducibility</a></li></ul>
+  <h4>Guides</h4>
+  <ul><li><a href="analyse.html">Analyse a file</a></li><li><a href="web-ui.html">The web UI</a></li><li><a href="exports.html">Reports and exports</a></li><li><a href="replay.html">Replay and export a run</a></li></ul>
+  <h4>Models and sandbox</h4>
+  <ul><li><a href="models.html">Use a real model</a></li><li><a href="mock-model.html">The mock model</a></li><li><a href="sandbox.html">The sandbox</a></li></ul>
+  <h4>Reference</h4>
+  <ul><li><a href="cli.html">Command line</a></li><li><a href="config.html">Configuration</a></li><li><a href="security.html">Security</a></li><li><a href="architecture.html">Architecture</a></li></ul>
+  <h4>Development</h4>
+  <ul><li><a href="golden-cases.html">Golden cases</a></li><li><a href="ci.html">CI</a></li></ul>
+  </div></details>
+
+  <p class="crumb"><a href="index.html">Docs</a> / <a href="pipeline.html">Concepts</a> / Reproducibility</p>
+  <h1>Reproducibility</h1>
+  <p class="lead">SwarmLabRE makes three claims, from the strongest to the weakest: a recorded run replays to byte-identical files, a live run is pinned and recorded but not repeatable, and the containers can be run again against recorded model answers.</p>
+
+  <h2 id="replay">A recorded run replays to byte-identical files<a class="anc" href="#replay" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+  <p><code>swarmlabre replay RUN</code> rebuilds a finished run offline, with no model, no Docker and no network, and compares every output with the SHA-256 in the run's <code>manifest.json</code>: <code>report.json</code>, <code>report.md</code>, <code>report.html</code>, <code>board.json</code>, <code>iocs.csv</code>, <code>iocs.stix.json</code>, <code>iocs.misp.json</code> and <code>detection.yar</code>.</p>
+  </div>
+  <figure class="fig anim">
+    <svg class="fc-wide" viewBox="0 0 780 92" role="img" aria-label="Flowchart: a run is recorded with its inputs, model trace, events and manifest; replay rebuilds the board and every report file offline; each file is hashed and compared with the manifest; the result is exit 0 when every file is identical and exit 1 when one byte differs."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="85.5" y="32" text-anchor="middle">Record</text><text class="fc-s" x="85.5" y="52" text-anchor="middle">inputs.jsonl, the model trace,</text><text class="fc-s" x="85.5" y="68" text-anchor="middle">events and manifest.json</text></g><g class="st" style="--i:1"><path class="fc-a" d="M172 46H191" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box" x="196.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="281.5" y="32" text-anchor="middle">Replay</text><text class="fc-s" x="281.5" y="52" text-anchor="middle">rebuilds the board and</text><text class="fc-s" x="281.5" y="68" text-anchor="middle">every report file offline</text></g><g class="st" style="--i:3"><path class="fc-a" d="M368 46H387" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="392.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="477.5" y="32" text-anchor="middle">Compare</text><text class="fc-s" x="477.5" y="52" text-anchor="middle">hashes each file and checks</text><text class="fc-s" x="477.5" y="68" text-anchor="middle">it against the manifest</text></g><g class="st" style="--i:5"><path class="fc-a" d="M564 46H583" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="588.5" y="8.5" width="171" height="75" rx="8"/><text class="fc-t" x="673.5" y="32" text-anchor="middle">Result</text><text class="fc-s" x="673.5" y="52" text-anchor="middle">exit 0: every file identical</text><text class="fc-s" x="673.5" y="68" text-anchor="middle">exit 1: one byte differs</text></g></svg>
+    <svg class="fc-tall" viewBox="0 0 340 286" role="img" aria-label="The same flowchart, drawn top to bottom."><g class="st" style="--i:0"><rect class="fc-box" x="0.5" y="0.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="21" text-anchor="middle">Record</text><text class="fc-s" x="170" y="41" text-anchor="middle">inputs.jsonl, the model trace, events and manifest.json</text></g><g class="st" style="--i:1"><path class="fc-a" d="M170 52 V73" marker-end="url(#ar)"/></g><g class="st" style="--i:2"><rect class="fc-box" x="0.5" y="78.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="99" text-anchor="middle">Replay</text><text class="fc-s" x="170" y="119" text-anchor="middle">rebuilds the board and every report file offline</text></g><g class="st" style="--i:3"><path class="fc-a" d="M170 130 V151" marker-end="url(#ar)"/></g><g class="st" style="--i:4"><rect class="fc-box" x="0.5" y="156.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="177" text-anchor="middle">Compare</text><text class="fc-s" x="170" y="197" text-anchor="middle">hashes each file and checks it against the manifest</text></g><g class="st" style="--i:5"><path class="fc-a" d="M170 208 V229" marker-end="url(#ar)"/></g><g class="st" style="--i:6"><rect class="fc-box" x="0.5" y="234.5" width="339" height="51" rx="8"/><text class="fc-t" x="170" y="255" text-anchor="middle">Result</text><text class="fc-s" x="170" y="275" text-anchor="middle">exit 0: every file identical exit 1: one byte differs</text></g></svg>
+    <figcaption>Record a run, replay it offline and compare each rebuilt file with the manifest.</figcaption>
+  </figure>
+  <div class="prose">
+  <p>Replaying the recorded demo run prints the checks below. The command exits 0 only when every one of them is identical.</p>
+  </div>
+  <figure class="fig fig-chart">
+    <svg viewBox="0 0 420 278" role="img" aria-label="The replay of the demo run, file by file. Each of the eight output files, rebuilt by the replay and as recorded in the bundle, is identical to the hash in the manifest."><text class="c-col" x="190" y="14" text-anchor="middle">rebuilt</text><text class="c-col" x="330" y="14" text-anchor="middle">recorded copy</text><text class="c-row" x="0" y="48">board.json</text><g><title>board.json, rebuilt: identical</title><text class="m-yes" x="190" y="48" text-anchor="middle">identical</text></g><g><title>board.json, recorded copy: identical</title><text class="m-yes" x="330" y="48" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="58" x2="420" y2="58"/><text class="c-row" x="0" y="78">detection.yar</text><g><title>detection.yar, rebuilt: identical</title><text class="m-yes" x="190" y="78" text-anchor="middle">identical</text></g><g><title>detection.yar, recorded copy: identical</title><text class="m-yes" x="330" y="78" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="88" x2="420" y2="88"/><text class="c-row" x="0" y="108">iocs.csv</text><g><title>iocs.csv, rebuilt: identical</title><text class="m-yes" x="190" y="108" text-anchor="middle">identical</text></g><g><title>iocs.csv, recorded copy: identical</title><text class="m-yes" x="330" y="108" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="118" x2="420" y2="118"/><text class="c-row" x="0" y="138">iocs.misp.json</text><g><title>iocs.misp.json, rebuilt: identical</title><text class="m-yes" x="190" y="138" text-anchor="middle">identical</text></g><g><title>iocs.misp.json, recorded copy: identical</title><text class="m-yes" x="330" y="138" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="148" x2="420" y2="148"/><text class="c-row" x="0" y="168">iocs.stix.json</text><g><title>iocs.stix.json, rebuilt: identical</title><text class="m-yes" x="190" y="168" text-anchor="middle">identical</text></g><g><title>iocs.stix.json, recorded copy: identical</title><text class="m-yes" x="330" y="168" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="178" x2="420" y2="178"/><text class="c-row" x="0" y="198">report.html</text><g><title>report.html, rebuilt: identical</title><text class="m-yes" x="190" y="198" text-anchor="middle">identical</text></g><g><title>report.html, recorded copy: identical</title><text class="m-yes" x="330" y="198" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="208" x2="420" y2="208"/><text class="c-row" x="0" y="228">report.json</text><g><title>report.json, rebuilt: identical</title><text class="m-yes" x="190" y="228" text-anchor="middle">identical</text></g><g><title>report.json, recorded copy: identical</title><text class="m-yes" x="330" y="228" text-anchor="middle">identical</text></g><line class="m-line" x1="0" y1="238" x2="420" y2="238"/><text class="c-row" x="0" y="258">report.md</text><g><title>report.md, rebuilt: identical</title><text class="m-yes" x="190" y="258" text-anchor="middle">identical</text></g><g><title>report.md, recorded copy: identical</title><text class="m-yes" x="330" y="258" text-anchor="middle">identical</text></g></svg>
+    <figcaption>The output of <code>swarmlabre replay demo/sfaef16e6</code>, from its <code>checks</code> block. Hover a word for its file.</figcaption>
+    <details class="tv"><summary>Show as a table</summary><div class="tw"><table>
+      <thead><tr><th>File</th><th>Rebuilt</th><th>Recorded copy</th></tr></thead>
+      <tbody>
+        <tr><td><code>board.json</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>detection.yar</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>iocs.csv</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>iocs.misp.json</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>iocs.stix.json</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>report.html</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>report.json</code></td><td>identical</td><td>identical</td></tr>
+        <tr><td><code>report.md</code></td><td>identical</td><td>identical</td></tr>
+      </tbody></table></div></details>
+  </figure>
+  <div class="prose">
+  <p>Five more checks sit beside the files. <code>board</code> compares the rebuilt <code>board.jsonl</code> with the recorded one. <code>summary</code> compares the Reporter's summary, its lint result and its assessment with the recorded ones. <code>record</code> compares the rebuilt <code>swarm.json</code> with its hash in the manifest. <code>sample</code> checks that the kept sample is the one the manifest names, and <code>inputs_untouched</code> checks that no recorded input file changed after the run ended. The <code>bundle_outputs</code> column is the copy of each output a bundle carries under <code>out/</code>: the player serves and the demo embeds those files, so they are checked as well as the rebuilt ones. A bundle is copied without following links.</p>
+  </div>
+
+  <h3 id="rerun">What the replay re-runs<a class="anc" href="#rerun" aria-label="Link to this section">#</a></h3>
+  <div class="tw"><table>
+    <thead><tr><th>Step</th><th>Re-run</th><th>From</th></tr></thead>
+    <tbody>
+      <tr><td>The board's evidence checks: bytes at an offset, ATT&amp;CK id and name, call citations, duplicates and caps</td><td>yes, at the <code>full</code> level because the sample is kept</td><td><code>inputs.jsonl</code>: every post, resolution and spot check in the order the board received it, with the clock value it saw</td></tr>
+      <tr><td>The Reporter's summary, the lint and the assessment</td><td>yes</td><td>the Reporter's recorded text in <code>swarm.json</code></td></tr>
+      <tr><td>Verdict and confidence caps, YARA rules and their matching, IOC grouping and defanging, STIX and MISP ids, the HTML page</td><td>yes</td><td>the board, the layout and the prepared files of the run</td></tr>
+      <tr><td>What the model said and what the tools printed</td><td>no, recorded</td><td><code>model-trace.jsonl.gz</code> (every exchange, whole) and the agents' tool results inside the board inputs</td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+  <p>With no sample kept (<code>keep_sample = false</code>, or <code>--no-sample</code>), the replay is at the <code>downstream</code> level: the board is taken from the record, and the result says so. It never reports more than it checked.</p>
+  </div>
+
+  <h3 id="limits">What the replay does not do<a class="anc" href="#limits" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+  <p>Nothing signs <code>manifest.json</code>. Someone who edits a file and recomputes its hash and the manifest's gets a replay that agrees. The hashes catch an accidental change and an edit that left the manifest alone. A rebuild that differs in even one byte, or a recorded file edited afterwards, makes <code>replay</code> exit 1.</p>
+  </div>
+
+  <h3 id="repeatable">What makes the rebuild repeatable<a class="anc" href="#repeatable" aria-label="Link to this section">#</a></h3>
+  <div class="prose">
+  <ul>
+    <li>The build reads no wall clock. One clock module is pinned to the run's end time.</li>
+    <li>All times are UTC, so the local time zone has no effect.</li>
+    <li>Nothing is random: STIX and MISP ids are <code>uuid5</code> over the run id and the content.</li>
+    <li>Keys are sorted, and nothing depends on dict or set order.</li>
+  </ul>
+  <p>The test suite replays under different time zones and <code>PYTHONHASHSEED</code> values and expects the same hashes. The <a href="golden-cases.html">golden cases</a> pin the bytes of 11 recorded runs.</p>
+  </div>
+
+  <h2 id="live">A live run is pinned and recorded but can differ<a class="anc" href="#live" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+  <p>Six agents share one model, so the order of their requests, the server's batching and the tool timings differ between runs. The gate overwrites <code>temperature</code> and <code>seed</code> in every request, whatever the agent's client asked for. That removes the sampling noise the client controls and nothing else. Two live runs on the same sample can differ, for example in which agent posts first and so in the finding numbers.</p>
+  <p>Two live runs can differ, so a live run promises no identical results. Everything needed to reproduce its results offline is on disk.</p>
+  <p>Whether the model server honours <code>seed</code> at all is measured. Before a run, the same short question is asked twice with one seed, and <code>swarm.json</code> and <code>manifest.json</code> record <code>seed_support</code> as <code>honoured</code>, <code>ignored</code> or <code>unknown</code>.</p>
+  </div>
+
+  <h2 id="containers">Replaying the agents against recorded model answers<a class="anc" href="#containers" aria-label="Link to this section">#</a></h2>
+  <div class="prose">
+  <p><code>swarmlabre run SAMPLE --replay RUN</code> starts the containers as usual and answers every model request from the recorded trace. A reply is served only to a request whose body has the same SHA-256 as the recorded one. Any other request gets an error and is counted as <code>replay_diverged</code> in the result. The run reuses the recorded run's task key (<code>nonce.key</code>): the per-task marker the agents echo back is an HMAC of that key, so the conversations repeat word for word. It needs Docker and the two images.</p>
+  <p>On the second demo sample, which has a dispute, a resolution, a round 2 and a duplicate reject, the measurement was 0 unrecorded requests and the same findings, ids, evidence levels, statuses and rejects. Repeated eleven times, the count was 0 six times and 4 five times. Which agent posts first decides the finding numbers, and the containers' timing is not controlled, so a replay through the containers can diverge, and <code>replay_diverged</code> says so. The offline replay above is not affected.</p>
+  <p>This is a new run, so its files differ from the recording in the run id and the times. The byte-identical claim belongs to the offline replay. With a real model's tool use, timing-dependent tool output can also make a request differ from the recorded one.</p>
+  </div>
+
+  <h2 id="files">Files of a run<a class="anc" href="#files" aria-label="Link to this section">#</a></h2>
+  <div class="tw"><table>
+    <thead><tr><th>File</th><th>Content</th><th>Hashed in the manifest</th></tr></thead>
+    <tbody>
+      <tr><td><code>swarm.json</code></td><td>the run record</td><td>yes</td></tr>
+      <tr><td><code>board.jsonl</code></td><td>the board's decisions</td><td>yes</td></tr>
+      <tr><td><code>inputs.jsonl</code></td><td>the board's inputs, in order</td><td>yes</td></tr>
+      <tr><td><code>model-trace.jsonl.gz</code></td><td>every model exchange: the request is kept as its hash and the reply whole, at most 64 MiB</td><td>yes</td></tr>
+      <tr><td><code>layout.json</code>, <code>events.jsonl</code>, <code>detection.json</code></td><td>the map, the event log and the stored YARA rules</td><td>yes</td></tr>
+      <tr><td><code>manifest.json</code></td><td>tool version, sample hash, model and sampling, image ids, ATT&amp;CK version, report format and the hashes above</td><td>no</td></tr>
+      <tr><td><code>out/*</code></td><td>the outputs</td><td>named by hash in <code>manifest.json</code></td></tr>
+    </tbody>
+  </table></div>
+  <div class="prose">
+  <p>Everything in a run folder that came from a sample, a tool or a model is untrusted text. It is capped, never executed and shown only as text.</p>
+  </div>
+
+  <nav class="pager" aria-label="Previous and next page">
+    <a href="reports.html"><small>Previous</small>Reports</a>
+    <a class="nx" href="analyse.html"><small>Next</small>Analyse a file</a>
+  </nav>
+  <div class="foot"><span>SwarmLabRE alpha 0.1.0</span><a href="https://github.com/virqdroid/swarmlabre/blob/main/site/docs/reproducibility.html">Edit this page on GitHub</a></div>
+</main>
+
+<aside class="toc" aria-label="On this page">
+  <h4>On this page</h4>
+  <ul>
+    <li><a href="#replay">A recorded run replays to byte-identical files</a></li>
+    <li class="sub"><a href="#rerun">What the replay re-runs</a></li>
+    <li class="sub"><a href="#limits">What the replay does not do</a></li>
+    <li class="sub"><a href="#repeatable">What makes the rebuild repeatable</a></li>
+    <li><a href="#live">A live run is pinned and recorded but can differ</a></li>
+    <li><a href="#containers">Replaying the agents against recorded model answers</a></li>
+    <li><a href="#files">Files of a run</a></li>
+  </ul>
+</aside>
+</div>
+</body>
+</html>

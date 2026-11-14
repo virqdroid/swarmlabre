@@ -1,0 +1,2 @@
+tlp,group,type,indicator,defanged,evidence,offset,findings,context,run
+CLEAR,URLs,URL,http://c2.example.test/beacon,hxxp://c2[.]example[.]test/beacon,byte-checked,0x95,f2,"C2 URL. byte-checked, offset 0x95, finding f2.",s598de684

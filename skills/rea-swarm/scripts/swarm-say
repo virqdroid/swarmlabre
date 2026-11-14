@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""swarm-say: tell the person watching the swarm, in one short line, what you are doing now.
+
+Prints one line for swarmlabre, `@@SAY <nonce> <json>` (never pipe or redirect the output: swarmlabre would not see it), read from the result of this very command in your own session (the nonce is a secret of this task,
+in the environment variable SWARM_NONCE). The line is shown in the run's agent overview. It is a status for a human: it is not a finding and nothing checks it.
+Stdlib only. Exit 2 on a bad command line.
+"""
+import json, os, re, sys
+
+nonce = os.environ.get("SWARM_NONCE", "")
+if not re.fullmatch(r"[0-9a-f]{16}", nonce):
+    sys.exit("swarm-say: this command only works inside an Agent Swarms task (no SWARM_NONCE).")
+text = " ".join(" ".join(sys.argv[1:]).split())
+if not text:
+    sys.exit("swarm-say: give one short sentence, e.g. swarm-say \"Reading the decompiled network functions\".")
+if len(text) > 140:
+    text = text[:139].rstrip() + "…"
+print("@@SAY %s %s" % (nonce, json.dumps({"t": text}, ensure_ascii=True, separators=(",", ":"))))
+print("status sent. Do not pipe or redirect this command (no | tail, | head, > file): swarmlabre reads the line above.")

@@ -1,0 +1,4 @@
+{"sample_sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564", "shown": 2, "tool": "list_procedures", "total": 2, "truncated": false,"items":[
+{"address": "0x400078", "procedure": {"external": false, "thunk": false, "thunk_target": null}, "value": "entry"},
+{"address": "0x400086", "procedure": {"external": false, "thunk": false, "thunk_target": null}, "value": "FUN_00400086"}
+]}

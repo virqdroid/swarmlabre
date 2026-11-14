@@ -1,0 +1,62 @@
+{
+ "attack": "20.0",
+ "config": {
+  "detection_rules": true,
+  "max_parallel": 4,
+  "max_rounds": 2,
+  "report_contact": "",
+  "report_logo": false,
+  "report_org": "",
+  "task_minutes": 20.0,
+  "tlp": "CLEAR"
+ },
+ "env": {},
+ "finished": 1790000060.0,
+ "format": 1,
+ "images": {
+  "swarmlabre-agent": null,
+  "swarmlabre-tools": null
+ },
+ "inputs": {
+  "board.jsonl": "8211b7fad86ec54ea07bcfd54f91b5eb05a85ea3dbe52e4e1d3c27007018112d",
+  "events.jsonl": "3725ac5771542ab6d844c36ce7f836223cb2a5d2aaee7922bb916d63f5fcd794",
+  "inputs.jsonl": "bddd7ffba3aee4fed32976a4a912520bdf570562f4060f6edb3ab74a6d47bed8",
+  "layout.json": "cb8d4135d346028d786be8c30a80904f5c251d1b5140ec82d298a4ae3ea363e2",
+  "swarm.json": "b5461df02b9cc42eb797253486e5960942e3952da84cdeedb7cc4cab51669da7"
+ },
+ "model": {
+  "backend": "mock",
+  "model": "mock"
+ },
+ "model_trace_cut": false,
+ "outputs": {
+  "board.json": "d5f111768cbf3e9c491c98b0841d3e513559373c036c5fb4e56a0005eb013738",
+  "iocs.csv": "5ef642b92ffff38d60e8010ba517f1e7716bb2cdf86b2c08a019b984b4fdbc08",
+  "iocs.misp.json": "dbebc96512d6c50bb0d32cf5d60b6791e099fc36b4966da765ea5b9ca55fbbc9",
+  "iocs.stix.json": "8290e73d2b215f36ed2bfdb8fd8721a6d6b615ed39a3bebf7c06a290f1513d11",
+  "report.html": "b451f3c740b08bb5df9760f7010ca72abf445cc12f77800bb2e496891c468c5d",
+  "report.json": "80b7a02370b86c8c8d4b7b3b3471db6762c5efc0905ffc0fc0a467b1a776b497",
+  "report.md": "7fe64a13390ebe03b1d6cbccc5e68baf0b9b55fb978b32550d45731e16680646"
+ },
+ "report_format": 4,
+ "run": "s8f383ccd",
+ "sample": {
+  "kept": true,
+  "kind": "elf",
+  "name": "hostile.elf",
+  "sha256": "5a761477530c38d97351802b003f222d47fe218a69e5b8e739ac3a33b2c3cffd",
+  "size": 1704
+ },
+ "sampling": {
+  "note": "scripted board inputs; no model was asked",
+  "seed": 1,
+  "seed_support": "unknown",
+  "temperature": 0.0
+ },
+ "status": "done",
+ "tool": {
+  "name": "swarmlabre",
+  "revision": null,
+  "version": "0.1.0"
+ }
+}

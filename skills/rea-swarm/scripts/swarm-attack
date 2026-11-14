@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""swarm-attack: look up MITRE ATT&CK techniques before you post one. Reads /prep/attack.tsv (written by swarmlabre from MITRE's own data; current ids only, plus
+the retired ids and what replaced them). Do not write an ATT&CK id from memory: ids were retired and renumbered, and swarmlabre rejects a wrong id or name.
+
+  swarm-attack keylog sms            words: the techniques whose name or tactic matches (best first)
+  swarm-attack T1055                 an id: its name and tactics, and its sub-techniques
+  swarm-attack T1562.001             a retired id: what replaced it
+Stdlib only.
+"""
+import os
+import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import attacklib as A
+
+args = sys.argv[1:]
+if not args or args[0] in ("-h", "--help"):
+    sys.exit(__doc__)
+t = A.load()
+if not t:
+    sys.exit("swarm-attack: /prep/attack.tsv is not there. Use grep -i on it if it appears later; swarmlabre checks technique ids anyway.")
+cur, old = t
+q = " ".join(args)
+tid = args[0].upper() if re.fullmatch(r"[Tt]\d{4}(\.\d{3})?", args[0]) else ""
+if tid:
+    if tid in cur:
+        print("%s  %s  [%s]" % (tid, cur[tid][0], cur[tid][1]))
+        kids = sorted(i for i in cur if i.startswith(tid + "."))
+        for i in kids:
+            print("  %s  %s" % (i, cur[i][0].split(": ", 1)[-1]))
+    elif tid in old:
+        print("%s is retired: %s" % (tid, old[tid]))
+    else:
+        print("%s is not an id in this matrix." % tid)
+        near = A.search(cur, " ".join(args[1:]), 5, ratio=0.6)
+        if near:
+            print("closest by name: " + A.fmt(near))
+    sys.exit(0)
+rows = A.search(cur, q, 12, ratio=0.4)
+if not rows:
+    print("no technique matches '%s'. Try another word (what the code does, not the sample's name)." % q[:80])
+for _s, _sub, i, n, tac in rows:
+    print("%s  %s  [%s]" % (i, n, tac))

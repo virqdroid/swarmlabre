@@ -1,0 +1,42 @@
+{
+ "result": {
+  "document": "target-4f514261553c.bin",
+  "procedure_count": 2,
+  "segment_count": 5,
+  "segments": [
+   {
+    "end": "0x400078",
+    "length": 120,
+    "name": "segment_0.1",
+    "start": "0x400000"
+   },
+   {
+    "end": "0x400095",
+    "length": 29,
+    "name": ".text",
+    "start": "0x400078"
+   },
+   {
+    "end": "0x40010a",
+    "length": 117,
+    "name": ".rodata",
+    "start": "0x400095"
+   },
+   {
+    "end": ".shstrtab:0x19",
+    "length": 25,
+    "name": ".shstrtab",
+    "start": ".shstrtab:0x0"
+   },
+   {
+    "end": "_elfSectionHeaders:0x100",
+    "length": 256,
+    "name": "_elfSectionHeaders",
+    "start": "_elfSectionHeaders:0x0"
+   }
+  ],
+  "string_count": 6
+ },
+ "sample_sha256": "4f514261553c3026e9c926b58395d14446e8fbab6799dbc6dc4dd3749bcaf564",
+ "tool": "binary_overview"
+}

@@ -1,0 +1,9 @@
+{"sample_sha256": "c779ab286310fd78d2ab5e9b260d55ddec54fbd89f55a1bb657ebe8bf098753e", "shown": 7, "tool": "list_strings", "total": 7, "truncated": false,"items":[
+{"address": "0x400095", "string": {"byte_length": 30, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "http://c2.example.test/beacon"},
+{"address": "0x4000b3", "string": {"byte_length": 28, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "Mutex\\Global\\DemoSwarmMutex"},
+{"address": "0x4000cf", "string": {"byte_length": 21, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "cmd.exe /c echo demo"},
+{"address": "0x4000e4", "string": {"byte_length": 16, "encoding": "US-ASCII", "termination": "present_or_not_required"}, "value": "example.invalid"},
+{"address": ".shstrtab:0x1", "string": {"byte_length": 6, "encoding": "UTF-8", "termination": "present_or_not_required"}, "value": ".text"},
+{"address": ".shstrtab:0x7", "string": {"byte_length": 8, "encoding": "UTF-8", "termination": "present_or_not_required"}, "value": ".rodata"},
+{"address": ".shstrtab:0xf", "string": {"byte_length": 10, "encoding": "UTF-8", "termination": "present_or_not_required"}, "value": ".shstrtab"}
+]}

@@ -1,0 +1,2 @@
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":149,"title":"C2 URL","value":"http://c2.example.test/beacon"},"role":"ioc","seen":[],"seq":1,"t":1790000002.5,"task":1}
+{"op":"intake","others":[],"prep":[],"raw":{"confidence":"high","detail":"A made-up value.","kind":"ioc","off":179,"title":"Mutex name","value":"Mutex\\Global\\DemoSwarmMutex"},"role":"ioc","seen":[],"seq":2,"t":1790000003.0,"task":1}
