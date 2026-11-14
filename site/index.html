@@ -88,7 +88,7 @@ i.f.on{background:var(--ok);color:var(--lens);box-shadow:none}
 .dumpcap{color:var(--dim);font-size:.88rem;margin:10px 2px 0;max-width:80ch}
 .tested{margin:34px 0 0}
 .tested h2{margin:0 0 10px;font:600 .8rem var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--gold)}
-.proof{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--bg)}
+.proof{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--bg)}
 .proof>div{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:18px 22px;font-size:.9rem;color:var(--dim)}
 .proof>div:first-child{padding-left:0}
 .proof>div+div{border-left:1px solid var(--line)}
@@ -199,7 +199,6 @@ footer a{color:var(--dim)}
     <div class="proof">
       <div><b>arm64</b><span>Linux on one machine (NVIDIA GB10)</span><span class="nx">amd64 is next</span></div>
       <div><b>3 models</b><span class="mods"><span>Qwen3.8 Flash Next</span> <span>Qwen3.8 27B</span> <span>CYBER-FROST 3.8</span></span></div>
-      <div><b>44 findings</b><span>One live six-role run with Qwen3.8 Flash Next on a benign test file</span><span class="nx"><span class="ok">12</span> byte-checked, <span class="ok">31</span> in the tool log, <span class="bad">8</span> posts rejected</span></div>
     </div>
     <p class="tnote">The tests, the demo and the golden cases use a scripted mock.</p>
   </div>
