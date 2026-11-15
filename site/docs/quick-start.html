@@ -258,6 +258,23 @@ td[colspan]{white-space:normal}
   <p>Docker is needed only to analyse a new file (the agents and Ghidra/jadx run in containers); replaying, the UI, the static demo, the tests and CI never use it. <a href="analyse.html">Analyse a file</a> covers the two images, the mock model and the first run.</p>
   </div>
 
+  <h2 id="agent">Set it up with your own agent<a class="anc" href="#agent" aria-label="Link to this section">#</a></h2>
+  <div class="prose"><p>Open an empty folder in a coding agent that can run shell commands and reads <code>AGENTS.md</code> (Claude Code, Codex, Cursor, Gemini CLI and others) and paste this:</p></div>
+  <div class="code"><div class="cap">prompt for your agent</div>
+<pre>Set up SwarmLabRE on this machine and check that it works.
+
+1. Clone https://github.com/virqdroid/swarmlabre and read AGENTS.md before you run anything.
+2. Check that Python 3.12 is installed.
+3. Run the offline replay of demo/sfaef16e6 and the unit tests as AGENTS.md describes. Neither needs Docker, a model or the network.
+4. If Docker works and this is arm64 Linux, build the two images as AGENTS.md describes (about 10 minutes) and run the generated demo sample with the scripted mock model. Otherwise skip this step and say why.
+5. Report what passed, what failed and what you did not run, with the exit codes.
+
+Do not put an API key in a file, on a command line or in this chat. Do not analyse any file except the generated demo.elf. Do not change any file in the repository.</pre></div>
+  <div class="prose">
+  <p>The prompt stays short because <a href="https://github.com/virqdroid/swarmlabre/blob/main/AGENTS.md"><code>AGENTS.md</code></a> holds the exact commands, the order and the traps. The agent runs what that file says, so read it first if you do not trust your copy.</p>
+  <p>A real model needs two things you do yourself: the endpoint in <code>swarmlabre.toml</code> and the key exported in the environment variable named by <code>api_key_env</code>. Do not hand the key to the agent. <a href="models.html">Use a real model</a> shows the file.</p>
+  </div>
+
   <nav class="pager" aria-label="Previous and next page">
     <a href="index.html"><small>Previous</small>Overview</a>
     <a class="nx" href="pipeline.html"><small>Next</small>One run, in order</a>
@@ -273,6 +290,7 @@ td[colspan]{white-space:normal}
     <li><a href="#ui">Watch it in the web UI</a></li>
     <li><a href="#tests">Run the tests</a></li>
     <li><a href="#new">Analyse a new file</a></li>
+    <li><a href="#agent">Set it up with your own agent</a></li>
   </ul>
 </aside>
 </div>

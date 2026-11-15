@@ -69,6 +69,26 @@ seed        = 1
 `python3 -m swarmlabre run sample.elf` then runs the six roles against it. Before a run it asks the endpoint the same short question twice with one seed and records in
 the run whether the server honoured the seed (`seed_support` in `swarm.json`).
 
+## Set it up with your own coding agent
+
+Open an empty folder in a coding agent that can run shell commands and reads `AGENTS.md` (Claude Code, Codex, Cursor, Gemini CLI and others) and paste this:
+
+```text
+Set up SwarmLabRE on this machine and check that it works.
+
+1. Clone https://github.com/virqdroid/swarmlabre and read AGENTS.md before you run anything.
+2. Check that Python 3.12 is installed.
+3. Run the offline replay of demo/sfaef16e6 and the unit tests as AGENTS.md describes. Neither needs Docker, a model or the network.
+4. If Docker works and this is arm64 Linux, build the two images as AGENTS.md describes (about 10 minutes) and run the generated demo sample with the scripted mock model. Otherwise skip this step and say why.
+5. Report what passed, what failed and what you did not run, with the exit codes.
+
+Do not put an API key in a file, on a command line or in this chat. Do not analyse any file except the generated demo.elf. Do not change any file in the repository.
+```
+
+The prompt stays short because [`AGENTS.md`](AGENTS.md) holds the exact commands, the order and the traps. The agent runs what that file says, so read it first if you do not trust your copy.
+A real model needs two things you do yourself: the endpoint in `swarmlabre.toml` and the key exported in the environment variable named by `api_key_env`. Do not hand the key to the agent.
+The same steps by hand are in the sections above and in the [Quick start](https://swrm.re/docs/quick-start.html).
+
 ## The web UI
 
 ```sh

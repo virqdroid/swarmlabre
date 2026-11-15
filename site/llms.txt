@@ -1,0 +1,55 @@
+# SwarmLabRE
+
+> Up to six AI agents analyse one binary (ELF, PE or APK) and post to one board. The board checks every finding against the file's own bytes and the run's own tool log, the report is built from the checked facts, and a finished run replays offline to byte-identical report files. Python 3.12, standard library only; Docker is needed only to analyse a new file.
+
+Alpha, 0.1.0. A verdict, a family name and a confidence in a report are a model's opinion, capped by what the board could check. To set the lab up, read `AGENTS.md` in the repository first, then the Quick start. Replay, the web UI in replay mode, the tests and CI need no Docker, no GPU, no key and no network.
+
+## Start here
+
+- [AGENTS.md](https://github.com/virqdroid/swarmlabre/blob/main/AGENTS.md): rules for working in the repository, the exact setup commands and the test commands
+- [README](https://github.com/virqdroid/swarmlabre/blob/main/README.md): what it is, what was tested and what it is not
+- [Live demo](https://swrm.re/demo/): the real web UI playing a recorded run in the browser, with no model
+
+## Introduction
+
+- [Overview](https://swrm.re/docs/index.html): What SwarmLabRE does: up to six agents analyse one ELF, PE or APK, a board checks every finding, and a finished run replays to byte-identical reports.
+- [Quick start](https://swrm.re/docs/quick-start.html): Replay the recorded run, play it in the web UI and run the tests with Python 3.12 only, no Docker, no GPU, no key and no network.
+
+## Concepts
+
+- [One run, in order](https://swrm.re/docs/pipeline.html): A live SwarmLabRE run in order: stage and parse, prepare, round 1, posts, an optional round 2, the report and the seal.
+- [The six roles](https://swrm.re/docs/roles.html): The six SwarmLabRE roles: what each agent does, which findings it posts, which roles are optional and when each one starts.
+- [The board](https://swrm.re/docs/board.html): How SwarmLabRE's board checks every finding an agent posts: evidence levels, statuses, disputes and the reasons a post is refused.
+- [Reports](https://swrm.re/docs/reports.html): The files a SwarmLabRE run writes, what the report states as fact, what is model text, how the assessment is capped and which findings reach which file.
+- [Reproducibility](https://swrm.re/docs/reproducibility.html): What SwarmLabRE's reproducibility claims cover: byte-identical replay of a recorded run, a pinned live run, replay through the containers and the files of a run.
+
+## Guides
+
+- [Analyse a file](https://swrm.re/docs/analyse.html): How to analyse a new file with SwarmLabRE: the two Docker images, the run command and its options, and what happens between the host, the containers and the model.
+- [The web UI](https://swrm.re/docs/web-ui.html): The SwarmLabRE web UI: live, replay and static mode, the replay clock, what a recording does not hold, the server, the token and the checks that keep the page honest.
+- [Reports and exports](https://swrm.re/docs/exports.html): The indicator files and the YARA rules of a SwarmLabRE run: what feeds each, the columns of iocs.csv, the STIX and MISP mapping, and how a rule is written and matched.
+- [Replay and export a run](https://swrm.re/docs/replay.html): How to replay a recorded SwarmLabRE run offline, what the full and downstream replay levels check, and how to export a run into a bundle that replays on another machine.
+
+## Models and sandbox
+
+- [Use a real model](https://swrm.re/docs/models.html): How to use a real model with SwarmLabRE: an OpenAI-compatible endpoint, the key from an environment variable, and what the gate pins and limits on every request.
+- [The mock model](https://swrm.re/docs/mock-model.html): The SwarmLabRE mock model: a scripted stand-in for a language model that needs no GPU, key or network, the format of its JSON script and how it picks a reply.
+- [The sandbox](https://swrm.re/docs/sandbox.html): How SwarmLabRE sandboxes a run: two containers with no network and a read-only root, what each can reach, the checks before and during a run, and what the sandbox does not claim.
+
+## Reference
+
+- [Command line](https://swrm.re/docs/cli.html): Every command and flag of the SwarmLabRE command line, with its help text, its default and its exit codes.
+- [Configuration](https://swrm.re/docs/config.html): Every section and key of swarmlabre.toml with its default and its comment, and where the file is read from.
+- [Security](https://swrm.re/docs/security.html): What SwarmLabRE assumes is hostile, what it does about each threat, and what it does not claim.
+- [Architecture](https://swrm.re/docs/architecture.html): The parts of SwarmLabRE, where each runs, what is trusted and what is not, the modules and the rules the code keeps.
+
+## Development
+
+- [Golden cases](https://swrm.re/docs/golden-cases.html): The recorded runs that pin SwarmLabRE's output files byte for byte, what each case proves, how a golden file is changed, and what the cases do not cover.
+- [CI](https://swrm.re/docs/ci.html): The steps of the two GitHub workflows that test SwarmLabRE and publish its site, how to run the same checks locally and what CI leaves out.
+
+## Optional
+
+- [Sample report](https://swrm.re/sample/report.html): the report.html of the recorded run
+- [Security policy](https://github.com/virqdroid/swarmlabre/blob/main/SECURITY.md): how to report a problem
+- [Third-party components](https://github.com/virqdroid/swarmlabre/blob/main/THIRD_PARTY.md): licences of everything not written for this project

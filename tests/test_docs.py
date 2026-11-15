@@ -683,6 +683,17 @@ class QuickStartTest(unittest.TestCase):
         self.assertIn("Docker is needed only to analyse a new file (the agents and Ghidra/jadx run in containers); replaying, the UI, the static demo, the tests and CI never use it.", plain(self.raw))
         self.assertIn("Docker is needed only to analyse a new file (the agents and Ghidra/jadx run in containers); replaying, the UI, the static demo, the tests and CI never use it.", README)
 
+    def test_the_agent_prompt_is_the_readmes_and_names_what_agents_md_holds(self):
+        page = html.unescape(re.search(r'<div class="cap">prompt for your agent</div>\n<pre>(.*?)</pre>', self.raw, re.S).group(1))
+        readme = re.search(r"## Set it up with your own coding agent.*?```text\n(.*?)```", README_RAW, re.S).group(1).rstrip("\n")
+        self.assertEqual(page, readme)
+        agents = read(ROOT / "AGENTS.md")
+        for needle in ("demo/sfaef16e6", "arm64", "about 10 minutes", "demo.elf", "mock model"):
+            self.assertIn(needle, agents)
+        self.assertIn("https://github.com/" + one_pager.REPO.split("github.com/")[1], page)
+        self.assertNotRegex(page, r"(?i)api[_ ]?key\s*[=:]\s*\S")
+        self.assertIn('href="#agent"', self.raw)
+
 
 class PipelineTest(unittest.TestCase):
     @classmethod
@@ -4252,6 +4263,53 @@ class NoTextInTwoPlacesTest(unittest.TestCase):
         self.assertTrue((ROOT / "site" / "docs" / "web-ui.html").is_file())
         for name in ("README.md", "SECURITY.md", "docs/architecture.md", "docs/determinism.md"):
             self.assertNotRegex(read(ROOT / name), r"\]\((?:docs/)?ui\.md\)", "%s still links the old docs/ui.md text" % name)
+
+
+class LlmsTxtTest(unittest.TestCase):
+    """site/llms.txt (swrm.re/llms.txt): the docs listed for an agent that reads the site, in the order of the sidebar, each with the page's own description."""
+
+    def setUp(self):
+        self.raw = read(SITE / "llms.txt")
+        self.links = re.findall(r"^- \[([^\]]+)\]\((https://[^)\s]+)\): (.+)$", self.raw, re.M)
+
+    def test_shape(self):
+        lines = self.raw.splitlines()
+        self.assertEqual(lines[0], "# SwarmLabRE")
+        self.assertTrue(lines[2].startswith("> "), "a one-paragraph summary comes right after the title")
+        self.assertEqual([x for x in lines if x.startswith("#")], ["# SwarmLabRE", "## Start here"] + ["## " + s for s, _ in SIDEBAR] + ["## Optional"])
+        self.assertEqual(len(self.links), len(re.findall(r"^- ", self.raw, re.M)), "every list item is a link with a description")
+        self.assertNotRegex(self.raw, r"<[a-z/]", "plain text and Markdown only")
+
+    def test_every_docs_page_once_in_sidebar_order_with_its_description(self):
+        pages = [(u.rsplit("/", 1)[1], t, d) for t, u, d in self.links if u.startswith("https://swrm.re/docs/")]
+        self.assertEqual([p[0] for p in pages], ORDER)
+        for name, text, desc in pages:
+            self.assertEqual(text, TEXT_OF[name])
+            meta = re.search(r'<meta name="description" content="(.*?)"', read(DOCS / name), re.S).group(1)
+            self.assertEqual(desc, html.unescape(meta).strip(), name)
+
+    def test_other_links_point_at_files_that_exist(self):
+        files = {"AGENTS.md", "README.md", "SECURITY.md", "THIRD_PARTY.md"}
+        for text, url, _ in self.links:
+            if url.startswith("https://swrm.re/docs/"):
+                continue
+            m = re.fullmatch(r"https://github\.com/virqdroid/swarmlabre/blob/main/([\w.]+)", url)
+            if m:
+                self.assertIn(m.group(1), files)
+                self.assertTrue((ROOT / m.group(1)).is_file(), url)
+            else:
+                self.assertIn(url, ("https://swrm.re/demo/", "https://swrm.re/sample/report.html"))
+
+    def test_no_private_names(self):
+        low = self.raw.lower()
+        for bad in ("cyg" + "ient", "spark" + "-hub", "/home/", "private" + "relay", "agent" + " lab", "uns" + "loth"):
+            self.assertNotIn(bad, low)
+
+    def test_agents_md_holds_what_the_summary_sends_an_agent_to(self):
+        agents = read(ROOT / "AGENTS.md")
+        self.assertIn("read `AGENTS.md`", self.raw)
+        for cmd in ("python3 -m swarmlabre replay demo/sfaef16e6", "docker build -t swarmlabre-agent sandbox/", "python3 -m unittest discover -s tests"):
+            self.assertIn(cmd, agents)
 
 
 if __name__ == "__main__":
