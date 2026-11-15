@@ -23,6 +23,17 @@ class UnixConn(http.client.HTTPConnection):
         self.sock.settimeout(10)
         self.sock.connect(self.path)
 
+    def post_whole(self, path, body):
+        """POST with the head and the body in ONE write. http.client sends them in two, and a gate that refuses a request (403, 413) answers and closes without reading the body:
+        a body written after that close fails with BrokenPipeError, whenever the gate wins the race. One write puts the whole request in the gate's buffer first."""
+        data = json.dumps(body).encode()
+        head = "POST %s HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: %d\r\nConnection: close\r\n\r\n" % (path, len(data))
+        self.connect()
+        self.sock.sendall(head.encode() + data)
+        r = http.client.HTTPResponse(self.sock)
+        r.begin()
+        return r.status, r.read().decode()
+
 
 def chat(role="ioc", messages=None, **kw):
     return {"model": "m1", "stream": True, "messages": messages or [{"role": "user", "content": "go"}], **kw}
@@ -75,10 +86,7 @@ class GateTest(unittest.TestCase):
         self.addCleanup(lambda: (self.srv.shutdown(), self.srv.server_close()))
 
     def post(self, path, body):
-        c = UnixConn(self.sock)
-        c.request("POST", path, json.dumps(body).encode(), {"Content-Type": "application/json"})
-        r = c.getresponse()
-        return r.status, r.read().decode()
+        return UnixConn(self.sock).post_whole(path, body)
 
     def test_pinned_sampling_overwrites_what_the_agent_asked_for(self):
         code, text = self.post("/a/ioc/v1/chat/completions", chat(temperature=1.3, seed=99, top_p=0.5))
